@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
@@ -47,6 +48,9 @@ import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.Fragments.Settings;
 import com.studygoal.jisc.Fragments.Stats3;
 import com.studygoal.jisc.Fragments.StatsAttainment;
+import com.studygoal.jisc.Fragments.StatsAttedance;
+import com.studygoal.jisc.Fragments.StatsEventAttendance;
+import com.studygoal.jisc.Fragments.StatsLeaderBoard;
 import com.studygoal.jisc.Fragments.StatsPoints;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
@@ -360,52 +364,41 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                if(selectedPosition < 0)
-                    return;
+                if(selectedPosition < 0) { return; }
 
-                if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.feed))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new FeedFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.check_in))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new CheckInFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.attainment))) {
+                String selection = adapter.values[selectedPosition];
+                Fragment destination = null;
 
-                    getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.main_fragment, new StatsAttainment())
-                                        .commit();
-
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.friends))) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, new Friends())
-                            .commit();
-
-                }else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.settings))) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, new Settings())
-                            .commit();
-
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.graphs))) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, new Stats3())
-                            .commit();
-
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.points))) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, new StatsPoints())
-                            .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.log))) {
-                            logFragment = new LogActivityHistory();
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, logFragment)
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.target))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new TargetFragment())
-                                    .commit();
+                if(selection.equals(getString(R.string.feed))) {
+                    destination = new FeedFragment();
+                } else if(selection.equals(getString(R.string.check_in))) {
+                    destination = new CheckInFragment();
+                } else if(selection.equals(getString(R.string.attainment))) {
+                    destination = new StatsAttainment();
+                } else if(selection.equals(getString(R.string.friends))) {
+                    destination = new Friends();
+                } else if(selection.equals(getString(R.string.settings))) {
+                    destination = new Settings();
+                } else if(selection.equals(getString(R.string.graphs))) {
+                    destination = new Stats3();
+                } else if(selection.equals(getString(R.string.points))) {
+                    destination = new StatsPoints();
+                } else if(selection.equals(getString(R.string.log))) {
+                    logFragment = new LogActivityHistory();
+                    destination = logFragment;
+                } else if(selection.equals(getString(R.string.target))) {
+                    destination = new TargetFragment();
+                } else if (selection.equals(getString(R.string.leader_board))) {
+                    destination = new StatsLeaderBoard();
+                } else if (selection.equals(getString(R.string.events_attended))) {
+                    destination = new StatsEventAttendance();
+                } else if (selection.equals(getString(R.string.attendance))) {
+                    destination = new StatsAttedance();
                 }
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_fragment, destination)
+                        .commit();
             }
 
             @Override
@@ -481,7 +474,7 @@ public class MainActivity extends FragmentActivity {
                             @Override
                             public void onClick(View v) {
                                 dialog.dismiss();
-                                android.webkit.CookieManager.getInstance().removeAllCookies(null);
+                                android.webkit.CookieManager.getInstance().removeAllCookie();
                                 DataManager.getInstance().checkForbidden = false;
                                 DataManager.getInstance().set_jwt("");
 

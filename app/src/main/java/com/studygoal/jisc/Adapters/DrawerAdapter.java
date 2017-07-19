@@ -16,17 +16,15 @@ import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
 
 public class DrawerAdapter extends BaseAdapter {
-
-    private LayoutInflater inflater;
     public String[] values;
-    Context context;
-
     public TextView selected_text;
     public ImageView selected_image;
-
     public ImageView profile_pic;
     public boolean statsOpened;
 
+    private LayoutInflater inflater;
+    private Context context;
+    private static final int statOpenedNum = 6;
     public DrawerAdapter(Context con) {
         context = con;
         inflater = LayoutInflater.from(con);
@@ -42,6 +40,9 @@ public class DrawerAdapter extends BaseAdapter {
                     con.getString(R.string.graphs),
                     con.getString(R.string.attainment),
                     con.getString(R.string.points),
+                    con.getString(R.string.leader_board),
+                    con.getString(R.string.events_attended),
+                    con.getString(R.string.attendance),
                     con.getString(R.string.log),
                     con.getString(R.string.target),
                     con.getString(R.string.settings),
@@ -51,7 +52,7 @@ public class DrawerAdapter extends BaseAdapter {
 
     //Numarul de rows
     public int getCount() {
-        return statsOpened?values.length:values.length-3;
+        return statsOpened? values.length : values.length - statOpenedNum;
     }
 
     @Override
@@ -85,7 +86,7 @@ public class DrawerAdapter extends BaseAdapter {
             else
                 Glide.with(context).load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic).transform(new CircleTransform(context)).into((ImageView) convertView.findViewById(R.id.imageView));
         } else {
-            if(statsOpened && position > 3 && position < 7) {
+            if(statsOpened && position > 3 && position <= 3 + statOpenedNum) {
                 convertView = inflater.inflate(R.layout.nav_item_sub, parent, false);
             } else {
                 convertView = inflater.inflate(R.layout.nav_item, parent, false);
@@ -103,7 +104,7 @@ public class DrawerAdapter extends BaseAdapter {
             arrow_button.setVisibility(View.GONE);
 
             if(!statsOpened && position > 3) {
-                position += 3;
+                position += statOpenedNum;
             }
 
             textView.setText(values[position]);
