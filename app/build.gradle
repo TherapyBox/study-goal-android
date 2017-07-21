@@ -65,7 +65,6 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
 
-    compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
     compile files('libs/HockeySDK-3.6.0.jar')
     compile 'com.github.AndroidDeveloperLB:AutoFitTextView:4'
 
@@ -73,7 +72,6 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:11.0.1'
     compile 'com.google.firebase:firebase-auth:11.0.1'
     compile 'com.google.android.gms:play-services-auth:11.0.1'
-
     compile('com.twitter.sdk.android:twitter:2.3.1@aar') {
         transitive = true;
     }
