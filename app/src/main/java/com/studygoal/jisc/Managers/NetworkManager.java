@@ -70,7 +70,7 @@ import javax.net.ssl.TrustManagerFactory;
 public class NetworkManager {
 
     private static NetworkManager ourInstance = new NetworkManager();
-    private static int NETWORK_TIMEOUT = 10;
+    private static int NETWORK_TIMEOUT = 20;
     private String language;
     private SSLContext context;
     private Context appContext;
