@@ -158,6 +158,12 @@ public class CheckInFragment extends Fragment {
                         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
                         final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
+
+                        //debug for testing getsettings - by tmobiledevcore
+                        final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
+                        final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
+
+
                         CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

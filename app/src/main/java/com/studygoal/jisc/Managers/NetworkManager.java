@@ -3284,7 +3284,11 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("staff_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                DataManager.getInstance().user.email = jsonObject.getString("email");
+                if (jsonObject.getString("email") == ""){
+                    DataManager.getInstance().user.email = "not@known";
+                }else{
+                    DataManager.getInstance().user.email = jsonObject.getString("email");
+                }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3368,7 +3372,12 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("jisc_student_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                DataManager.getInstance().user.email = jsonObject.getString("email");
+
+                if (jsonObject.getString("email") == ""){
+                    DataManager.getInstance().user.email = "not@known";
+                }else{
+                    DataManager.getInstance().user.email = jsonObject.getString("email");
+                }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3471,7 +3480,11 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                DataManager.getInstance().user.email = jsonObject.getString("email");
+                if (jsonObject.getString("email") == ""){
+                    DataManager.getInstance().user.email = "not@known";
+                }else{
+                    DataManager.getInstance().user.email = jsonObject.getString("email");
+                }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3578,6 +3591,268 @@ public class NetworkManager {
             }
         }
     }
+
+
+    /**
+     * GET Get Attendance
+     * Example : https://api.x-dev.data.alpha.jisc.ac.uk/sg/attendance?skip=5&limit=2
+     *
+     * Use
+         To a student's attendance
+     Paramaters
+        skip: should be the items to skip when paging
+        limit: should be the number of items to return *
+
+     *
+     *
+     */
+    public boolean getAttendance(int skipValue, int limitvalue) {
+        Future<Boolean> futureResult = executorService.submit(new getAttendance(skipValue,limitvalue));
+        try {
+            return futureResult.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getAttendance implements Callable<Boolean> {
+        int skipvalue;
+        int limitvalue;
+
+
+        getAttendance(int skipValue, int limitvalue) {
+            this.skipvalue = skipvalue;
+            this.limitvalue = limitvalue;
+        }
+
+        @Override
+        public Boolean call() {
+
+            try {
+
+                // dev base url not working so changed to staging url
+                String apiURL = "https://api.x-staging.data.alpha.jisc.ac.uk/sg/attendance?skip="+String.valueOf(this.skipvalue)+"&limit="+String.valueOf(this.limitvalue);
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection;
+                urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("GET");
+
+                int responseCode = urlConnection.getResponseCode();
+                if(responseCode != 200) {
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+
+                try {
+                    JSONArray jsonArray = new JSONArray(sb.toString());
+                    if(jsonArray.length() == 0) {
+                        return false;
+                    }
+
+                    // Do process for getting attendance value
+                    // Right now it return non value.
+                    return false;
+
+
+                } catch (Exception e) {
+                    return false;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+
+    /**
+     * GET Get Weekly Attendance
+     * Example : https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate=2017-01-01&enddate=2017-08-08
+     *
+     * Use
+     To a student's attendance
+     Paramaters
+     startdate: start date in ISO format
+     enddate: end date in ISO format
+
+     *
+     *
+     */
+    public boolean getWeeklyAttendance(Date startDate,Date endDate) {
+        Future<Boolean> futureResult = executorService.submit(new getWeeklyAttendance(startDate,endDate));
+        try {
+            return futureResult.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getWeeklyAttendance implements Callable<Boolean> {
+        Date startDate;
+        Date endDate;
+
+
+        getWeeklyAttendance(Date startDate,Date endDate) {
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        @Override
+        public Boolean call() {
+
+            try {
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+                // dev base url not working so changed to staging url
+                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate="+sdf.format(this.startDate)+"&enddate="+sdf.format(this.endDate);
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection;
+                urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("GET");
+
+                int responseCode = urlConnection.getResponseCode();
+                if(responseCode != 200) {
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+
+                try {
+                    JSONArray jsonArray = new JSONArray(sb.toString());
+                    if(jsonArray.length() == 0) {
+                        return false;
+                    }
+
+                    // Do process for getting attendance value
+                    // Right now it return non value.
+                    return false;
+
+
+                } catch (Exception e) {
+                    return false;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+
+
+
+
+
+    /**
+     *  GET Get Setting
+        https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=attendanceData
+     Use
+        To a site setting
+     Paramaters
+            setting: the setting you want to get
+     valid values:
+        studyGoalAttendance: whether to show checkin feature
+        attendanceData: whether to show attendance data
+     Results:
+         Success: 200
+         { "value": false } ```
+     *
+     *
+     */
+
+    public boolean getSetting(String settingOption) {
+        Future<Boolean> futureResult = executorService.submit(new getSetting(settingOption));
+        try {
+            return futureResult.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getSetting implements Callable<Boolean> {
+        String settingOption;
+
+        getSetting(String settingOption) {
+            this.settingOption = settingOption;
+        }
+
+        @Override
+        public Boolean call() {
+
+            try {
+
+                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting="+this.settingOption;
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection;
+                urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("GET");
+
+                int responseCode = urlConnection.getResponseCode();
+                if(responseCode != 200) {
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+
+                try {
+                    JSONObject jsonObject = new JSONObject(sb.toString());
+                    Boolean resultValue = jsonObject.getBoolean("value");
+                    if (resultValue){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+
+
 
     /**
      * checkIfUserRegistered() => checks if the user is registered;

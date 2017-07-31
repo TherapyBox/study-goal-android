@@ -11,6 +11,8 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,6 +27,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -726,15 +729,43 @@ public class MainActivity extends FragmentActivity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == CAMERA_REQUEST_CODE) {
-            // Bitmap photo = (Bitmap)intent.getExtras().get("data");
-            // savebitmap(photo);
-            // final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.jpg";
+
             final String url = DataManager.getInstance().selfie_url;
+
+            showProgressBar(null);
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(url, options);
+
+            int rotateangle = getCameraPhotoOrientation(MainActivity.this, url);
+
+            Bitmap bitmap_origin = BitmapFactory.decodeFile(url, options);
+
+            if (rotateangle != 0){
+                //Rotate Bitmap
+                int width = bitmap_origin.getWidth();
+                int height = bitmap_origin.getHeight();
+                int newWidth = width;
+                int newHeight  = height;
+                // calculate the scale - in this case = 0.4f
+                float scaleWidth = ((float) newWidth) / width;
+                float scaleHeight = ((float) newHeight) / height;
+                Matrix matrix = new Matrix();
+                matrix.postScale(scaleWidth, scaleHeight);
+                matrix.postRotate(rotateangle);
+                Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
+                savebitmap(resizedBitmap);
+            }else {
+                savebitmap(bitmap_origin);
+            }
+            final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
+//            final String url = DataManager.getInstance().selfie_url;
             showProgressBar(null);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (NetworkManager.getInstance().updateProfileImage(url)) {
+                    if (NetworkManager.getInstance().updateProfileImage(imagePath1)) {
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -762,7 +793,28 @@ public class MainActivity extends FragmentActivity {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
-                savebitmap(bitmap);
+
+                int rotateangle = getCameraPhotoOrientation(MainActivity.this, imagePath);
+
+                Bitmap bitmap_origin = BitmapFactory.decodeFile(imagePath, options);
+
+                if (rotateangle != 0){
+                    //Rotate Bitmap
+                    int width = bitmap_origin.getWidth();
+                    int height = bitmap_origin.getHeight();
+                    int newWidth = width;
+                    int newHeight  = height;
+                    // calculate the scale - in this case = 0.4f
+                    float scaleWidth = ((float) newWidth) / width;
+                    float scaleHeight = ((float) newHeight) / height;
+                    Matrix matrix = new Matrix();
+                    matrix.postScale(scaleWidth, scaleHeight);
+                    matrix.postRotate(rotateangle);
+                    Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
+                    savebitmap(resizedBitmap);
+                }else {
+                    savebitmap(bitmap_origin);
+                }
 
                 final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
                 new Thread(new Runnable() {
@@ -798,4 +850,33 @@ public class MainActivity extends FragmentActivity {
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
+    // Get Image Rotation Angle
+    public int getCameraPhotoOrientation(Context context, String imagePath){
+        int rotate = 0;
+        try {
+            File imageFile = new File(imagePath);
+
+            ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+
+            Log.i("RotateImage", "Exif orientation: " + orientation);
+            Log.i("RotateImage", "Rotate value: " + rotate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rotate;
+    }
+
 }

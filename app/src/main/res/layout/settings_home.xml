@@ -16,6 +16,14 @@
             android:id="@+id/profile_picture"
             android:src="@drawable/temp_profile"/>
 
+        <ProgressBar
+            android:id="@+id/profile_spinner"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"

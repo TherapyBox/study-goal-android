@@ -1,23 +1,36 @@
 package com.studygoal.jisc.Fragments;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatTextView;
+import android.text.Editable;
+import android.text.Html;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
@@ -43,13 +56,13 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
     AppCompatTextView module;
     AppCompatTextView activityType;
 
-    TextView hours_spent, minutes_spent;
+    EditText hours_spent, minutes_spent;
     TextView date;
 
     public Boolean isInEditMode;
     public ActivityHistory item;
 
-
+    RelativeLayout addModuleLayout;
 
     EditText note;
     private String init_date;
@@ -74,25 +87,111 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
 
         DataManager.getInstance().reload();
 
+        note = (EditText)mainView.findViewById(R.id.log_activity_edittext_note);
+
         ((TextView)mainView.findViewById(R.id.log_activity_module_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
         ((TextView)mainView.findViewById(R.id.log_activity_text_choose)).setTypeface(DataManager.getInstance().myriadpro_regular);
         ((TextView)mainView.findViewById(R.id.log_activity_activity_type_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
+        addModuleLayout = (RelativeLayout)mainView.findViewById(R.id.add_new_module_layout);
+        addModuleLayout.setVisibility(View.GONE);
+        ((EditText)mainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView)mainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        mainView.findViewById(R.id.add_module_button_text).setOnClickListener(this);
 
-        ((TextView)mainView.findViewById(R.id.log_activity_text_hours)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        TextView log_activity_text_hours = (TextView) mainView.findViewById(R.id.log_activity_text_hours);
+        log_activity_text_hours.setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        mainView.findViewById(R.id.log_activity_cardView_timespent).setOnClickListener(this);
-
-        hours_spent = ((TextView)mainView.findViewById(R.id.log_activity_text_timer_1));
+        hours_spent = ((EditText) mainView.findViewById(R.id.log_activity_text_timer_1));
         hours_spent.setTypeface(DataManager.getInstance().myriadpro_regular);
-        minutes_spent = ((TextView)mainView.findViewById(R.id.log_activity_text_timer_3));
+        minutes_spent = ((EditText) mainView.findViewById(R.id.log_activity_text_timer_3));
         minutes_spent.setTypeface(DataManager.getInstance().myriadpro_regular);
+
+        TextWatcher hoursWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(s.toString().length() != 0) {
+                    int value = Integer.parseInt(s.toString());
+                    if (value < 0 || value > 9) {
+                        hours_spent.setText("0");
+                    }
+                }
+            }
+        };
+
+        TextWatcher minutesWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(s.toString().length() != 0) {
+                    int value = Integer.parseInt(s.toString());
+                    if (value < 0 || value > 59) {
+                        minutes_spent.setText("0");
+                    }
+                }
+            }
+        };
+
+        final View contentView = container;
+        contentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private int mPreviousHeight;
+
+            @Override
+            public void onGlobalLayout() {
+                int newHeight = contentView.getHeight();
+                if (mPreviousHeight != 0) {
+                    if (mPreviousHeight > newHeight) {
+
+                        // Height decreased: keyboard was shown
+                        mainView.findViewById(R.id.content_scroll).setPadding(0, 0, 0, 200);
+
+                        if(note.isFocused()) {
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Do something after 100ms
+
+                                    ScrollView scrollView = (ScrollView) mainView.findViewById(R.id.log_fragment_container);
+                                    scrollView.scrollTo(0, mainView.findViewById(R.id.content_scroll).getHeight());
+                                }
+                            }, 100);
+                        }
+
+                    } else if (mPreviousHeight < newHeight) {
+                        mainView.findViewById(R.id.content_scroll).setPadding(0, 0, 0, 0);
+                    } else {
+                        // No change
+                    }
+                }
+                mPreviousHeight = newHeight;
+            }
+        });
+
+        hours_spent.addTextChangedListener(hoursWatcher);
+        minutes_spent.addTextChangedListener(minutesWatcher);
 
         ((TextView)mainView.findViewById(R.id.log_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         date = ((TextView)mainView.findViewById(R.id.log_activity_text_date));
         date.setTypeface(DataManager.getInstance().myriadpro_regular);
-
 
         chooseActivity = (AppCompatTextView) mainView.findViewById(R.id.log_activity_chooseActivity_textView);
         chooseActivity.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
@@ -104,7 +203,6 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
         activityType.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         activityType.setTypeface(DataManager.getInstance().myriadpro_regular);
         activityType.setText(DataManager.getInstance().activity_type.get(0));
-
 
         module = (AppCompatTextView) mainView.findViewById(R.id.log_activity_module_textView);
         module.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
@@ -119,7 +217,7 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
 
         mainView.findViewById(R.id.log_activity_save_btn).setOnClickListener(this);
 
-        note = (EditText)mainView.findViewById(R.id.log_activity_edittext_note);
+
         note.setTypeface(DataManager.getInstance().myriadpro_regular);
         note.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View view, MotionEvent event) {
@@ -196,7 +294,29 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.log_activity_save_btn: {
+
+                View view = getActivity().getCurrentFocus();
+                if(view!=null) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+
                 if(isInEditMode) {
+
+                    if(DataManager.getInstance().user.isDemo) {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogLogActivity.this.getActivity());
+                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_editactivitylog) + "</font>"));
+                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                        return;
+                    }
+
                     final int time_spent = Integer.parseInt(hours_spent.getText().toString()) * 60 + Integer.parseInt(minutes_spent.getText().toString());
                     if(init_date.equals(date.getText().toString()) && init_timespent.equals(time_spent+"") && init_note.equals(note.getText().toString())) {
                         DataManager.getInstance().mainActivity.onBackPressed();
@@ -257,6 +377,20 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
 
                     }
                 } else {
+                    if(DataManager.getInstance().user.isDemo) {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogLogActivity.this.getActivity());
+                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_saveactivitylog) + "</font>"));
+                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                        return;
+                    }
+
                     if(module.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.no_module))) {
                         Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.no_module_selected, Snackbar.LENGTH_LONG).show();
                         return;
@@ -333,13 +467,23 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
                 ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
                 ((TextView)dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
 
+                final ModuleAdapter moduleAdapter = new ModuleAdapter(DataManager.getInstance().mainActivity, module.getText().toString());
                 final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(new ModuleAdapter(DataManager.getInstance().mainActivity, module.getText().toString()));
+                listView.setAdapter(moduleAdapter);
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        module.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
-                        dialog.dismiss();
+                        if(DataManager.getInstance().user.isSocial
+                                && position == moduleAdapter.moduleList.size() - 1) {
+                            //add new module
+                            EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
+                            add_module_edit_text.setText("");
+                            addModuleLayout.setVisibility(View.VISIBLE);
+                            dialog.dismiss();
+                        } else {
+                            module.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                            dialog.dismiss();
+                        }
                     }
                 });
 
@@ -494,6 +638,46 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
                 ((DatePickerFragment) newFragment).fragment = this;
                 newFragment.show(DataManager.getInstance().mainActivity.getSupportFragmentManager(), "datePicker");
                 break;
+            }
+            case R.id.add_module_button_text: {
+                EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
+                final String moduleName = add_module_edit_text.getText().toString();
+                if(moduleName.length() == 0) {
+                    Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.module_name_invalid, Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        final HashMap<String, String> params = new HashMap<>();
+                        params.put("student_id", DataManager.getInstance().user.id);
+                        params.put("module", moduleName);
+                        params.put("is_social", "yes");
+
+                        if (NetworkManager.getInstance().addModule(params)) {
+
+                            DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                }
+                            });
+                        } else {
+                            DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    (DataManager.getInstance().mainActivity).hideProgressBar();
+                                    Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    }
+                }).start();
+
+                addModuleLayout.setVisibility(View.GONE);
+
+                return;
             }
         }
     }

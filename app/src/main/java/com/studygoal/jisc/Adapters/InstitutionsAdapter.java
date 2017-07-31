@@ -28,7 +28,7 @@ public class InstitutionsAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return institutions.size()+1;
+        return institutions.size();
     }
 
     @Override
@@ -47,21 +47,32 @@ public class InstitutionsAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.institution_item, viewGroup, false);
         }
 
-        if(i < institutions.size()) {
-            TextView name = (TextView) view.findViewById(R.id.name);
-            name.setTypeface(DataManager.getInstance().myriadpro_regular);
+        TextView name = (TextView) view.findViewById(R.id.name);
+        name.setTypeface(DataManager.getInstance().myriadpro_regular);
+
+        // set manually to change university name
+        // original code
+        // name.setText(institutions.get(i).name);
+        //it's hard coded part. so after web service updated.  it need to be removed.
+        //hard code start
+        String temp_name = institutions.get(i).name;
+
+        if (temp_name.toLowerCase().contains("Gloucestershire".toLowerCase())){
+            name.setText("University of Gloucestershire");
+        }else if (temp_name.toLowerCase().contains("Oxford Brookes".toLowerCase())){
+            name.setText("Oxford Brookes University");
+        }else if (temp_name.toLowerCase().contains("South Wales".toLowerCase())){
+            name.setText("University of South Wales | Prifysgol De Cymru");
+        }else if (temp_name.toLowerCase().contains("Strathclyde".toLowerCase())){
+            name.setText("University of Strathclyde");
+        }else{
             name.setText(institutions.get(i).name);
-            name.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
-
-            view.setTag(institutions.get(i));
-        } else {
-            TextView name = (TextView) view.findViewById(R.id.name);
-            name.setTypeface(DataManager.getInstance().myriadpro_bold);
-            name.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            name.setText(context.getString(R.string.institution_no_listed));
-
-            view.setTag("no institution");
         }
+
+        //hard code end
+
+        name.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+        view.setTag(institutions.get(i));
 
         return view;
     }

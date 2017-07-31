@@ -25,10 +25,14 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
@@ -47,6 +51,8 @@ public class Settings extends Fragment {
     private TextView home_value;
     private TextView language_value;
     private ImageView profile_image;
+    ProgressBar profile_spinner;
+
 
     @Override
     public void onResume() {
@@ -130,6 +136,7 @@ public class Settings extends Fragment {
         name.setText(DataManager.getInstance().user.name);
         TextView email = (TextView) mainView.findViewById(R.id.email);
         email.setTypeface(font);
+
         email.setText(DataManager.getInstance().user.email + " | Student ID : " + DataManager.getInstance().user.jisc_student_id);
         mainView.findViewById(R.id.camera).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,6 +174,7 @@ public class Settings extends Fragment {
         });
 
         profile_image = (ImageView) mainView.findViewById(R.id.profile_picture);
+        profile_spinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
         refresh_image();
         return mainView;
     }
@@ -182,7 +190,23 @@ public class Settings extends Fragment {
                         manager.mainActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).into(profile_image);
+                                profile_spinner.setVisibility(View.VISIBLE);
+
+                                Glide.with(manager.mainActivity)
+                                        .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                                        .listener(new RequestListener<String, GlideDrawable>() {
+                                            @Override
+                                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                                profile_spinner.setVisibility(View.INVISIBLE);
+                                                return false;
+                                            }
+                                        })
+                                        .into(profile_image);
                                 Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
                             }
                         });
@@ -196,7 +220,23 @@ public class Settings extends Fragment {
                         manager.mainActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).into(profile_image);
+                                profile_spinner.setVisibility(View.VISIBLE);
+
+                                Glide.with(manager.mainActivity)
+                                        .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                                        .listener(new RequestListener<String, GlideDrawable>() {
+                                            @Override
+                                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                                profile_spinner.setVisibility(View.INVISIBLE);
+                                                return false;
+                                            }
+                                        })
+                                        .into(profile_image);
                                 Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
                             }
                         });
