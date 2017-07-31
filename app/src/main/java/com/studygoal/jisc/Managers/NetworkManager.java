@@ -3284,8 +3284,8 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("staff_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                if (jsonObject.getString("email") == ""){
-                    DataManager.getInstance().user.email = "not@known";
+                if (jsonObject.getString("email") == "not@known"){
+                    DataManager.getInstance().user.email = "";
                 }else{
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
@@ -3373,8 +3373,8 @@ public class NetworkManager {
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
 
-                if (jsonObject.getString("email") == ""){
-                    DataManager.getInstance().user.email = "not@known";
+                if (jsonObject.getString("email") == "not@known"){
+                    DataManager.getInstance().user.email = "";
                 }else{
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
@@ -3480,8 +3480,8 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                if (jsonObject.getString("email") == ""){
-                    DataManager.getInstance().user.email = "not@known";
+                if (jsonObject.getString("email") == "not@known"){
+                    DataManager.getInstance().user.email = "";
                 }else{
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
