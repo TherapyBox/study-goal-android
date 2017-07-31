@@ -26,11 +26,7 @@ public class AttainmentAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        int size = list.size();
-        if(DataManager.getInstance().user.affiliation.contains("glos.ac.uk")) {
-            size++;
-        }
-        return size;
+        return list.size();
     }
 
     @Override
@@ -48,23 +44,16 @@ public class AttainmentAdapter extends BaseAdapter {
         if(convertView == null) {
             convertView = inflater.inflate(R.layout.attainment_item, parent, false);
         }
+        Attainment attainment = list.get(position);
 
         TextView name = (TextView) convertView.findViewById(R.id.name);
         TextView percent = (TextView) convertView.findViewById(R.id.percent);
+
         name.setTypeface(DataManager.getInstance().myriadpro_regular);
         percent.setTypeface(DataManager.getInstance().myriadpro_regular);
+        name.setText(Utils.attainmentDate(attainment.date) + " " + attainment.module);
+        percent.setText(attainment.percent);
 
-        if(position >= list.size() && DataManager.getInstance().user.affiliation.contains("glos.ac.uk")) {
-
-            name.setText(DataManager.getInstance().mainActivity.getString(R.string.attainment_info));
-            percent.setVisibility(View.GONE);
-
-        } else {
-            Attainment attainment = list.get(position);
-            percent.setVisibility(View.VISIBLE);
-            name.setText(Utils.attainmentDate(attainment.date) + " " + attainment.module);
-            percent.setText(attainment.percent);
-        }
         return convertView;
     }
 

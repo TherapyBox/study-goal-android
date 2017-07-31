@@ -6,13 +6,12 @@
     <TextView
         android:id="@+id/name"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:layout_centerVertical="true"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:gravity="center_vertical"
-        android:textSize="15sp"
-        android:textColor="#000000"/>
+        android:textColor="@color/dark_grey"/>
 
     <!--<LinearLayout-->
         <!--android:layout_width="match_parent"-->

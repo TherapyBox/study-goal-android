@@ -1,13 +1,10 @@
 package com.studygoal.jisc.Adapters;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.SwitchCompat;
-import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.studygoal.jisc.Fragments.FriendsSearch;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.ReceivedRequest;
@@ -68,7 +64,7 @@ public class FriendsRequestAdapter extends BaseAdapter {
 
         if(list.size() == 0) {
 
-            convertView = inflater.inflate(R.layout.empty_item, parent, false);
+                convertView = inflater.inflate(R.layout.empty_item, parent, false);
 
             TextView name = (TextView) convertView.findViewById(R.id.name);
             name.setTypeface(DataManager.getInstance().myriadpro_regular);
@@ -157,21 +153,6 @@ public class FriendsRequestAdapter extends BaseAdapter {
                     dialog.findViewById(R.id.send).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            dialog.dismiss();
-                            if(DataManager.getInstance().user.isDemo) {
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(FriendsRequestAdapter.this.context);
-                                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + FriendsRequestAdapter.this.context.getString(R.string.demo_mode_sendfriendrequest) + "</font>"));
-                                alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                                AlertDialog alertDialog = alertDialogBuilder.create();
-                                alertDialog.show();
-                                return;
-                            }
-
                             HashMap<String, String> params = new HashMap<>();
                             params.put("student_id", DataManager.getInstance().user.id);
                             params.put("from_user", attendant.id);
@@ -237,19 +218,6 @@ public class FriendsRequestAdapter extends BaseAdapter {
                         @Override
                         public void onClick(View v) {
                             dialog.dismiss();
-                            if(DataManager.getInstance().user.isDemo) {
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(FriendsRequestAdapter.this.context);
-                                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + FriendsRequestAdapter.this.context.getString(R.string.demo_mode_sendfriendrequest) + "</font>"));
-                                alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                                AlertDialog alertDialog = alertDialogBuilder.create();
-                                alertDialog.show();
-                                return;
-                            }
                             HashMap<String, String> params = new HashMap<>();
                             params.put("student_id", DataManager.getInstance().user.id);
                             params.put("deleted_user", attendant.id);

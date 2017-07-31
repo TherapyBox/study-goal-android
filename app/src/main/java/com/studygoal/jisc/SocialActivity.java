@@ -7,9 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
@@ -44,10 +43,8 @@ import io.fabric.sdk.android.Fabric;
 
 public class SocialActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
-    private static final String TWITTER_KEY = "8sRjZ9CSN89N1iHMyMZjfedeE";
-    private static final String TWITTER_SECRET = "GPRDOuvl9HBoIZVYZo7r5XlverGN6HAGNouJYhCDOVIYrd7lcT";
-
+    private static final String TWITTER_KEY = "M0NKXVGquYoclGTcG81u49hka";
+    private static final String TWITTER_SECRET = "CCpca8rm2GuJFkuHmTdTiwBsTcWdv7Ybi5Qqi7POIA6BvCObY6";
     TwitterAuthClient mTwitterAuthClient;
 
     CallbackManager callbackManager;
@@ -97,24 +94,11 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new Twitter(authConfig));
 
-        CookieSyncManager.createInstance(this);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeSessionCookie();
-        Twitter.getSessionManager().clearActiveSession();
-        Twitter.logOut();
-
         mTwitterAuthClient= new TwitterAuthClient();
         TextView login_with_twitter = (TextView)findViewById(R.id.login_with_twitter);
         login_with_twitter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                CookieSyncManager.createInstance(SocialActivity.this);
-                CookieManager cookieManager = CookieManager.getInstance();
-                cookieManager.removeSessionCookie();
-                Twitter.getSessionManager().clearActiveSession();
-                Twitter.logOut();
-
                 socialType = 2;
                 socialID = "";
                 email = "";
@@ -139,6 +123,8 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
 
                             @Override
                             public void failure(TwitterException exception) {
+                                Log.e("TWITTER", exception.toString());
+
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SocialActivity.this);
                                 alertDialogBuilder.setMessage(R.string.facebook_error_email);
                                 alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
@@ -149,8 +135,6 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
                                 });
                                 AlertDialog alertDialog = alertDialogBuilder.create();
                                 alertDialog.show();
-
-                                exception.printStackTrace();
                             }
                         });
                     }
@@ -197,6 +181,7 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
                         new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
+                                Log.e("LoginActivity", response.toString());
 
                                 try {
                                     socialID = object.getString("id");
@@ -246,6 +231,7 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
 
             email = acct.getEmail();
@@ -259,11 +245,13 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
             });
 
         } else {
+            Log.e("JISC", "handleSignInResult:" + result.getStatus().getResolution());
         }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e("JISC","connection result: "+connectionResult);
     }
 
     @Override
@@ -274,38 +262,11 @@ public class SocialActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     void loginSocial() {
-
-        Integer response = NetworkManager.getInstance().loginSocial(email,socialID);
-
-        if(response == 200) {
+        if (NetworkManager.getInstance().loginSocial(email,socialID)) {
             Intent intent = new Intent(SocialActivity.this, MainActivity.class);
             startActivity(intent);
             SocialActivity.this.finish();
-            return;
-        }
-
-        if (response == 403) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SocialActivity.this);
-            alertDialogBuilder.setMessage(R.string.social_login_error);
-            alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-        } else {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SocialActivity.this);
-            alertDialogBuilder.setMessage(R.string.something_went_wrong);
-            alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
         }
     }
+
 }

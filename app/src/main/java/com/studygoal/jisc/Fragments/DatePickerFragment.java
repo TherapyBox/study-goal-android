@@ -12,7 +12,8 @@ import com.studygoal.jisc.Utils.Utils;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DatePickerFragment extends DialogFragment {
+public class DatePickerFragment extends DialogFragment
+        implements DatePickerDialog.OnDateSetListener {
 
     public LogLogActivity fragment;
 
@@ -25,15 +26,13 @@ public class DatePickerFragment extends DialogFragment {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog dialog = new DatePickerDialog(getActivity(), null, year, month, day);
-        dialog.getDatePicker().init(year, month, day, new DatePicker.OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker view, int y, int m, int d) {
-                fragment.date.setText(Utils.formatDate(y, m, d));
-                fragment.date.setTag(y + "-" + ((m+1)<10?"0"+(m+1):(m+1)) + "-" + (d<10?"0"+d:d));
-            }
-        });
+        DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
         dialog.getDatePicker().setMaxDate(new Date().getTime());
         return dialog;
+    }
+
+    public void onDateSet(DatePicker view, int year, int month, int day) {
+        fragment.date.setText(Utils.formatDate(year, month, day));
+        fragment.date.setTag(year + "-" + ((month+1)<10?"0"+(month+1):(month+1)) + "-" + (day<10?"0"+day:day));
     }
 }

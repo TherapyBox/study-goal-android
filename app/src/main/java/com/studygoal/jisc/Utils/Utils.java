@@ -14,7 +14,6 @@ import com.studygoal.jisc.R;
 
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -152,20 +151,111 @@ public class Utils {
     }
 
     public static String formatDate(int year, int month, int day) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
+        Calendar c = Calendar.getInstance();
+        c.set(year, month, day);
 
-        String[] suffixes =
-                {"th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
-                        "th", "th", "th", "th", "th", "th", "th", "th", "th", "th",
-                        "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
-                        "th", "st"};
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE d");
-
-        String result = dateFormat.format(calendar.getTime()) + suffixes[day] + " ";
-        dateFormat = new SimpleDateFormat("MMMM yyyy");
-        result += dateFormat.format(calendar.getTime());
+        String result = "";
+        if(!DataManager.getInstance().mainActivity.isLandscape) {
+            switch (c.get(Calendar.DAY_OF_WEEK)) {
+                case Calendar.MONDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.monday) + " ";
+                    break;
+                }
+                case Calendar.TUESDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.tuesday) + " ";
+                    break;
+                }
+                case Calendar.WEDNESDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.wednesday) + " ";
+                    break;
+                }
+                case Calendar.THURSDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.thursday) + " ";
+                    break;
+                }
+                case Calendar.FRIDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.friday) + " ";
+                    break;
+                }
+                case Calendar.SATURDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.saturday) + " ";
+                    break;
+                }
+                case Calendar.SUNDAY: {
+                    result += DataManager.getInstance().context.getString(R.string.sunday) + " ";
+                    break;
+                }
+            }
+        }
+        switch (day) {
+            case 1: {
+                result += DataManager.getInstance().context.getString(R.string._1st) + " ";
+                break;
+            }
+            case 2: {
+                result += DataManager.getInstance().context.getString(R.string._2nd) + " ";
+                break;
+            }
+            case 3: {
+                result += DataManager.getInstance().context.getString(R.string._3rd) + " ";
+                break;
+            }
+            default: {
+                result += day + DataManager.getInstance().context.getString(R.string._th) + " ";
+                break;
+            }
+        }
+        switch (month) {
+            case Calendar.JANUARY: {
+                result += DataManager.getInstance().context.getString(R.string.jan) + " ";
+                break;
+            }
+            case Calendar.FEBRUARY: {
+                result += DataManager.getInstance().context.getString(R.string.feb) + " ";
+                break;
+            }
+            case Calendar.MARCH: {
+                result += DataManager.getInstance().context.getString(R.string.mar) + " ";
+                break;
+            }
+            case Calendar.APRIL: {
+                result += DataManager.getInstance().context.getString(R.string.apr) + " ";
+                break;
+            }
+            case Calendar.MAY: {
+                result += DataManager.getInstance().context.getString(R.string.may) + " ";
+                break;
+            }
+            case Calendar.JUNE: {
+                result += DataManager.getInstance().context.getString(R.string.jun) + " ";
+                break;
+            }
+            case Calendar.JULY: {
+                result += DataManager.getInstance().context.getString(R.string.jul) + " ";
+                break;
+            }
+            case Calendar.AUGUST: {
+                result += DataManager.getInstance().context.getString(R.string.aug) + " ";
+                break;
+            }
+            case Calendar.SEPTEMBER: {
+                result += DataManager.getInstance().context.getString(R.string.sep) + " ";
+                break;
+            }
+            case Calendar.OCTOBER: {
+                result += DataManager.getInstance().context.getString(R.string.oct) + " ";
+                break;
+            }
+            case Calendar.NOVEMBER: {
+                result += DataManager.getInstance().context.getString(R.string.nov) + " ";
+                break;
+            }
+            case Calendar.DECEMBER: {
+                result += DataManager.getInstance().context.getString(R.string.dec) + " ";
+                break;
+            }
+        }
+        result += year;
 
         return result;
     }
@@ -292,6 +382,9 @@ public class Utils {
     public static String jwtDecoded(String JWTEncoded) {
         try {
             String[] split = JWTEncoded.split("\\.");
+            Log.d("JWT_DECODED", "Header: " + getJson(split[0]));
+            Log.d("JWT_DECODED", "Body: " + getJson(split[1]));
+
             return getJson(split[1]);
         } catch (Exception e) {
             return "";

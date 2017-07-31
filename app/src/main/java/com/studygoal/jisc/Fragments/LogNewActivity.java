@@ -1,11 +1,9 @@
 package com.studygoal.jisc.Fragments;
 
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -15,9 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
-import android.text.Editable;
-import android.text.Html;
-import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,10 +20,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.activeandroid.query.Delete;
@@ -57,7 +50,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
     AppCompatTextView module;
     AppCompatTextView activityType;
 
-    EditText reminder_textView;
+    TextView reminder_textView;
     TextView countdown_textView;
 
     AlarmManager am;
@@ -69,7 +62,6 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
     SharedPreferences saves;
 
-    RelativeLayout addModuleLayout;
 
     @Override
     public void onResume() {
@@ -86,17 +78,8 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
         DataManager.getInstance().reload();
 
-        addModuleLayout = (RelativeLayout)mainView.findViewById(R.id.add_new_module_layout);
-        addModuleLayout.setVisibility(View.GONE);
-
-        ((EditText)mainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        mainView.findViewById(R.id.add_module_button_text).setOnClickListener(this);
-
         countdown_textView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
         countdown_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
-
-        ((TextView)mainView.findViewById(R.id.new_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         am = (AlarmManager) DataManager.getInstance().mainActivity.getSystemService(Context.ALARM_SERVICE);
 
@@ -115,28 +98,9 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
         chooseActivity.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         chooseActivity.setOnClickListener(this);
 
-        reminder_textView = ((EditText) mainView.findViewById(R.id.new_activity_text_timer_1));
+        reminder_textView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_1));
         reminder_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
-        reminder_textView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(s.toString().length() != 0) {
-                    int value = Integer.parseInt(s.toString());
-                    if (value < 0 || value > 60) {
-                        reminder_textView.setText("");
-                        reminder_textView.setSelection(reminder_textView.getText().length());
-                    }
-                }
-            }
-        });
+        reminder_textView.setOnClickListener(this);
 
         countdown_textView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
         countdown_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
@@ -328,6 +292,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 //duration = 1;
                 params.put("time_spent", duration + "");
 
+                System.out.println("ADD_ACTIVITY: " + params.toString());
                 String responseCode = NetworkManager.getInstance().addActivity(params);
                 if (responseCode.equals("403")) {
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.already_added_activity, Snackbar.LENGTH_LONG).show();
@@ -437,21 +402,6 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 break;
             }
             case R.id.new_activity_btn_start: {
-
-                if(DataManager.getInstance().user.isDemo) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogNewActivity.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addactivitylog) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                    return;
-                }
-
                 if(module.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.no_module))) {
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.no_module_selected, Snackbar.LENGTH_LONG).show();
                     return;
@@ -463,7 +413,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_started, Snackbar.LENGTH_LONG).show();
 
                 timestamp = System.currentTimeMillis();
-                int reminder = Integer.parseInt(reminder_textView.getText().toString());
+                int reminder = (Integer.parseInt(reminder_textView.getText().toString().split(":")[0]) * 60) + Integer.parseInt(reminder_textView.getText().toString().split(":")[1]);
                 timer = new Timer();
                 timertask = new TimerTask() {
                     @Override
@@ -513,11 +463,14 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 if(reminder != 0) {
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
                     //TODO: Bug Samsung devices - old code works on all except samsung
+//                    pendingIntent = PendingIntent.getBroadcast(getActivity(), 0,
+//                            intent, PendingIntent.FLAG_ONE_SHOT);
                     pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                             intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + reminder * 1000, pendingIntent);
+                    am.set(AlarmManager.RTC_WAKEUP,
+                            System.currentTimeMillis() + reminder * 1000, pendingIntent);
 
-                    //TODO: BUGFIX
+                    //TODO: BUGFIX AICI
                 }
                 break;
             }
@@ -609,30 +562,19 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
                 ((TextView)dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
 
-                final ModuleAdapter moduleAdapter = new ModuleAdapter(DataManager.getInstance().mainActivity, module.getText().toString());
                 final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(moduleAdapter);
+                listView.setAdapter(new ModuleAdapter(DataManager.getInstance().mainActivity, module.getText().toString()));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                        if(DataManager.getInstance().user.isSocial
-                                && position == moduleAdapter.moduleList.size() - 1) {
-                            //add new module
-                            EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
-                            add_module_edit_text.setText("");
-                            addModuleLayout.setVisibility(View.VISIBLE);
-                            dialog.dismiss();
-                        } else {
-                            module.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
-                            RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
-                            if (activity != null) {
-                                activity.student_id = DataManager.getInstance().user.id;
-                                activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", module.getText().toString()).executeSingle())).id;
-                                activity.save();
-                            }
-                            dialog.dismiss();
+                        module.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                        RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
+                        if(activity != null) {
+                            activity.student_id = DataManager.getInstance().user.id;
+                            activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", module.getText().toString()).executeSingle())).id;
+                            activity.save();
                         }
+                        dialog.dismiss();
                     }
                 });
 
@@ -714,46 +656,6 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
                 dialog.show();
                 break;
-            }
-            case R.id.add_module_button_text: {
-                EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
-                final String moduleName = add_module_edit_text.getText().toString();
-                if(moduleName.length() == 0) {
-                    Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.module_name_invalid, Snackbar.LENGTH_LONG).show();
-                    return;
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        final HashMap<String, String> params = new HashMap<>();
-                        params.put("student_id", DataManager.getInstance().user.id);
-                        params.put("module", moduleName);
-                        params.put("is_social", "yes");
-
-                        if (NetworkManager.getInstance().addModule(params)) {
-
-                            DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                }
-                            });
-                        } else {
-                            DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    (DataManager.getInstance().mainActivity).hideProgressBar();
-                                    Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-                                }
-                            });
-                        }
-                    }
-                }).start();
-
-                addModuleLayout.setVisibility(View.GONE);
-
-                return;
             }
         }
     }
