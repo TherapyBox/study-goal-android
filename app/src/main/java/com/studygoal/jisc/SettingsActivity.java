@@ -34,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private ProfileFragment fragment;
     private ListView list_menu;
-    private ListMenuAdapter[] adapter = { new ListMenuAdapter(this, 0) };
+    private ListMenuAdapter[] adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        adapter = new ListMenuAdapter[]{ new ListMenuAdapter(this, 0) };
         fragment = new ProfileFragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)

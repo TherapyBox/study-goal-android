@@ -34,6 +34,8 @@ public class CheckInFragment extends Fragment {
     ListView list;
     ActivitiesHistoryAdapter adapter;
     SwipeRefreshLayout layout;
+    boolean gps_enabled = false;
+    boolean network_enabled = false;
 
     @Override
     public void onResume() {
@@ -55,143 +57,142 @@ public class CheckInFragment extends Fragment {
         final TextView pin_text_edit = (TextView) mainView.findViewById(R.id.pin_text_edit);
         pin_text_edit.setTypeface(DataManager.getInstance().oratorstd_typeface);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                )
+                ) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 102);
+        }
+
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+
+        if (!gps_enabled && !network_enabled) {
+
+            CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                    dialog.setMessage(getActivity().getResources().getString(R.string.gps_network_not_enabled));
+                    dialog.setPositiveButton(getActivity().getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            Intent myIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            getActivity().startActivity(myIntent);
+                        }
+                    });
+                    dialog.setNegativeButton(getActivity().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        }
+                    });
+                    dialog.show();
+                }
+            });
+        }
+
         ((TextView) mainView.findViewById(R.id.pin_send_button)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-        mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                if (DataManager.getInstance().user.isDemo) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                    return;
-                }
-
-                if (DataManager.getInstance().user.isStaff
-                        || DataManager.getInstance().user.isDemo) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                    return;
-                }
-
-                final String pin_text_edit_text = pin_text_edit.getText().toString();
-                if (pin_text_edit_text.length() == 0) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                                (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                                        ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                                )
-                                ) {
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 102);
-                            return;
-                        }
-
-                        boolean gps_enabled = false;
-                        boolean network_enabled = false;
-
-                        try {
-                            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                        } catch (Exception ex) {
-                        }
-
-                        try {
-                            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                        } catch (Exception ex) {
-                        }
-
-                        if (!gps_enabled && !network_enabled) {
-
-                            CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+            mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                        if (DataManager.getInstance().user.isDemo) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
+                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void run() {
-                                    final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-                                    dialog.setMessage(getActivity().getResources().getString(R.string.gps_network_not_enabled));
-                                    dialog.setPositiveButton(getActivity().getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                            Intent myIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                            getActivity().startActivity(myIntent);
-                                        }
-                                    });
-                                    dialog.setNegativeButton(getActivity().getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                        }
-                                    });
-                                    dialog.show();
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
                                 }
                             });
-
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
                             return;
                         }
 
-                        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if (DataManager.getInstance().user.isStaff
+                                || DataManager.getInstance().user.isDemo) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
+                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+                            return;
+                        }
 
-                        final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
+                        final String pin_text_edit_text = pin_text_edit.getText().toString();
+                        if (pin_text_edit_text.length() == 0) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
+                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+                        }
 
-                        //debug for testing getsettings - by tmobiledevcore
-                        final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
-                        final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
-
-
-                        CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+                        new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                String message;
-                                if(result) {
-                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
-                                } else {
-                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
+
+                                try {
+                                    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                                } catch (SecurityException se){
+                                    se.printStackTrace();
                                 }
 
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
-                                alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
+
+                                //debug for testing getsettings - by tmobiledevcore
+                                final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
+                                final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
+
+
+                                CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
                                     @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
+                                    public void run() {
+                                        String message;
+                                        if (result) {
+                                            message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
+                                        } else {
+                                            message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
+                                        }
+
+                                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
+                                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                        AlertDialog alertDialog = alertDialogBuilder.create();
+                                        alertDialog.show();
+
+                                        pin_text_edit.setText("");
                                     }
                                 });
-                                AlertDialog alertDialog = alertDialogBuilder.create();
-                                alertDialog.show();
-
-                                pin_text_edit.setText("");
                             }
-                        });
-                    }
-                }).start();
-            }
-        });
+                        }).start();
+                }
+            });
 
 
         GridLayout grid = (GridLayout) mainView.findViewById(R.id.grid_layout);

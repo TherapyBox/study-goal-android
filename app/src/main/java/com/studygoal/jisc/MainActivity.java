@@ -824,8 +824,12 @@ public class MainActivity extends FragmentActivity {
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    settings_fragment.refresh_image();
-                                    hideProgressBar();
+                                    if(settings_fragment == null){
+                                        settings_fragment = new Settings();
+                                    }
+                                        settings_fragment.refresh_image();
+                                        hideProgressBar();
+
                                 }
                             });
                         } else {
