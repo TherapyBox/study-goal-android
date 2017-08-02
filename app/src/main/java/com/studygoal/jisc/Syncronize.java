@@ -55,7 +55,7 @@ public class Syncronize extends IntentService {
                     Set<String> trophiesShown = prefs.getStringSet("trophies",new HashSet<String>());
                     for(final TrophyMy trophyMy : newList)
                         if(!listOfIds.contains(trophyMy.trophy_id)) {
-                           if(trophiesShown.add(trophyMy.trophy_id)) DataManager.getInstance().showTrophyNotification(trophyMy);
+//                           if(trophiesShown.add(trophyMy.trophy_id)) DataManager.getInstance().showTrophyNotification(trophyMy);
                             editor.putStringSet("trophies",trophiesShown);
                             editor.apply();
                         }
