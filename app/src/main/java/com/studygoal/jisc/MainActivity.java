@@ -249,12 +249,12 @@ public class MainActivity extends FragmentActivity {
 
         DataManager.getInstance().mainActivity = this;
 
-        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
-        NetworkManager.getInstance().getMyTrophies();
-
-        if (new Select().from(ActivityHistory.class).count() == 0) {
-            NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
-        }
+//        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
+//        NetworkManager.getInstance().getMyTrophies();
+//
+//        if (new Select().from(ActivityHistory.class).count() == 0) {
+//            NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
+//        }
 
         new Thread(new Runnable() {
             @Override
@@ -283,6 +283,10 @@ public class MainActivity extends FragmentActivity {
                 NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriends(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriendRequests(DataManager.getInstance().user.id);
+                NetworkManager.getInstance().getSettings(getString(R.string.attendanceData));
+                NetworkManager.getInstance().getSettings(getString(R.string.studyGoalAttendance));
+                NetworkManager.getInstance().getSettings(getString(R.string.attainmentData));
+                NetworkManager.getInstance().getWeeklyAttendance();
             }
         }).start();
 
@@ -324,7 +328,7 @@ public class MainActivity extends FragmentActivity {
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if (DataManager.getInstance().language.toLowerCase().equals("english") || DataManager.getInstance().language.toLowerCase().equals("SAESNEG".toLowerCase())) {
+        if (DataManager.getInstance().language == null || DataManager.getInstance().language.toLowerCase().equals("english") || DataManager.getInstance().language.toLowerCase().equals("SAESNEG".toLowerCase())) {
             Locale locale = new Locale("en");
             Locale.setDefault(locale);
             Configuration config = new Configuration();
@@ -396,9 +400,11 @@ public class MainActivity extends FragmentActivity {
                     destination = new StatsAttedance();
                 }
 
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, destination)
-                        .commit();
+                if(destination!=null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, destination)
+                            .commit();
+                }
             }
 
             @Override

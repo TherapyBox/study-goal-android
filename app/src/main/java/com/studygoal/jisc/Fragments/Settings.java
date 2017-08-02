@@ -134,8 +134,9 @@ public class Settings extends Fragment {
             }
         });
 
-        language_value.setText(DataManager.getInstance().language.toLowerCase().equals("english")?getString(R.string.english).toUpperCase():getString(R.string.welsh).toUpperCase());
-
+        if(DataManager.getInstance().language!=null) {
+            language_value.setText(DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english).toUpperCase() : getString(R.string.welsh).toUpperCase());
+        }
         mainView.findViewById(R.id.friends_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

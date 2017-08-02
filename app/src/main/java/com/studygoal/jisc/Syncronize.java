@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.activeandroid.query.Select;
 import com.studygoal.jisc.Fragments.LogNewActivity;
@@ -14,7 +15,9 @@ import com.studygoal.jisc.Models.TrophyMy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,9 +50,14 @@ public class Syncronize extends IntentService {
                     listOfIds.add(trophyMy.trophy_id);
                 if(NetworkManager.getInstance().getMyTrophies()) {
                     List<TrophyMy> newList = new Select().from(TrophyMy.class).execute();
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor = prefs.edit();
+                    Set<String> trophiesShown = prefs.getStringSet("trophies",new HashSet<String>());
                     for(final TrophyMy trophyMy : newList)
                         if(!listOfIds.contains(trophyMy.trophy_id)) {
-                           DataManager.getInstance().showTrophyNotification(trophyMy);
+                           if(trophiesShown.add(trophyMy.trophy_id)) DataManager.getInstance().showTrophyNotification(trophyMy);
+                            editor.putStringSet("trophies",trophiesShown);
+                            editor.apply();
                         }
                 }
 

@@ -1,6 +1,8 @@
 package com.studygoal.jisc.Adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,8 @@ import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
 
+import java.util.ArrayList;
+
 public class DrawerAdapter extends BaseAdapter {
     public String[] values;
     public TextView selected_text;
@@ -24,7 +28,7 @@ public class DrawerAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
     private Context context;
-    private static final int statOpenedNum = 6;
+    private static int statOpenedNum = 2;
     public DrawerAdapter(Context con) {
         context = con;
         inflater = LayoutInflater.from(con);
@@ -33,20 +37,32 @@ public class DrawerAdapter extends BaseAdapter {
         if(DataManager.getInstance().user.isSocial) {
             values = new String[] {"0", con.getString(R.string.feed), con.getString(R.string.log), con.getString(R.string.target), con.getString(R.string.logout)};
         } else {
-            values = new String[] {"0",
-                    con.getString(R.string.feed),
-                    con.getString(R.string.friends),
-                    con.getString(R.string.stats),
-                    con.getString(R.string.graphs),
-                    con.getString(R.string.attainment),
-                    con.getString(R.string.points),
-                    con.getString(R.string.leader_board),
-                    con.getString(R.string.events_attended),
-                    con.getString(R.string.attendance),
-                    con.getString(R.string.log),
-                    con.getString(R.string.target),
-                    con.getString(R.string.settings),
-                    con.getString(R.string.logout)};
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(con);
+            ArrayList<String> valuesList = new ArrayList<>();
+            valuesList.add("0");
+            valuesList.add(con.getString(R.string.feed));
+            valuesList.add(con.getString(R.string.friends));
+            valuesList.add(con.getString(R.string.stats));
+            valuesList.add(con.getString(R.string.graphs));
+            if (prefs.getBoolean(con.getString(R.string.attainmentData), false)) {
+                valuesList.add(con.getString(R.string.attainment));
+                statOpenedNum++;
+            }
+            valuesList.add(con.getString(R.string.points));
+            if (prefs.getBoolean(con.getString(R.string.attendanceData), false)) {
+                valuesList.add(con.getString(R.string.events_attended));
+                statOpenedNum++;
+                valuesList.add(con.getString(R.string.attendance));
+                statOpenedNum++;
+            }
+            if(prefs.getBoolean(con.getString(R.string.studyGoalAttendance),false)){
+                valuesList.add(con.getString(R.string.check_in));
+            }
+            valuesList.add(con.getString(R.string.log));
+            valuesList.add(con.getString(R.string.target));
+            valuesList.add(con.getString(R.string.settings));
+            valuesList.add(con.getString(R.string.logout));
+            values = valuesList.toArray(new String[valuesList.size()]);
         }
     }
 

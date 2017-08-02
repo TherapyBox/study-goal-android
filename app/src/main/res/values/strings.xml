@@ -336,6 +336,10 @@
     <string name="coursework_exams">Coursework/Exams</string>
     <string name="attending">Attending</string>
 
+    <string name="attendanceData">attendanceData</string>
+    <string name="studyGoalAttendance">studyGoalAttendance</string>
+    <string name="attainmentData">attainmentData</string>
+
     <string name="week">Week</string>
     <string name="me">Me</string>
     <string name="sun">Sun</string>
