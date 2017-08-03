@@ -5,21 +5,18 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
@@ -27,7 +24,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -50,8 +46,12 @@ import com.studygoal.jisc.Fragments.Friends;
 import com.studygoal.jisc.Fragments.LogActivityHistory;
 import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.Fragments.Settings;
-import com.studygoal.jisc.Fragments.Stats;
-import com.studygoal.jisc.Fragments.Stats2;
+import com.studygoal.jisc.Fragments.Stats3;
+import com.studygoal.jisc.Fragments.StatsAttainment;
+import com.studygoal.jisc.Fragments.StatsAttedance;
+import com.studygoal.jisc.Fragments.StatsEventAttendance;
+import com.studygoal.jisc.Fragments.StatsLeaderBoard;
+import com.studygoal.jisc.Fragments.StatsPoints;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
@@ -72,8 +72,6 @@ import java.util.Locale;
 
 public class MainActivity extends FragmentActivity {
 
-    public static final int CAMERA_REQUEST_CODE = 100;
-
     public DrawerLayout drawer;
     public RelativeLayout friend, settings, addTarget, send, timer, back;
     Settings settings_fragment;
@@ -89,24 +87,21 @@ public class MainActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         DataManager.getInstance().checkForbidden = true;
+
+        try {
+            Glide.with(DataManager.getInstance().mainActivity).load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic).transform(new CircleTransform(DataManager.getInstance().mainActivity)).into(DataManager.getInstance().mainActivity.adapter.profile_pic);
+        } catch (Exception ignored) {
+        }
     }
 
     public void refreshDrawer() {
         if (adapter != null) {
-            if(DataManager.getInstance().user.isSocial) {
-                adapter.values = new String[]{"0", getString(R.string.feed), getString(R.string.log), getString(R.string.target), getString(R.string.logout)};
-            } else {
-                adapter.values = new String[]{"0", getString(R.string.feed), getString(R.string.check_in), getString(R.string.stats), getString(R.string.log), getString(R.string.target), getString(R.string.logout)};
-//                adapter.values = new String[]{"0", getString(R.string.feed), getString(R.string.stats), getString(R.string.log), getString(R.string.target), getString(R.string.logout)};
-            }
-
             adapter.notifyDataSetChanged();
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         isLandscape = DataManager.getInstance().isLandscape;
         DataManager.getInstance().checkForbidden = true;
         super.onCreate(savedInstanceState);
@@ -254,9 +249,12 @@ public class MainActivity extends FragmentActivity {
 
         DataManager.getInstance().mainActivity = this;
 
-        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
-        NetworkManager.getInstance().getMyTrophies();
-
+//        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
+//        NetworkManager.getInstance().getMyTrophies();
+//
+//        if (new Select().from(ActivityHistory.class).count() == 0) {
+//            NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
+//        }
 
         new Thread(new Runnable() {
             @Override
@@ -282,10 +280,13 @@ public class MainActivity extends FragmentActivity {
                     }
                 }
 
-                NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriends(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriendRequests(DataManager.getInstance().user.id);
+                NetworkManager.getInstance().getSettings(getString(R.string.attendanceData));
+                NetworkManager.getInstance().getSettings(getString(R.string.studyGoalAttendance));
+                NetworkManager.getInstance().getSettings(getString(R.string.attainmentData));
+                NetworkManager.getInstance().getWeeklyAttendance();
             }
         }).start();
 
@@ -302,20 +303,14 @@ public class MainActivity extends FragmentActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_fragment, new FeedFragment())
                     .commit();
-        }
-        if (DataManager.getInstance().home_screen.toLowerCase().equals("feed")) {
+        } else if (DataManager.getInstance().home_screen.toLowerCase().equals("feed")) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_fragment, new FeedFragment())
                     .commit();
         } else if (DataManager.getInstance().home_screen.toLowerCase().equals("stats")) {
-            if (isLandscape)
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new Stats())
-                        .commit();
-            else
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new Stats2())
-                        .commit();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_fragment, new Stats3())
+                    .commit();
         } else if (DataManager.getInstance().home_screen.toLowerCase().equals("log")) {
             logFragment = new LogActivityHistory();
             getSupportFragmentManager().beginTransaction()
@@ -333,7 +328,7 @@ public class MainActivity extends FragmentActivity {
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if (DataManager.getInstance().language.toLowerCase().equals("english") || DataManager.getInstance().language.toLowerCase().equals("SAESNEG".toLowerCase())) {
+        if (DataManager.getInstance().language == null || DataManager.getInstance().language.toLowerCase().equals("english") || DataManager.getInstance().language.toLowerCase().equals("SAESNEG".toLowerCase())) {
             Locale locale = new Locale("en");
             Locale.setDefault(locale);
             Configuration config = new Configuration();
@@ -373,33 +368,42 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.feed))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new FeedFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.check_in))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new CheckInFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.stats))) {
-                            if (isLandscape)
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.main_fragment, new Stats())
-                                        .commit();
-                            else
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.main_fragment, new Stats2())
-                                        .commit();
+                if(selectedPosition < 0) { return; }
 
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.log))) {
-                            logFragment = new LogActivityHistory();
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, logFragment)
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.target))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new TargetFragment())
-                                    .commit();
+                String selection = adapter.values[selectedPosition];
+                Fragment destination = null;
+
+                if(selection.equals(getString(R.string.feed))) {
+                    destination = new FeedFragment();
+                } else if(selection.equals(getString(R.string.check_in))) {
+                    destination = new CheckInFragment();
+                } else if(selection.equals(getString(R.string.attainment))) {
+                    destination = new StatsAttainment();
+                } else if(selection.equals(getString(R.string.friends))) {
+                    destination = new Friends();
+                } else if(selection.equals(getString(R.string.settings))) {
+                    destination = new Settings();
+                } else if(selection.equals(getString(R.string.graphs))) {
+                    destination = new Stats3();
+                } else if(selection.equals(getString(R.string.points))) {
+                    destination = new StatsPoints();
+                } else if(selection.equals(getString(R.string.log))) {
+                    logFragment = new LogActivityHistory();
+                    destination = logFragment;
+                } else if(selection.equals(getString(R.string.target))) {
+                    destination = new TargetFragment();
+                } else if (selection.equals(getString(R.string.leader_board))) {
+                    destination = new StatsLeaderBoard();
+                } else if (selection.equals(getString(R.string.events_attended))) {
+                    destination = new StatsEventAttendance();
+                } else if (selection.equals(getString(R.string.attendance))) {
+                    destination = new StatsAttedance();
+                }
+
+                if(destination!=null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, destination)
+                            .commit();
                 }
             }
 
@@ -412,10 +416,18 @@ public class MainActivity extends FragmentActivity {
         adapter = new DrawerAdapter(this);
         navigationView = (ListView) findViewById(R.id.nav_view);
         navigationView.setAdapter(adapter);
+        navigationView.setDivider(null);
+        navigationView.setDividerHeight(0);
         navigationView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 if (position != 0) {
+
+                    if(adapter.values[position].equals(getString(R.string.stats))) {
+                        adapter.statsOpened = !adapter.statsOpened;
+                        adapter.notifyDataSetChanged();
+                    }
+
                     adapter.selected_image.setColorFilter(0x00FFFFFF);
                     adapter.selected_text.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.light_grey));
                     adapter.selected_image = (ImageView) view.findViewById(R.id.drawer_item_icon);
@@ -423,11 +435,18 @@ public class MainActivity extends FragmentActivity {
                     adapter.selected_image.setColorFilter(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
                     adapter.selected_text.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
 
+                    if(adapter.values[position].equals(getString(R.string.stats))) {
+                        return;
+                    }
+
                     for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
                         getSupportFragmentManager().popBackStackImmediate();
                     }
 
                     selectedPosition = position;
+                    if(!adapter.statsOpened && position > 2) {
+                        selectedPosition = position + 3;
+                    }
                     drawer.closeDrawer(GravityCompat.START);
 
                     if(adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
@@ -460,9 +479,7 @@ public class MainActivity extends FragmentActivity {
                         dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-
                                 dialog.dismiss();
-
                                 android.webkit.CookieManager.getInstance().removeAllCookie();
                                 DataManager.getInstance().checkForbidden = false;
                                 DataManager.getInstance().set_jwt("");
@@ -489,24 +506,6 @@ public class MainActivity extends FragmentActivity {
                 }
             }
         });
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        if(sharedPreferences.contains("push_token")
-                && sharedPreferences.getString("push_token","").length() > 0) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    NetworkManager.getInstance().updateDeviceDetails();
-                }
-            }).start();
-        }
-
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     public void setTitle(String title) {
@@ -664,7 +663,7 @@ public class MainActivity extends FragmentActivity {
             }
             case 5: {
                 menu.setVisibility(View.VISIBLE);
-                settings.setVisibility(View.VISIBLE);
+//                settings.setVisibility(View.VISIBLE);
                 break;
             }
             case 6: {
@@ -728,44 +727,16 @@ public class MainActivity extends FragmentActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == CAMERA_REQUEST_CODE) {
+        if (requestCode == 100) {
+            Bitmap photo = (Bitmap)intent.getExtras().get("data");
+            savebitmap(photo);
 
-            final String url = DataManager.getInstance().selfie_url;
-
-            showProgressBar(null);
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            Bitmap bitmap = BitmapFactory.decodeFile(url, options);
-
-            int rotateangle = getCameraPhotoOrientation(MainActivity.this, url);
-
-            Bitmap bitmap_origin = BitmapFactory.decodeFile(url, options);
-
-            if (rotateangle != 0){
-                //Rotate Bitmap
-                int width = bitmap_origin.getWidth();
-                int height = bitmap_origin.getHeight();
-                int newWidth = width;
-                int newHeight  = height;
-                // calculate the scale - in this case = 0.4f
-                float scaleWidth = ((float) newWidth) / width;
-                float scaleHeight = ((float) newHeight) / height;
-                Matrix matrix = new Matrix();
-                matrix.postScale(scaleWidth, scaleHeight);
-                matrix.postRotate(rotateangle);
-                Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
-                savebitmap(resizedBitmap);
-            }else {
-                savebitmap(bitmap_origin);
-            }
-            final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
-//            final String url = DataManager.getInstance().selfie_url;
+            final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
             showProgressBar(null);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (NetworkManager.getInstance().updateProfileImage(imagePath1)) {
+                    if (NetworkManager.getInstance().updateProfileImage(imagePath)) {
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -782,7 +753,6 @@ public class MainActivity extends FragmentActivity {
                     });
                 }
             }).start();
-
         } else if (requestCode == 101) {
 
             if (intent != null) {
@@ -793,28 +763,7 @@ public class MainActivity extends FragmentActivity {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
-
-                int rotateangle = getCameraPhotoOrientation(MainActivity.this, imagePath);
-
-                Bitmap bitmap_origin = BitmapFactory.decodeFile(imagePath, options);
-
-                if (rotateangle != 0){
-                    //Rotate Bitmap
-                    int width = bitmap_origin.getWidth();
-                    int height = bitmap_origin.getHeight();
-                    int newWidth = width;
-                    int newHeight  = height;
-                    // calculate the scale - in this case = 0.4f
-                    float scaleWidth = ((float) newWidth) / width;
-                    float scaleHeight = ((float) newHeight) / height;
-                    Matrix matrix = new Matrix();
-                    matrix.postScale(scaleWidth, scaleHeight);
-                    matrix.postRotate(rotateangle);
-                    Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
-                    savebitmap(resizedBitmap);
-                }else {
-                    savebitmap(bitmap_origin);
-                }
+                savebitmap(bitmap);
 
                 final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
                 new Thread(new Runnable() {
@@ -824,12 +773,8 @@ public class MainActivity extends FragmentActivity {
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(settings_fragment == null){
-                                        settings_fragment = new Settings();
-                                    }
-                                        settings_fragment.refresh_image();
-                                        hideProgressBar();
-
+                                    settings_fragment.refresh_image();
+                                    hideProgressBar();
                                 }
                             });
                         } else {
@@ -854,33 +799,4 @@ public class MainActivity extends FragmentActivity {
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
-    // Get Image Rotation Angle
-    public int getCameraPhotoOrientation(Context context, String imagePath){
-        int rotate = 0;
-        try {
-            File imageFile = new File(imagePath);
-
-            ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
-
-            Log.i("RotateImage", "Exif orientation: " + orientation);
-            Log.i("RotateImage", "Rotate value: " + rotate);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return rotate;
-    }
-
 }

@@ -1,17 +1,20 @@
 package com.studygoal.jisc.Managers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.webkit.CookieManager;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
-import com.studygoal.jisc.BuildConfig;
+import com.activeandroid.query.Select;
+import com.studygoal.jisc.LoginActivity;
 import com.studygoal.jisc.Models.ActivityHistory;
+import com.studygoal.jisc.Models.ActivityPoints;
 import com.studygoal.jisc.Models.Attainment;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.Models.CurrentUser;
@@ -20,13 +23,13 @@ import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.Institution;
 import com.studygoal.jisc.Models.Module;
-import com.studygoal.jisc.Models.News;
 import com.studygoal.jisc.Models.PendingRequest;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.StretchTarget;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.Models.TrophyMy;
+import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 
 import org.json.JSONArray;
@@ -36,6 +39,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -50,9 +54,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -68,13 +74,12 @@ import javax.net.ssl.TrustManagerFactory;
 public class NetworkManager {
 
     private static NetworkManager ourInstance = new NetworkManager();
-    private static int NETWORK_TIMEOUT = 10;
+    private static int NETWORK_TIMEOUT = 20;
     private String language;
     private SSLContext context;
     private Context appContext;
     private ExecutorService executorService;
 
-    public String no_https_host = "http://stuapp.analytics.alpha.jisc.ac.uk/";
     public String host = "https://stuapp.analytics.alpha.jisc.ac.uk/";
 
     public static NetworkManager getInstance() {
@@ -96,9 +101,7 @@ public class NetworkManager {
             // (could be from a resource or ByteArrayInputStream or ...)
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             // From https://www.washington.edu/itconnect/security/ca/load-der.crt
-            InputStream cert = appContext.getAssets().open("cert/certificate.crt");
-//            InputStream cert = appContext.getAssets().open("cert/stuapp.analytics.alpha.jisc.ac.uk.crt");
-            InputStream caInput = new BufferedInputStream(cert);
+            InputStream caInput = new BufferedInputStream(appContext.getAssets().open("cert/certificate.crt"));
             Certificate ca;
             try {
                 ca = cf.generateCertificate(caInput);
@@ -137,78 +140,6 @@ public class NetworkManager {
         }
     }
 
-    public void updateDeviceDetails() {
-        try {
-            URL url = new URL(host + "fn_register_device");
-            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-            urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-            HashMap<String,String> params = new HashMap<>();
-            params.put("student_id",DataManager.getInstance().user.id);
-            params.put("version",BuildConfig.VERSION_NAME);
-            params.put("build",""+BuildConfig.VERSION_CODE);
-            params.put("bundle_identifier",""+ BuildConfig.APPLICATION_ID);
-            params.put("is_active", (DataManager.getInstance().get_jwt().length() > 0?"1":"0"));
-            params.put("is_social", (DataManager.getInstance().user.isSocial?"yes":"no"));
-            params.put("device_token", Build.SERIAL);
-            params.put("platform", "android");
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
-            params.put("push_token",sharedPreferences.getString("push_token",""));
-
-            String urlParameters = "";
-            Iterator it = params.entrySet().iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                Map.Entry entry = (Map.Entry) it.next();
-                if (i == 0)
-                    urlParameters += entry.getKey() + "=" + entry.getValue();
-                else
-                    urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
-            }
-
-            Log.e("JISC","PARAMS: "+urlParameters);
-
-            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            int responseCode = urlConnection.getResponseCode();
-            forbidden(responseCode);
-            if (responseCode != 200) {
-
-                InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                Log.e("JISC","Response: "+sb.toString());
-            }
-
-            InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            is.close();
-
-            Log.e("JISC","Response: "+sb.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-    }
-
     private class deleteFeed implements Callable<Boolean> {
         String feedId;
 
@@ -241,6 +172,9 @@ public class NetworkManager {
                     }
                     is.close();
 
+                    Log.e("deleteFeed", "ResponseCode = " + responseCode);
+                    Log.e("deleteFeed", "Response = " + sb.toString());
+
                     return false;
                 }
 
@@ -252,6 +186,8 @@ public class NetworkManager {
                     sb.append(line);
                 }
                 is.close();
+
+                Log.e("deleteFeed", "Response = " + sb.toString());
 
                 return true;
             } catch (Exception e) {
@@ -292,12 +228,14 @@ public class NetworkManager {
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    if (responseCode == 204) {
+                        Log.i("getStudentByEmail", "No records found");
+                    } else {
+                        Log.e("getStudentByEmail", "Code: " + responseCode);
+                    }
                     return null;
                 }
 
@@ -407,6 +345,8 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    System.out.println(urlParameters);
+                    Log.e("addTarget", "ResponseCode = " + responseCode);
                     return responseCode + "";
                 }
                 System.out.println(urlParameters);
@@ -461,6 +401,7 @@ public class NetworkManager {
                 DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
+
                 String header = "Content-Disposition: form-data; name=\"language\"";
                 wr.writeBytes(header);
                 wr.writeBytes(crlf);
@@ -468,13 +409,15 @@ public class NetworkManager {
                 wr.writeBytes(language);
 
 
-                wr.writeBytes(crlf + twoHyphens + boundary + crlf);
-                header = "Content-Disposition: form-data; name=\"is_social\"";
-                wr.writeBytes(header);
-                wr.writeBytes(crlf);
-                wr.writeBytes(crlf);
-                wr.writeBytes((DataManager.getInstance().user.isStaff ? "yes" : "no"));
+                if(DataManager.getInstance().user.isSocial) {
+                    wr.writeBytes(crlf + twoHyphens + boundary + crlf);
 
+                    header = "Content-Disposition: form-data; name=\"is_social\"";
+                    wr.writeBytes(header);
+                    wr.writeBytes(crlf);
+                    wr.writeBytes(crlf);
+                    wr.writeBytes((DataManager.getInstance().user.isStaff ? "yes" : "no"));
+                }
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
 
@@ -485,7 +428,7 @@ public class NetworkManager {
                 wr.writeBytes(DataManager.getInstance().user.id);
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
-                header = "Content-Disposition: attachment; name=\"image_data\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".png" + crlf;
+                header = "Content-Disposition: attachment; name=\"profile_photo\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".png" + crlf;
                 wr.writeBytes(header);
 
                 header = "Content-Type: image/png" + crlf + crlf;
@@ -493,7 +436,7 @@ public class NetworkManager {
 
                 Bitmap bm = BitmapFactory.decodeFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 
                 wr.write(baos.toByteArray());
                 wr.writeBytes(crlf + twoHyphens + boundary + twoHyphens + crlf);
@@ -512,6 +455,8 @@ public class NetworkManager {
                     }
 
                     is.close();
+
+                    Log.e("Jisc","error: "+sb.toString());
                 }
 
                 BufferedInputStream is = new BufferedInputStream(urlConnection.getInputStream());
@@ -579,9 +524,12 @@ public class NetworkManager {
 
                 HttpsURLConnection urlConnection;
                 urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
                 urlConnection.setRequestMethod("GET");
                 urlConnection.addRequestProperty("Authorization", DataManager.getInstance().get_jwt());
                 urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                Log.e("getEngagementGraph","Compare graph: "+apiURL);
 
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
@@ -596,6 +544,9 @@ public class NetworkManager {
                     }
                     is.close();
 
+                    Log.e("getEngagementGraph","Compare graph: "+sb.toString());
+                    Log.e("getEngagementGraph", "Code: " + responseCode);
+
                     return engagement_list;
                 }
 
@@ -607,6 +558,8 @@ public class NetworkManager {
                     sb.append(line);
                 }
                 is.close();
+
+                Log.e("Jisc","Compare graph: "+sb.toString());
 
                 if(compareType.length() == 0) {
                     switch (this.scope) {
@@ -915,10 +868,12 @@ public class NetworkManager {
                 urlConnection.addRequestProperty("Authorization", DataManager.getInstance().get_jwt());
                 urlConnection.setSSLSocketFactory(context.getSocketFactory());
                 urlConnection.setRequestMethod("GET");
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
 
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("getAssigmentRanking", "Code: " + responseCode);
                     return false;
                 }
 
@@ -991,6 +946,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("CurrentOverallRanking", "Code: " + responseCode);
                     return "-1";
                 }
 
@@ -1076,6 +1032,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("getCurrentRanking", "Code: " + responseCode);
                     return "-1";
                 }
 
@@ -1119,7 +1076,6 @@ public class NetworkManager {
                 }
                 double value = (((double) CL + 0.5 * (double) FI) / mapOfMarks.size()) * 100;
                 int topPercent = 100 - (int) value;
-//                int topPercent = (student_position*100)/total_unique;
                 return topPercent + "";
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1128,8 +1084,8 @@ public class NetworkManager {
         }
     }
 
-    public boolean getStudentActivityPoint() {
-        Future<Boolean> future = executorService.submit(new getStudentActivityPoint());
+    public boolean getStudentActivityPoint(String scope) {
+        Future<Boolean> future = executorService.submit(new getStudentActivityPoint(scope));
         try {
             return future.get();
         } catch (Exception e) {
@@ -1140,25 +1096,41 @@ public class NetworkManager {
 
     private class getStudentActivityPoint implements Callable<Boolean> {
 
-        getStudentActivityPoint() {
+        String scope;
+        getStudentActivityPoint(String s) {
+            scope = s;
         }
 
         @Override
         public Boolean call() {
             try {
 
-                String apiURL = "https://app.analytics.alpha.jisc.ac.uk/v2/activity/points?scope=overall"
+                String apiURL = "https://app.analytics.alpha.jisc.ac.uk/v2/activity/points?scope="+scope
                         + ((DataManager.getInstance().user.isSocial)?"&is_social=yes":"");
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
                 urlConnection.addRequestProperty("Authorization", DataManager.getInstance().get_jwt());
                 urlConnection.setSSLSocketFactory(context.getSocketFactory());
 
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("getStudentActivityPoint", "Code: " + responseCode);
+
+                    InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(
+                            is, "iso-8859-1"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    is.close();
+
                     return false;
                 }
 
@@ -1172,32 +1144,35 @@ public class NetworkManager {
                 }
                 is.close();
 
-                JSONObject jsonObject = new JSONObject(sb.toString());
-                DataManager.getInstance().user.overall_activity_points = jsonObject.getString("totalPoints");
+                Log.e("Jisc","Activity Points: "+sb.toString());
 
-                url = new URL("https://app.analytics.alpha.jisc.ac.uk/v2/activity/points?scope=7d");
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.addRequestProperty("Authorization", DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+                JSONObject object = new JSONObject(sb.toString());
+                if(object.has("info")
+                        && object.get("info") instanceof JSONObject) {
 
-                responseCode = urlConnection.getResponseCode();
-                forbidden(responseCode);
-                if (responseCode != 200) {
-                    return false;
+                    JSONObject array = object.getJSONObject("info");
+                    Iterator<?> keys = array.keys();
+
+                    DataManager.getInstance().user.points.clear();
+
+                    while( keys.hasNext() ) {
+                        String key = (String)keys.next();
+                        if ( array.get(key) instanceof JSONObject ) {
+                            JSONObject hash = array.getJSONObject(key);
+                            ActivityPoints activityPoints = new ActivityPoints();
+                            activityPoints.id = hash.getString("_id");
+                            activityPoints.key = key;
+                            activityPoints.points = hash.getString("points");
+
+                            String[] words = activityPoints.id.split("/");
+                            String id = words[words.length - 1];
+                            id = id.substring(0, 1).toUpperCase() + id.substring(1).toLowerCase();
+                            activityPoints.activity = id;
+
+                            DataManager.getInstance().user.points.add(activityPoints);
+                        }
+                    }
                 }
-
-                is = new BufferedInputStream(urlConnection.getInputStream());
-                reader = new BufferedReader(new InputStreamReader(
-                        is, "iso-8859-1"), 8);
-                sb = new StringBuilder();
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                jsonObject = new JSONObject(sb.toString());
-                DataManager.getInstance().user.last_week_activity_points = jsonObject.getString("totalPoints");
 
                 return true;
             } catch (Exception e) {
@@ -1241,6 +1216,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("getAppSettings", "Code: " + responseCode);
                     SharedPreferences preferences = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
                     DataManager.getInstance().home_screen = preferences.getString("home_screen", "feed");
                     DataManager.getInstance().language = preferences.getString("home_screen", "english");
@@ -1330,6 +1306,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("changeAppSettings", "ResponseCode = " + responseCode);
                     return false;
                 }
 
@@ -1395,6 +1372,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("postFeedMessage", "ResponseCode = " + responseCode);
                     return false;
                 }
                 System.out.println(urlParameters);
@@ -1459,6 +1437,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("hidePost", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -1522,6 +1501,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("acceptFriendRequest", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -1569,6 +1549,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("deleteFriendRequest", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -1616,6 +1597,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("cancelFriendRequest", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -1663,6 +1645,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("deleteFriend", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -1726,6 +1709,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("changeFriendSettings", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -1781,6 +1765,8 @@ public class NetworkManager {
                         urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
                 }
 
+                Log.e("Jisc","Params: "+urlParameters);
+
                 DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
                 wr.writeBytes(urlParameters);
                 wr.flush();
@@ -1799,6 +1785,7 @@ public class NetworkManager {
                     }
                     is.close();
 
+                    Log.e("fn_send_friend_request", "ResponseCode = " + sb.toString());
                     return false;
                 }
                 return true;
@@ -1839,14 +1826,15 @@ public class NetworkManager {
                 urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getFriendRequests", "No records found");
                         new Delete().from(ReceivedRequest.class).execute();
-                    } else {
-
-                    }
+                    } else
+                        Log.e("getFriendRequests", "Code: " + responseCode);
                     return false;
                 }
 
@@ -1986,10 +1974,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getSentFriendRequests", "No records found");
                         new Delete().from(PendingRequest.class).execute();
-                    } else {
-
-                    }
+                    } else
+                        Log.e("getSentFriendRequests", "Code: " + responseCode);
                     return false;
                 }
 
@@ -2133,6 +2121,8 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("getFriends",""+apiURL);
+                    Log.e("getFriends","JWT: "+DataManager.getInstance().get_jwt());
 
                     InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
@@ -2143,9 +2133,13 @@ public class NetworkManager {
                     }
                     is.close();
 
+                    Log.e("getFriends",""+sb.toString());
+
                     if (responseCode == 204) {
+                        Log.e("getFriends", "No records found");
                         new Delete().from(Friend.class).execute();
                     } else {
+                        Log.e("getFriends", "Code: " + responseCode);
                     }
                     return false;
                 }
@@ -2158,6 +2152,8 @@ public class NetworkManager {
                     sb.append(line);
                 }
                 is.close();
+
+                Log.e("Jisc","List: "+sb.toString());
 
                 JSONArray jsonArray = new JSONArray(sb.toString());
 
@@ -2185,214 +2181,8 @@ public class NetworkManager {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                }
-                ActiveAndroid.endTransaction();
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    public boolean getNewsFeed() {
-        language = LinguisticManager.getInstance().getLanguageCode();
-        Future<Boolean> future = executorService.submit(new getNewsFeed());
-        try {
-            return future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean postNotificationMessage(HashMap<String, String> params) {
-        language = LinguisticManager.getInstance().getLanguageCode();
-        Future<Boolean> future_result = executorService.submit(new postNotificationMessage(params));
-        try {
-            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class postNotificationMessage implements Callable<Boolean> {
-
-        HashMap<String,String> params;
-
-        postNotificationMessage(HashMap<String, String> params) {
-            params.put("language", language);
-            this.params = params;
-            if(DataManager.getInstance().user.isSocial)
-                this.params.put("is_social",(DataManager.getInstance().user.isSocial?"yes":"no"));
-        }
-
-        @Override
-        public Boolean call() {
-            try {
-                String apiURL = host + "fn_add_push_notification";
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-                String urlParameters = "";
-                Iterator it = params.entrySet().iterator();
-                for (int i = 0; it.hasNext(); i++) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    if (i == 0)
-                        urlParameters += entry.getKey() + "=" + entry.getValue();
-                    else
-                        urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
-                }
-
-                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                wr.writeBytes(urlParameters);
-                wr.flush();
-                wr.close();
-
-                int responseCode = urlConnection.getResponseCode();
-                forbidden(responseCode);
-                if (responseCode != 200) {
-                    return false;
-                }
-                System.out.println(urlParameters);
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    private class getNewsFeed implements Callable<Boolean> {
-
-        getNewsFeed() {
-        }
-
-        @Override
-        public Boolean call() {
-            try {
-                String apiURL = host + "fn_get_push_notifications?student_id="
-                        + DataManager.getInstance().user.id
-                        + "&language=" + language
-                        + ((DataManager.getInstance().user.isSocial)?"&is_social=yes":"&is_social=yes");
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-                int responseCode = urlConnection.getResponseCode();
-                if (responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                JSONArray jsonArray = new JSONArray(sb.toString());
-
-                ActiveAndroid.beginTransaction();
-                try {
-                    new Delete().from(News.class).execute();
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        News item = new News();
-                        item.id = jsonObject.getString("id");
-                        item.message_from = jsonObject.getString("message_from");
-                        item.message = jsonObject.getString("message");
-                        item.created_date = jsonObject.getString("created");
-                        item.read = jsonObject.getString("is_read");
-                        if(!item.read.equals("1"))
-                            item.save();
-                    }
-                    ActiveAndroid.setTransactionSuccessful();
-                } finally {
                     ActiveAndroid.endTransaction();
                 }
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    public boolean markNewsAsRead(News item) {
-        language = LinguisticManager.getInstance().getLanguageCode();
-        Future<Boolean> future = executorService.submit(new markNewsAsRead(item.id));
-        try {
-            return future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class markNewsAsRead implements Callable<Boolean> {
-
-        HashMap<String, String> params;
-        markNewsAsRead(String id) {
-            params = new HashMap<>();
-            params.put("student_id", DataManager.getInstance().user.id);
-            params.put("notification_id", id);
-            params.put("is_social", "yes");
-        }
-
-        @Override
-        public Boolean call() {
-            try {
-                String apiURL = host + "fn_update_notifications_read_status";
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("PUT");
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-
-                String urlParameters = "";
-                Iterator it = params.entrySet().iterator();
-                for (int i = 0; it.hasNext(); i++) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    if (i == 0)
-                        urlParameters += entry.getKey() + "=" + entry.getValue();
-                    else
-                        urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
-                }
-
-                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                wr.writeBytes(urlParameters);
-                wr.flush();
-                wr.close();
-
-                int responseCode = urlConnection.getResponseCode();
-                if (responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
 
                 return true;
             } catch (Exception e) {
@@ -2437,14 +2227,16 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getFeed", "No records found");
                         new Delete().from(Feed.class).execute();
-                    } else {
-                    }
+                    } else
+                        Log.e("getFeed", "Code: " + responseCode);
                     return false;
                 }
 
                 InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -2453,6 +2245,7 @@ public class NetworkManager {
                 is.close();
 
                 JSONArray jsonArray = new JSONArray(sb.toString());
+
                 ActiveAndroid.beginTransaction();
                 try {
                     new Delete().from(Feed.class).execute();
@@ -2515,11 +2308,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getStretchTargets", "No records found");
                         new Delete().from(StretchTarget.class).execute();
-                    } else {
-
-                    }
-
+                    } else
+                        Log.e("getStretchTargets", "Code: " + responseCode);
                     return false;
                 }
 
@@ -2615,6 +2407,8 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    System.out.println(urlParameters);
+                    Log.e("addStretchTarget", "ResponseCode = " + responseCode);
                     return false;
                 }
                 System.out.println(urlParameters);
@@ -2679,6 +2473,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("unhideFriend", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -2742,6 +2537,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("hideFriend", "ResponseCode: " + responseCode);
                     return false;
                 }
                 return true;
@@ -2805,6 +2601,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("deleteTarget", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -2868,6 +2665,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("editTarget", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -2931,6 +2729,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("addTarget", "ResponseCode = " + responseCode);
                     return false;
                 }
                 System.out.println(urlParameters);
@@ -2978,11 +2777,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getTargets", "No records found");
                         new Delete().from(Targets.class).execute();
-                    } else {
-
-                    }
-
+                    } else
+                        Log.e("getTargets", "Code: " + responseCode);
                     return false;
                 }
 
@@ -3069,6 +2867,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("deleteActivity", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -3132,6 +2931,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("editActivity", "ResponseCode = " + responseCode);
                     return false;
                 }
                 return true;
@@ -3204,6 +3004,9 @@ public class NetworkManager {
                         sb.append(line);
                     }
                     is.close();
+
+                    Log.e("addActivity", "ResponseCode = " + responseCode);
+                    Log.e("addActivity", "Response = " + sb.toString());
 
                     return responseCode + "";
                 }
@@ -3284,11 +3087,7 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("staff_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                if (jsonObject.getString("email").equals("not@known")){
-                    DataManager.getInstance().user.email = "";
-                }else{
-                    DataManager.getInstance().user.email = jsonObject.getString("email");
-                }
+                DataManager.getInstance().user.email = jsonObject.getString("email");
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3351,6 +3150,7 @@ public class NetworkManager {
                 int responseCode = urlConnection.getResponseCode();
                 forbidden(responseCode);
                 if (responseCode != 200) {
+                    Log.e("fn_login","Response code: "+responseCode);
                     return false;
                 }
 
@@ -3372,12 +3172,7 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("jisc_student_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-
-                if (jsonObject.getString("email").equals("not@known")){
-                    DataManager.getInstance().user.email = "";
-                }else{
-                    DataManager.getInstance().user.email = jsonObject.getString("email");
-                }
+                DataManager.getInstance().user.email = jsonObject.getString("email");
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3431,9 +3226,10 @@ public class NetworkManager {
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("POST");
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
                 urlConnection.setDoInput(true);
                 urlConnection.setDoOutput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
 
                 String urlParameters = "language=" + LinguisticManager.getInstance().getLanguageCode() +
                                         "&social_id="+password+
@@ -3459,6 +3255,10 @@ public class NetworkManager {
                     }
                     is.close();
 
+                    Log.e("loginSocial", "URL: "+apiURL);
+                    Log.e("loginSocial", "parameters: "+urlParameters);
+                    Log.e("loginSocial", "Response code: "+responseCode);
+                    Log.e("loginSocial", ""+sb.toString());
                     return responseCode;
                 }
 
@@ -3472,6 +3272,7 @@ public class NetworkManager {
                 is.close();
 
                 JSONObject jsonObject = new JSONObject(sb.toString());
+                Log.e("JISC",""+jsonObject.toString());
 
                 new Delete().from(CurrentUser.class).execute();
                 DataManager.getInstance().user = new CurrentUser();
@@ -3480,11 +3281,7 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                if (jsonObject.getString("email").equals("not@known")){
-                    DataManager.getInstance().user.email = "";
-                }else{
-                    DataManager.getInstance().user.email = jsonObject.getString("email");
-                }
+                DataManager.getInstance().user.email = jsonObject.getString("email");
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3556,6 +3353,9 @@ public class NetworkManager {
                 }
                 is.close();
 
+                Log.e("Jisc","setuserpin: "+apiURL);
+                Log.e("Jisc","setuserpin: "+sb.toString());
+
                 try {
                     JSONArray jsonArray = new JSONArray(sb.toString());
                     if(jsonArray.length() == 0) {
@@ -3591,268 +3391,6 @@ public class NetworkManager {
             }
         }
     }
-
-
-    /**
-     * GET Get Attendance
-     * Example : https://api.x-dev.data.alpha.jisc.ac.uk/sg/attendance?skip=5&limit=2
-     *
-     * Use
-         To a student's attendance
-     Paramaters
-        skip: should be the items to skip when paging
-        limit: should be the number of items to return *
-
-     *
-     *
-     */
-    public boolean getAttendance(int skipValue, int limitvalue) {
-        Future<Boolean> futureResult = executorService.submit(new getAttendance(skipValue,limitvalue));
-        try {
-            return futureResult.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getAttendance implements Callable<Boolean> {
-        int skipvalue;
-        int limitvalue;
-
-
-        getAttendance(int skipValue, int limitvalue) {
-            this.skipvalue = skipvalue;
-            this.limitvalue = limitvalue;
-        }
-
-        @Override
-        public Boolean call() {
-
-            try {
-
-                // dev base url not working so changed to staging url
-                String apiURL = "https://api.x-staging.data.alpha.jisc.ac.uk/sg/attendance?skip="+String.valueOf(this.skipvalue)+"&limit="+String.valueOf(this.limitvalue);
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection;
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-
-                int responseCode = urlConnection.getResponseCode();
-                if(responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                try {
-                    JSONArray jsonArray = new JSONArray(sb.toString());
-                    if(jsonArray.length() == 0) {
-                        return false;
-                    }
-
-                    // Do process for getting attendance value
-                    // Right now it return non value.
-                    return false;
-
-
-                } catch (Exception e) {
-                    return false;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-
-    /**
-     * GET Get Weekly Attendance
-     * Example : https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate=2017-01-01&enddate=2017-08-08
-     *
-     * Use
-     To a student's attendance
-     Paramaters
-     startdate: start date in ISO format
-     enddate: end date in ISO format
-
-     *
-     *
-     */
-    public boolean getWeeklyAttendance(Date startDate,Date endDate) {
-        Future<Boolean> futureResult = executorService.submit(new getWeeklyAttendance(startDate,endDate));
-        try {
-            return futureResult.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getWeeklyAttendance implements Callable<Boolean> {
-        Date startDate;
-        Date endDate;
-
-
-        getWeeklyAttendance(Date startDate,Date endDate) {
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
-
-        @Override
-        public Boolean call() {
-
-            try {
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-                // dev base url not working so changed to staging url
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate="+sdf.format(this.startDate)+"&enddate="+sdf.format(this.endDate);
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection;
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-
-                int responseCode = urlConnection.getResponseCode();
-                if(responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                try {
-                    JSONArray jsonArray = new JSONArray(sb.toString());
-                    if(jsonArray.length() == 0) {
-                        return false;
-                    }
-
-                    // Do process for getting attendance value
-                    // Right now it return non value.
-                    return false;
-
-
-                } catch (Exception e) {
-                    return false;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-
-
-
-
-
-    /**
-     *  GET Get Setting
-        https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=attendanceData
-     Use
-        To a site setting
-     Paramaters
-            setting: the setting you want to get
-     valid values:
-        studyGoalAttendance: whether to show checkin feature
-        attendanceData: whether to show attendance data
-     Results:
-         Success: 200
-         { "value": false } ```
-     *
-     *
-     */
-
-    public boolean getSetting(String settingOption) {
-        Future<Boolean> futureResult = executorService.submit(new getSetting(settingOption));
-        try {
-            return futureResult.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getSetting implements Callable<Boolean> {
-        String settingOption;
-
-        getSetting(String settingOption) {
-            this.settingOption = settingOption;
-        }
-
-        @Override
-        public Boolean call() {
-
-            try {
-
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting="+this.settingOption;
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection;
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-
-                int responseCode = urlConnection.getResponseCode();
-                if(responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                try {
-                    JSONObject jsonObject = new JSONObject(sb.toString());
-                    Boolean resultValue = jsonObject.getBoolean("value");
-                    if (resultValue){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                } catch (Exception e) {
-                    return false;
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-
-
 
     /**
      * checkIfUserRegistered() => checks if the user is registered;
@@ -3891,6 +3429,7 @@ public class NetworkManager {
 
                 int responseCode = urlConnection.getResponseCode();
                 if (responseCode != 200) {
+                    Log.e("checkIfUserRegistered", "Response code: "+responseCode);
                     return false;
                 }
                 InputStream is = new BufferedInputStream(urlConnection.getInputStream());
@@ -3903,6 +3442,8 @@ public class NetworkManager {
                 is.close();
 
                 JSONObject jsonObject = new JSONObject(sb.toString());
+
+                Log.e("Jisc","/student: "+jsonObject.toString());
 
                 if (jsonObject.has("APPSHIB_ID")
                         && !jsonObject.getString("APPSHIB_ID").equals("")
@@ -3956,6 +3497,7 @@ public class NetworkManager {
 
                 int responseCode = urlConnection.getResponseCode();
                 if (responseCode != 200) {
+                    Log.e("checkIfStaffRegistered", "Response code: "+responseCode);
                     return false;
                 }
                 InputStream is = new BufferedInputStream(urlConnection.getInputStream());
@@ -3969,7 +3511,7 @@ public class NetworkManager {
                 is.close();
 
                 JSONObject jsonObject = new JSONObject(sb.toString());
-
+                Log.e("Jisc","Staff registered: "+jsonObject.toString());
                 if (jsonObject.getString("APPSHIB_ID") != JSONObject.NULL && !jsonObject.getString("APPSHIB_ID").contentEquals(""))
                     return true;
                 else
@@ -4019,8 +3561,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("downloadInstitutions", "No records found");
                         new Delete().from(Institution.class).execute();
                     } else {
+                        Log.e("downloadInstitutions", "Code: " + responseCode);
                     }
                     return "Error";
                 }
@@ -4061,6 +3605,7 @@ public class NetworkManager {
             }
         }
     }
+
 
     /**
      * getActivityHistory(String student_id)
@@ -4103,11 +3648,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getActivityHistory", "No records found");
                         new Delete().from(ActivityHistory.class).execute();
-                    } else {
-
-                    }
-
+                    } else
+                        Log.e("getActivityHistory", "Code: " + responseCode);
                     return false;
                 }
 
@@ -4153,6 +3697,158 @@ public class NetworkManager {
         }
     }
 
+    public boolean getSettings(String parameter) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future = executorService.submit(new getSettings(parameter));
+        try {
+            return future.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getSettings implements Callable<Boolean> {
+
+        String parameter;
+
+        getSettings(String parameter) {
+            this.parameter = parameter;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting="+parameter;
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    if (responseCode == 204) {
+                        Log.i("getSettings", "No records found");
+                    } else
+                        Log.e("getSettings", "Code: " + responseCode);
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+
+                JSONObject jsonObject = new JSONObject(sb.toString());
+
+                ActiveAndroid.beginTransaction();
+                try {
+                   SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(appContext);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean(parameter,jsonObject.getBoolean("value"));
+                    editor.apply();
+                    Log.e(parameter,prefs.getBoolean(parameter,false)?"true":"false");
+                    ActiveAndroid.setTransactionSuccessful();
+                } finally {
+                    ActiveAndroid.endTransaction();
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+    public boolean getWeeklyAttendance() {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<String> futureResult = executorService.submit(new getWeeklyAttendance());
+        try {
+            String result = futureResult.get();
+            return result.equals("Success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    private class getWeeklyAttendance implements Callable<String> {
+
+        getWeeklyAttendance() {
+        }
+
+        @Override
+        public String call() {
+            try {
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+                Calendar cal = GregorianCalendar.getInstance();
+                cal.setTime(new Date());
+                cal.add(Calendar.DAY_OF_YEAR, -35);
+                Date daysBeforeDate = cal.getTime();
+                String current = sdf.format(new Date());
+                String past = sdf.format(daysBeforeDate);
+                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate="+past+"&enddate="+current;
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    if (responseCode == 204) {
+                        Log.i("getWeeklyAttendance", "No records found");
+                        new Delete().from(Institution.class).execute();
+                    } else {
+                        Log.e("getWeeklyAttendance", "Code: " + responseCode);
+                    }
+                    return "Error";
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+
+                JSONArray jsonArray = new JSONArray(sb.toString());
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(appContext);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(appContext.getString(R.string.attendance),sb.toString());
+                editor.apply();
+                Log.e("Attendance",sb.toString());
+
+//                ActiveAndroid.beginTransaction();
+//                try {
+//
+//                    }
+//
+//                    ActiveAndroid.setTransactionSuccessful();
+//                } finally {
+//                    ActiveAndroid.endTransaction();
+//                }
+                return "Success";
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error";
+            }
+        }
+    }
+
     /**
      * getModules()
      *
@@ -4194,9 +3890,8 @@ public class NetworkManager {
                     if (responseCode == 204) {
                         Log.i("getModules", "No records found");
                         new Delete().from(Module.class).execute();
-                    } else {
-
-                    }
+                    } else
+                        Log.e("getModules", "Code: " + responseCode);
 
                     InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
@@ -4206,6 +3901,8 @@ public class NetworkManager {
                         sb.append(line);
                     }
                     is.close();
+
+                    Log.e("Jisc",sb.toString());
 
                     return false;
                 }
@@ -4218,6 +3915,8 @@ public class NetworkManager {
                     sb.append(line);
                 }
                 is.close();
+
+                Log.e("JISC","Modules: "+sb.toString());
 
                 JSONObject jsonObject = new JSONObject(sb.toString());
                 ActiveAndroid.beginTransaction();
@@ -4296,9 +3995,10 @@ public class NetworkManager {
                 forbidden(responseCode);
                 if (responseCode != 200) {
                     if (responseCode == 204) {
+                        Log.i("getModules", "No records found");
                         new Delete().from(Module.class).execute();
-                    } else {
-                    }
+                    } else
+                        Log.e("getModules", "Code: " + responseCode);
 
                     InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
@@ -4410,6 +4110,9 @@ public class NetworkManager {
                         sb.append(line);
                     }
                     is.close();
+
+                    Log.e("addmodule", "ResponseCode = " + responseCode);
+                    Log.e("addmodule", "Response = " + sb.toString());
 
                     return false;
                 }

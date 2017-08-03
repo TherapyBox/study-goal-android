@@ -59,7 +59,7 @@ public class Settings extends Fragment {
         super.onResume();
         DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.settings));
         DataManager.getInstance().mainActivity.hideAllButtons();
-        DataManager.getInstance().mainActivity.showCertainButtons(7);
+        DataManager.getInstance().mainActivity.showCertainButtons(5);
 
         String selected_value = "";
         switch (DataManager.getInstance().home_screen.toLowerCase()) {
@@ -116,8 +116,9 @@ public class Settings extends Fragment {
         language.setTypeface(font);
         language_value = (TextView) mainView.findViewById(R.id.language_value);
         language_value.setTypeface(font);
-        language_value.setText(DataManager.getInstance().language.toLowerCase().equals("english")?getString(R.string.english).toUpperCase():getString(R.string.welsh).toUpperCase());
-
+        if(DataManager.getInstance().language!=null) {
+            language_value.setText(DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english).toUpperCase() : getString(R.string.welsh).toUpperCase());
+        }
         ((TextView)mainView.findViewById(R.id.email_text)).setTypeface(font);
 
         TextView privacy = (TextView) mainView.findViewById(R.id.privacy_text);
