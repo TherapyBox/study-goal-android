@@ -4,14 +4,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,18 +20,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.activeandroid.ActiveAndroid;
-import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.bumptech.glide.Glide;
 import com.daimajia.swipe.SwipeLayout;
-import com.studygoal.jisc.Fragments.LogLogActivity;
-import com.studygoal.jisc.LoginActivity;
-import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Managers.SocialManager;
-import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.News;
@@ -75,7 +68,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         feedViewHolder.ontop.setBackgroundColor(Color.parseColor("#ffffff"));
         feedViewHolder.ontop.setOnClickListener(null);
-        if(i < newsList.size()) {
+        if (i < newsList.size()) {
             final News item = newsList.get(i);
 
             feedViewHolder.swipelayout.setSwipeEnabled(false);
@@ -84,7 +77,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             feedViewHolder.open.setVisibility(View.GONE);
             feedViewHolder.profile_pic.setVisibility(View.GONE);
 
-            if(!item.read.equals("1")) {
+            if (!item.read.equals("1")) {
                 feedViewHolder.ontop.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -127,10 +120,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                                 + item.created_date.split(" ")[0].split("-")[2] + " "
                                 + LinguisticManager.getInstance().convertMonth(item.created_date.split(" ")[0].split("-")[1]) + " " + item.created_date.split(" ")[0].split("-")[0]);
 
-            feedViewHolder.feed.setText("You have a new message: "+item.message);
+            feedViewHolder.feed.setText("You have a new message: " + item.message);
             feedViewHolder.feed.setTextSize(20);
 
-            if(!item.read.equals("1")) {
+            if (!item.read.equals("1")) {
                 feedViewHolder.ontop.setBackgroundColor(Color.parseColor("#bad8f7"));
             } else {
                 feedViewHolder.ontop.setBackgroundColor(Color.parseColor("#ffffff"));
@@ -138,7 +131,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         } else {
 
-            final Feed item = feedList.get(i-newsList.size());
+            final Feed item = feedList.get(i - newsList.size());
 
             feedViewHolder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -283,8 +276,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     photo = "";
                 if (photo.equals("")) {
                     Glide.with(context).load(R.drawable.profilenotfound).transform(new CircleTransform(context)).placeholder(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
-                }
-                else {
+                } else {
                     Glide.with(context).load(NetworkManager.getInstance().host + photo).transform(new CircleTransform(context)).placeholder(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
                 }
             }
@@ -367,12 +359,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             try {
                 message = (TextView) v.findViewById(R.id.message);
                 message.setTypeface(DataManager.getInstance().myriadpro_regular);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             view = v;
             try {
-                ontop = (RelativeLayout)v.findViewById(R.id.on_top);
+                ontop = (RelativeLayout) v.findViewById(R.id.on_top);
                 swipelayout = (SwipeLayout) v.findViewById(R.id.swipelayout);
-                deleteButton = (RelativeLayout)v.findViewById(R.id.delete);
+                deleteButton = (RelativeLayout) v.findViewById(R.id.delete);
                 profile_pic = (ImageView) v.findViewById(R.id.feed_item_profile);
                 feed = (TextView) v.findViewById(R.id.feed_item_feed);
                 time_ago = (TextView) v.findViewById(R.id.feed_item_time_ago);
@@ -394,7 +387,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 hide_post.setTypeface(DataManager.getInstance().myriadpro_regular);
                 hide_friend.setTypeface(DataManager.getInstance().myriadpro_regular);
                 delete_friend.setTypeface(DataManager.getInstance().myriadpro_regular);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 }

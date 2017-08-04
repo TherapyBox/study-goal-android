@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -102,111 +101,111 @@ public class CheckInFragment extends Fragment {
 
         ((TextView) mainView.findViewById(R.id.pin_send_button)).setTypeface(DataManager.getInstance().oratorstd_typeface);
 
-            mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                        if (DataManager.getInstance().user.isDemo) {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
-                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
-                            return;
+        mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (DataManager.getInstance().user.isDemo) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
+                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    return;
+                }
+
+                if (DataManager.getInstance().user.isStaff
+                        || DataManager.getInstance().user.isDemo) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
+                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    return;
+                }
+
+                final String pin_text_edit_text = pin_text_edit.getText().toString();
+                if (pin_text_edit_text.length() == 0) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
+                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        } catch (SecurityException se) {
+                            se.printStackTrace();
                         }
 
-                        if (DataManager.getInstance().user.isStaff
-                                || DataManager.getInstance().user.isDemo) {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
-                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
-                            return;
-                        }
+                        final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
 
-                        final String pin_text_edit_text = pin_text_edit.getText().toString();
-                        if (pin_text_edit_text.length() == 0) {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
-                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
-                        }
+                        //debug for testing getsettings - by tmobiledevcore
+                        final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
+                        final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
 
-                        new Thread(new Runnable() {
+
+                        CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
-                                try {
-                                    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                                } catch (SecurityException se){
-                                    se.printStackTrace();
+                                String message;
+                                if (result) {
+                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
+                                } else {
+                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
                                 }
 
-                                final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
-
-                                //debug for testing getsettings - by tmobiledevcore
-                                final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
-                                final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
-
-
-                                CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
+                                alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void run() {
-                                        String message;
-                                        if (result) {
-                                            message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
-                                        } else {
-                                            message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
-                                        }
-
-                                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
-                                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                            }
-                                        });
-                                        AlertDialog alertDialog = alertDialogBuilder.create();
-                                        alertDialog.show();
-
-                                        pin_text_edit.setText("");
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
                                     }
                                 });
+                                AlertDialog alertDialog = alertDialogBuilder.create();
+                                alertDialog.show();
+
+                                pin_text_edit.setText("");
                             }
-                        }).start();
-                }
-            });
+                        });
+                    }
+                }).start();
+            }
+        });
 
 
         GridLayout grid = (GridLayout) mainView.findViewById(R.id.grid_layout);
         int childCount = grid.getChildCount();
 
-        for (int i= 0; i < childCount; i++){
-            if(grid.getChildAt(i) instanceof ImageView) {
+        for (int i = 0; i < childCount; i++) {
+            if (grid.getChildAt(i) instanceof ImageView) {
                 final ImageView text = (ImageView) grid.getChildAt(i);
                 text.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View view) {
                         // your click code here
                         String pin_text_edit_text = pin_text_edit.getText().toString();
-                        if(pin_text_edit_text.length()>0)
-                            pin_text_edit.setText(pin_text_edit_text.substring(0,pin_text_edit_text.length()-1));
+                        if (pin_text_edit_text.length() > 0)
+                            pin_text_edit.setText(pin_text_edit_text.substring(0, pin_text_edit_text.length() - 1));
                     }
                 });
             } else {

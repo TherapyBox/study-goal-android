@@ -55,7 +55,6 @@ import com.studygoal.jisc.Fragments.StatsPoints;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.ReceivedRequest;
@@ -71,6 +70,8 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 public class MainActivity extends FragmentActivity {
+
+    public static final int CAMERA_REQUEST_CODE = 100;
 
     public DrawerLayout drawer;
     public RelativeLayout friend, settings, addTarget, send, timer, back;
@@ -146,7 +147,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                if(DataManager.getInstance().user.isDemo) {
+                if (DataManager.getInstance().user.isDemo) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_postfeed) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -171,7 +172,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                if(v.getTag() != null && v.getTag().equals("from_list")) {
+                if (v.getTag() != null && v.getTag().equals("from_list")) {
 
                     v.setTag("");
                     final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
@@ -261,19 +262,19 @@ public class MainActivity extends FragmentActivity {
             public void run() {
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
-                if(DataManager.getInstance().user.isStaff) {
+                if (DataManager.getInstance().user.isStaff) {
                     ActiveAndroid.beginTransaction();
                     new Delete().from(Module.class).execute();
                     for (int i = 0; i < 3; i++) {
                         Module modules = new Module();
-                        modules.id = "DUMMY_"+(i+1);
-                        modules.name = "Dummy Module "+(i+1);
+                        modules.id = "DUMMY_" + (i + 1);
+                        modules.name = "Dummy Module " + (i + 1);
                         modules.save();
                     }
                     ActiveAndroid.setTransactionSuccessful();
                     ActiveAndroid.endTransaction();
                 } else {
-                    if(DataManager.getInstance().user.isSocial) {
+                    if (DataManager.getInstance().user.isSocial) {
                         NetworkManager.getInstance().getSocialModules();
                     } else {
                         NetworkManager.getInstance().getModules();
@@ -368,29 +369,31 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                if(selectedPosition < 0) { return; }
+                if (selectedPosition < 0) {
+                    return;
+                }
 
                 String selection = adapter.values[selectedPosition];
                 Fragment destination = null;
 
-                if(selection.equals(getString(R.string.feed))) {
+                if (selection.equals(getString(R.string.feed))) {
                     destination = new FeedFragment();
-                } else if(selection.equals(getString(R.string.check_in))) {
+                } else if (selection.equals(getString(R.string.check_in))) {
                     destination = new CheckInFragment();
-                } else if(selection.equals(getString(R.string.attainment))) {
+                } else if (selection.equals(getString(R.string.attainment))) {
                     destination = new StatsAttainment();
-                } else if(selection.equals(getString(R.string.friends))) {
+                } else if (selection.equals(getString(R.string.friends))) {
                     destination = new Friends();
-                } else if(selection.equals(getString(R.string.settings))) {
+                } else if (selection.equals(getString(R.string.settings))) {
                     destination = new Settings();
-                } else if(selection.equals(getString(R.string.graphs))) {
+                } else if (selection.equals(getString(R.string.graphs))) {
                     destination = new Stats3();
-                } else if(selection.equals(getString(R.string.points))) {
+                } else if (selection.equals(getString(R.string.points))) {
                     destination = new StatsPoints();
-                } else if(selection.equals(getString(R.string.log))) {
+                } else if (selection.equals(getString(R.string.log))) {
                     logFragment = new LogActivityHistory();
                     destination = logFragment;
-                } else if(selection.equals(getString(R.string.target))) {
+                } else if (selection.equals(getString(R.string.target))) {
                     destination = new TargetFragment();
                 } else if (selection.equals(getString(R.string.leader_board))) {
                     destination = new StatsLeaderBoard();
@@ -400,7 +403,7 @@ public class MainActivity extends FragmentActivity {
                     destination = new StatsAttedance();
                 }
 
-                if(destination!=null) {
+                if (destination != null) {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, destination)
                             .commit();
@@ -423,7 +426,7 @@ public class MainActivity extends FragmentActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 if (position != 0) {
 
-                    if(adapter.values[position].equals(getString(R.string.stats))) {
+                    if (adapter.values[position].equals(getString(R.string.stats))) {
                         adapter.statsOpened = !adapter.statsOpened;
                         adapter.notifyDataSetChanged();
                     }
@@ -435,7 +438,7 @@ public class MainActivity extends FragmentActivity {
                     adapter.selected_image.setColorFilter(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
                     adapter.selected_text.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
 
-                    if(adapter.values[position].equals(getString(R.string.stats))) {
+                    if (adapter.values[position].equals(getString(R.string.stats))) {
                         return;
                     }
 
@@ -444,12 +447,12 @@ public class MainActivity extends FragmentActivity {
                     }
 
                     selectedPosition = position;
-                    if(!adapter.statsOpened && position > 2) {
+                    if (!adapter.statsOpened && position > 2) {
                         selectedPosition = position + 3;
                     }
                     drawer.closeDrawer(GravityCompat.START);
 
-                    if(adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
+                    if (adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
                         final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                         dialog.setContentView(R.layout.confirmation_dialog);
@@ -561,7 +564,7 @@ public class MainActivity extends FragmentActivity {
 
 
     public void showProgressBar(@Nullable String text) {
-        if(blackout != null) {
+        if (blackout != null) {
             blackout.setVisibility(View.VISIBLE);
             blackout.requestLayout();
             blackout.setOnClickListener(null);
@@ -569,10 +572,10 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void showProgressBar2(@Nullable String text) {
-        if(blackout != null) {
+        if (blackout != null) {
             blackout.setVisibility(View.VISIBLE);
 
-            if(blackout.findViewById(R.id.progress_bar) != null)
+            if (blackout.findViewById(R.id.progress_bar) != null)
                 blackout.findViewById(R.id.progressbar).setVisibility(View.GONE);
 
             blackout.requestLayout();
@@ -699,13 +702,13 @@ public class MainActivity extends FragmentActivity {
             int nw;
             int nh;
 
-            if(w >= 500 && h >= 500) {
-                if(w > h) {
+            if (w >= 500 && h >= 500) {
+                if (w > h) {
                     nw = 500;
-                    nh = (500 * h/w);
+                    nh = (500 * h / w);
                 } else {
                     nh = 500;
-                    nw = (500 * w/h);
+                    nw = (500 * w / h);
                 }
             } else {
                 nw = w;
@@ -713,7 +716,7 @@ public class MainActivity extends FragmentActivity {
             }
 
             outStream = new FileOutputStream(file);
-            bmp = Bitmap.createScaledBitmap(bmp,nw,nh,false);
+            bmp = Bitmap.createScaledBitmap(bmp, nw, nh, false);
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
             outStream.flush();
             outStream.close();
@@ -728,7 +731,7 @@ public class MainActivity extends FragmentActivity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == 100) {
-            Bitmap photo = (Bitmap)intent.getExtras().get("data");
+            Bitmap photo = (Bitmap) intent.getExtras().get("data");
             savebitmap(photo);
 
             final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
@@ -791,8 +794,9 @@ public class MainActivity extends FragmentActivity {
             }
         }
     }
+
     public static String getRealPathFromURI(Context context, Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         CursorLoader cursorLoader = new CursorLoader(context, contentUri, proj, null, null, null);
         Cursor cursor = cursorLoader.loadInBackground();
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
