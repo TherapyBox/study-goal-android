@@ -3078,7 +3078,11 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("staff_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                DataManager.getInstance().user.email = jsonObject.getString("email");
+                   if (jsonObject.getString("email").equals("not@known")){
+                    DataManager.getInstance().user.email = "";
+                }else{
+                    DataManager.getInstance().user.email = jsonObject.getString("email");
+                }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
@@ -3163,7 +3167,11 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("jisc_student_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                DataManager.getInstance().user.email = jsonObject.getString("email");
+                   if (jsonObject.getString("email").equals("not@known")){
+                    DataManager.getInstance().user.email = "";
+                }else{
+                    DataManager.getInstance().user.email = jsonObject.getString("email");
+                }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
                 DataManager.getInstance().user.affiliation = jsonObject.getString("affiliation");
                 DataManager.getInstance().user.profile_pic = jsonObject.getString("profile_pic");
