@@ -729,7 +729,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-
+        if (intent == null) return;
         if (requestCode == 100) {
             Bitmap photo = (Bitmap) intent.getExtras().get("data");
             savebitmap(photo);

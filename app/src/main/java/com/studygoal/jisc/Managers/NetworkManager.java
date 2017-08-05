@@ -397,7 +397,6 @@ public class NetworkManager {
                 DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
-
                 String header = "Content-Disposition: form-data; name=\"language\"";
                 wr.writeBytes(header);
                 wr.writeBytes(crlf);
@@ -405,15 +404,13 @@ public class NetworkManager {
                 wr.writeBytes(language);
 
 
-                if (DataManager.getInstance().user.isSocial) {
-                    wr.writeBytes(crlf + twoHyphens + boundary + crlf);
+                wr.writeBytes(crlf + twoHyphens + boundary + crlf);
+                header = "Content-Disposition: form-data; name=\"is_social\"";
+                wr.writeBytes(header);
+                wr.writeBytes(crlf);
+                wr.writeBytes(crlf);
+                wr.writeBytes((DataManager.getInstance().user.isStaff ? "yes" : "no"));
 
-                    header = "Content-Disposition: form-data; name=\"is_social\"";
-                    wr.writeBytes(header);
-                    wr.writeBytes(crlf);
-                    wr.writeBytes(crlf);
-                    wr.writeBytes((DataManager.getInstance().user.isStaff ? "yes" : "no"));
-                }
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
 
@@ -424,7 +421,7 @@ public class NetworkManager {
                 wr.writeBytes(DataManager.getInstance().user.id);
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
-                header = "Content-Disposition: attachment; name=\"profile_photo\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".png" + crlf;
+                header = "Content-Disposition: attachment; name=\"image_data\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".png" + crlf;
                 wr.writeBytes(header);
 
                 header = "Content-Type: image/png" + crlf + crlf;
@@ -432,7 +429,7 @@ public class NetworkManager {
 
                 Bitmap bm = BitmapFactory.decodeFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);
 
                 wr.write(baos.toByteArray());
                 wr.writeBytes(crlf + twoHyphens + boundary + twoHyphens + crlf);
@@ -451,8 +448,6 @@ public class NetworkManager {
                     }
 
                     is.close();
-
-                    Log.e("Jisc", "error: " + sb.toString());
                 }
 
                 BufferedInputStream is = new BufferedInputStream(urlConnection.getInputStream());
