@@ -279,6 +279,32 @@ public class Settings extends Fragment {
         super.onDestroyView();
     }
 
+    private void loadImageView(final DataManager manager) {
+        manager.mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                profile_spinner.setVisibility(View.VISIBLE);
+
+                Glide.with(manager.mainActivity)
+                        .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                        .listener(new RequestListener<String, GlideDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                profile_spinner.setVisibility(View.INVISIBLE);
+                                return false;
+                            }
+                        })
+                        .into(profile_image);
+                Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
+            }
+        });
+    }
+
     public void refresh_image() {
         final DataManager manager = DataManager.getInstance();
         if (manager.user.isSocial) {
@@ -289,62 +315,27 @@ public class Settings extends Fragment {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    manager.mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            profile_spinner.setVisibility(View.VISIBLE);
-
-                            Glide.with(manager.mainActivity)
-                                    .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
-                                    .listener(new RequestListener<String, GlideDrawable>() {
-                                        @Override
-                                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                            return false;
-                                        }
-
-                                        @Override
-                                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                            profile_spinner.setVisibility(View.INVISIBLE);
-                                            return false;
-                                        }
-                                    })
-                                    .into(profile_image);
-                            Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
-                        }
-                    });
+                    loadImageView(manager);
+                }
+            }).start();
+        }
+        if (manager.user.isStaff) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean success = NetworkManager.getInstance().loginStaff();
+                    if (success) loadImageView(manager);
                 }
             }).start();
         } else {
-            if (NetworkManager.getInstance().login()) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        manager.mainActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                profile_spinner.setVisibility(View.VISIBLE);
-
-                                Glide.with(manager.mainActivity)
-                                        .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
-                                        .listener(new RequestListener<String, GlideDrawable>() {
-                                            @Override
-                                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                                return false;
-                                            }
-
-                                            @Override
-                                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                                profile_spinner.setVisibility(View.INVISIBLE);
-                                                return false;
-                                            }
-                                        })
-                                        .into(profile_image);
-                                Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
-                            }
-                        });
-                    }
-                }).start();
-            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Boolean login = NetworkManager.getInstance().login();
+                    if (login)
+                        loadImageView(manager);
+                }
+            }).start();
         }
     }
 
