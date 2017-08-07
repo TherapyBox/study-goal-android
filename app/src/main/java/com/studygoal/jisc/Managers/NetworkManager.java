@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -65,6 +66,11 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 public class NetworkManager {
 
@@ -2102,52 +2108,82 @@ public class NetworkManager {
 
                 String apiURL = host + "fn_list_friends?student_id=" + student_id + "&language=" + language
                         + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
-                URL url = new URL(apiURL);
 
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+                // init ok http
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .addInterceptor(logging)
+                        .sslSocketFactory(context.getSocketFactory())
+                        .build();
+                Request request = new Request.Builder()
+                        .url(apiURL)
+                        .addHeader("Authorization", "Bearer " + DataManager.getInstance().get_jwt())
+                        .build();
+                Response execute = null;
+                try {
+                    execute = client.newCall(request).execute();
+                    Log.e("GetFriends", "Code: " + execute.code());
 
-                int responseCode = urlConnection.getResponseCode();
-                forbidden(responseCode);
-                if (responseCode != 200) {
-                    Log.e("getFriends", "" + apiURL);
-                    Log.e("getFriends", "JWT: " + DataManager.getInstance().get_jwt());
-
-                    InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    is.close();
-
-                    Log.e("getFriends", "" + sb.toString());
-
-                    if (responseCode == 204) {
-                        Log.e("getFriends", "No records found");
-                        new Delete().from(Friend.class).execute();
-                    } else {
-                        Log.e("getFriends", "Code: " + responseCode);
-                    }
+                } catch (ProtocolException e) {
+//                    Log.e("GetFriends", "ProtocolException: " + e.getMessage());
+                    new Delete().from(Friend.class).execute();
+                }
+                if (execute == null || execute.body() == null) {
                     return false;
                 }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                if (!execute.isSuccessful()) {
+                    Log.e("GetFriends", "FAILED!");
+                    return false;
                 }
-                is.close();
+                String response = execute.body().toString();
 
-                Log.e("Jisc", "List: " + sb.toString());
 
-                JSONArray jsonArray = new JSONArray(sb.toString());
+//                URL url = new URL(apiURL);
+//
+//                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+//                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+//                urlConnection.setRequestMethod("GET");
+//                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+//
+//                int responseCode = urlConnection.getResponseCode();
+//                forbidden(responseCode);
+//                if (responseCode != 200) {
+//                    Log.e("getFriends", "" + apiURL);
+//                    Log.e("getFriends", "JWT: " + DataManager.getInstance().get_jwt());
+//
+//                    InputStream is = new BufferedInputStream(urlConnection.getErrorStream());
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+//                    StringBuilder sb = new StringBuilder();
+//                    String line;
+//                    while ((line = reader.readLine()) != null) {
+//                        sb.append(line);
+//                    }
+//                    is.close();
+//
+//                    Log.e("getFriends", "" + sb.toString());
+//
+//                    if (responseCode == 204) {
+//                        Log.e("getFriends", "No records found");
+//                        new Delete().from(Friend.class).execute();
+//                    } else {
+//                        Log.e("getFriends", "Code: " + responseCode);
+//                    }
+//                    return false;
+//                }
+//
+//                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+//                StringBuilder sb = new StringBuilder();
+//                String line;
+//                while ((line = reader.readLine()) != null) {
+//                    sb.append(line);
+//                }
+//                is.close();
 
+//                Log.e("Jisc", "List: " + sb.toString());
+//                JSONArray jsonArray = new JSONArray(sb.toString());
+                JSONArray jsonArray = new JSONArray(response);
                 ActiveAndroid.beginTransaction();
                 try {
                     for (int i = 0; i < jsonArray.length(); i++) {

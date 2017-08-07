@@ -36,6 +36,7 @@ import android.widget.TextView;
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
+import com.activeandroid.util.Log;
 import com.bumptech.glide.Glide;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
@@ -103,6 +104,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.setEnabled(true);
         isLandscape = DataManager.getInstance().isLandscape;
         DataManager.getInstance().checkForbidden = true;
         super.onCreate(savedInstanceState);
