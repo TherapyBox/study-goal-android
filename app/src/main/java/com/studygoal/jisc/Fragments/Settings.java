@@ -8,9 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
@@ -38,6 +38,11 @@ import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.Event.EventReloadImage;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -209,11 +214,8 @@ public class Settings extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (position == 0) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                                    (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                                            ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                                            ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
-
+                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                                    || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
                                         102);
                             } else {
@@ -227,9 +229,8 @@ public class Settings extends Fragment {
                                 DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
                             }
                         } else {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                                    (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                                            ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
                                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 103);
                             } else {
@@ -305,7 +306,7 @@ public class Settings extends Fragment {
         });
     }
 
-    public void refresh_image() {
+    private void refresh_image() {
         final DataManager manager = DataManager.getInstance();
         if (manager.user.isSocial) {
             Integer response = NetworkManager.getInstance().loginSocial(manager.user.email, manager.user.password);
@@ -339,6 +340,11 @@ public class Settings extends Fragment {
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRefreshImageEvenFired(EventReloadImage eventReloadImage) {
+        refresh_image();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if (requestCode == 103) {
@@ -361,5 +367,17 @@ public class Settings extends Fragment {
                 DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
             }
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

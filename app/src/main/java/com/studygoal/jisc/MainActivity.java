@@ -61,9 +61,12 @@ import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.RunningActivity;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.Event.EventReloadImage;
 
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -745,7 +748,8 @@ public class MainActivity extends FragmentActivity {
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                settings_fragment.refresh_image();
+//                                settings_fragment.refresh_image();
+                                EventBus.getDefault().post(new EventReloadImage());
                                 hideProgressBar();
                             }
                         });
@@ -778,7 +782,8 @@ public class MainActivity extends FragmentActivity {
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    settings_fragment.refresh_image();
+//                                    settings_fragment.refresh_image();
+                                    EventBus.getDefault().post(new EventReloadImage());
                                     hideProgressBar();
                                 }
                             });
