@@ -293,6 +293,15 @@ public class MainActivity extends FragmentActivity {
                 NetworkManager.getInstance().getSettings(getString(R.string.studyGoalAttendance));
                 NetworkManager.getInstance().getSettings(getString(R.string.attainmentData));
                 NetworkManager.getInstance().getWeeklyAttendance();
+
+                // change left menu after login
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter = new DrawerAdapter(MainActivity.this);
+                        navigationView.setAdapter(adapter);
+                    }
+                });
             }
         }).start();
 
