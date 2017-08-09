@@ -508,6 +508,9 @@ public class MainActivity extends FragmentActivity {
                                 getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_staff", "").apply();
                                 getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", "").apply();
 
+                                PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                        .edit().remove("trophies").apply();
+
                                 new Delete().from(CurrentUser.class).execute();
                                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                 startActivity(intent);
