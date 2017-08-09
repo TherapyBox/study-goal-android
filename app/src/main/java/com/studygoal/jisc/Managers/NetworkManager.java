@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
+import com.studygoal.jisc.BuildConfig;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.ActivityPoints;
 import com.studygoal.jisc.Models.Attainment;
@@ -36,6 +38,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ProtocolException;
@@ -67,8 +70,10 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -84,6 +89,10 @@ public class NetworkManager {
     public String no_https_host = "http://stuapp.analytics.alpha.jisc.ac.uk/";
     public String host = "https://stuapp.analytics.alpha.jisc.ac.uk/";
 
+    HttpLoggingInterceptor logging = new HttpLoggingInterceptor()
+            .setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
+    OkHttpClient okHttpClient;
+
     public static NetworkManager getInstance() {
         return ourInstance;
     }
@@ -95,6 +104,10 @@ public class NetworkManager {
     public void init(Context context) {
         this.appContext = context;
         setCertificate();
+        okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .sslSocketFactory(this.context.getSocketFactory())
+                .build();
     }
 
     private void setCertificate() {
@@ -2110,19 +2123,13 @@ public class NetworkManager {
                         + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
 
                 // init ok http
-                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-                logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .addInterceptor(logging)
-                        .sslSocketFactory(context.getSocketFactory())
-                        .build();
                 Request request = new Request.Builder()
                         .url(apiURL)
                         .addHeader("Authorization", "Bearer " + DataManager.getInstance().get_jwt())
                         .build();
                 Response execute = null;
                 try {
-                    execute = client.newCall(request).execute();
+                    execute = okHttpClient.newCall(request).execute();
                     Log.e("GetFriends", "Code: " + execute.code());
 
                 } catch (ProtocolException e) {
@@ -3114,9 +3121,9 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("staff_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                   if (jsonObject.getString("email").equals("not@known")){
+                if (jsonObject.getString("email").equals("not@known")) {
                     DataManager.getInstance().user.email = "";
-                }else{
+                } else {
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
@@ -3127,6 +3134,8 @@ public class NetworkManager {
                 DataManager.getInstance().user.modified_date = jsonObject.getString("modified_date");
                 DataManager.getInstance().user.isStaff = true;
                 DataManager.getInstance().user.isSocial = false;
+
+                Log.e(getClass().getCanonicalName(), DataManager.getInstance().user.toString());
 
                 DataManager.getInstance().user.save();
                 return true;
@@ -3203,9 +3212,9 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("jisc_student_id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                   if (jsonObject.getString("email").equals("not@known")){
+                if (jsonObject.getString("email").equals("not@known")) {
                     DataManager.getInstance().user.email = "";
-                }else{
+                } else {
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
@@ -3217,6 +3226,8 @@ public class NetworkManager {
                 DataManager.getInstance().user.modules = jsonObject.getString("modules");
                 DataManager.getInstance().user.created_date = jsonObject.getString("created_date");
                 DataManager.getInstance().user.modified_date = jsonObject.getString("modified_date");
+
+                Log.e(getClass().getCanonicalName(), DataManager.getInstance().user.toString());
 
                 DataManager.getInstance().user.save();
                 return true;
@@ -3316,9 +3327,9 @@ public class NetworkManager {
                 DataManager.getInstance().user.jisc_student_id = jsonObject.getString("id");
                 DataManager.getInstance().user.pid = jsonObject.getString("pid");
                 DataManager.getInstance().user.name = jsonObject.getString("name");
-                 if (jsonObject.getString("email").equals("not@known")){
+                if (jsonObject.getString("email").equals("not@known")) {
                     DataManager.getInstance().user.email = "";
-                }else{
+                } else {
                     DataManager.getInstance().user.email = jsonObject.getString("email");
                 }
                 DataManager.getInstance().user.eppn = jsonObject.getString("eppn");
@@ -4486,6 +4497,37 @@ public class NetworkManager {
                 e.printStackTrace();
                 return false;
             }
+        }
+    }
+
+    public void updateDeviceDetails() {
+        RequestBody formBody = new FormBody.Builder()
+                .add("student_id", DataManager.getInstance().user.id)
+                .add("version", BuildConfig.VERSION_NAME)
+                .add("build", "" + BuildConfig.VERSION_CODE)
+                .add("bundle_identifier", BuildConfig.APPLICATION_ID)
+                .add("is_active", (DataManager.getInstance().get_jwt().length() > 0 ? "1" : "0"))
+                .add("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"))
+                .add("device_token", Build.SERIAL)
+                .add("platform", "android")
+                .add("push_token", PreferenceManager.getDefaultSharedPreferences(appContext).getString("push_token", ""))
+                .build();
+        Request request = new Request.Builder()
+                .url(host + "fn_register_device")
+                .addHeader("Authorization", "Bearer " + DataManager.getInstance().get_jwt())
+                .post(formBody)
+                .build();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            if (response.isSuccessful()) {
+                String message = response.body().string();
+                Log.e(getClass().getCanonicalName(), "Updated device info: " + message);
+            } else {
+                Log.e(getClass().getCanonicalName(), "Error code: " + response.code());
+            }
+            // Do something with the response.
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

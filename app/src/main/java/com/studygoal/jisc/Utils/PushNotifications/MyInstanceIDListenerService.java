@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.studygoal.jisc.Managers.NetworkManager;
 
 public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
 
@@ -28,5 +29,7 @@ public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.edit().putString("push_token", refreshedToken).apply();
+
+        NetworkManager.getInstance().updateDeviceDetails(); // update device token when the device token is changed.
     }
 }
