@@ -30,6 +30,8 @@ import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.Models.ED;
 import com.studygoal.jisc.Models.Friend;
@@ -435,6 +437,9 @@ public class StatsGraphsFragment extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.engagement_graph));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(8);
+
+        String module = (mModule != null && mModule.getText() != null) ? mModule.getText().toString() : null;
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.ViewedGraphModule, module);
     }
 
     private void getData() {
