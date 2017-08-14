@@ -55,7 +55,7 @@
 //        mainView.findViewById(R.id.log_activity_btn).setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                LogLogActivity fragment = new LogLogActivity();
+//                LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
 //                fragment.isInEditMode = false;
 //                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
 //                        .replace(R.id.main_fragment, fragment)

@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
@@ -29,13 +28,10 @@ import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.Module;
-import com.studygoal.jisc.Models.Trophy;
-import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ActivityDetails extends Fragment {
 
@@ -75,7 +71,7 @@ public class ActivityDetails extends Fragment {
         mainView.findViewById(R.id.edit_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LogLogActivity fragment = new LogLogActivity();
+                LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
                 fragment.isInEditMode = true;
                 fragment.item = activityHistory;
                 DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()

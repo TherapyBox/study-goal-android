@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.activeandroid.query.Select;
 import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Fragments.LogActivityHistoryFragment;
-import com.studygoal.jisc.Fragments.LogLogActivity;
+import com.studygoal.jisc.Fragments.LogCompletedActivityFragment;
 import com.studygoal.jisc.Fragments.LogNewActivityFragment;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
@@ -129,7 +129,7 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                         @Override
                         public void onClick(View v) {
                             swipeLayout.close(true);
-                            LogLogActivity fragment = new LogLogActivity();
+                            LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
                             fragment.isInEditMode = true;
                             fragment.item = activityHistory;
                             ((MainActivity) context).getSupportFragmentManager().beginTransaction()
@@ -235,7 +235,7 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                     @Override
                     public void onClick(View v) {
                         swipeLayout.close(true);
-                        LogLogActivity fragment = new LogLogActivity();
+                        LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
                         fragment.isInEditMode = true;
                         fragment.item = activityHistory;
                         ((MainActivity) context).getSupportFragmentManager().beginTransaction()

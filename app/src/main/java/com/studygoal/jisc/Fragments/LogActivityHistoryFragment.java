@@ -191,7 +191,7 @@ public class LogActivityHistoryFragment extends Fragment {
                             .addToBackStack(null)
                             .commit();
                 } else {
-                    LogLogActivity fragment = new LogLogActivity();
+                    LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
                     fragment.isInEditMode = false;
                     DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, fragment)

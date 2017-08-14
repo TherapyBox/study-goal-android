@@ -100,7 +100,7 @@ public class TargetItem extends Fragment {
                             .commit();
                 } else {
                     DataManager.getInstance().fromTargetItem = true;
-                    LogLogActivity fragment = new LogLogActivity();
+                    LogCompletedActivityFragment fragment = new LogCompletedActivityFragment();
                     fragment.isInEditMode = false;
                     DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, fragment)

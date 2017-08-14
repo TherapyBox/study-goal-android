@@ -54,7 +54,7 @@ import java.util.TimerTask;
 
 public class LogNewActivityFragment extends Fragment implements View.OnClickListener {
 
-    private View mainView;
+    private View mMainView;
     private AppCompatTextView mChooseActivity;
     private AppCompatTextView mModule;
     private AppCompatTextView mActivityType;
@@ -76,40 +76,40 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        mainView = inflater.inflate(R.layout.log_fragment_new_activity, container, false);
+        mMainView = inflater.inflate(R.layout.log_fragment_new_activity, container, false);
 
         DataManager.getInstance().reload();
 
-        mAddModuleLayout = (RelativeLayout) mainView.findViewById(R.id.add_new_module_layout);
+        mAddModuleLayout = (RelativeLayout) mMainView.findViewById(R.id.add_new_module_layout);
         mAddModuleLayout.setVisibility(View.GONE);
 
-        ((EditText) mainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        mainView.findViewById(R.id.add_module_button_text).setOnClickListener(this);
+        ((EditText) mMainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        mMainView.findViewById(R.id.add_module_button_text).setOnClickListener(this);
 
-        mCountdownTextView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
+        mCountdownTextView = ((TextView) mMainView.findViewById(R.id.new_activity_text_timer_2));
         mCountdownTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView) mainView.findViewById(R.id.new_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         mAlarmManager = (AlarmManager) DataManager.getInstance().mainActivity.getSystemService(Context.ALARM_SERVICE);
 
-        mModule = (AppCompatTextView) mainView.findViewById(R.id.new_activity_module_textView);
+        mModule = (AppCompatTextView) mMainView.findViewById(R.id.new_activity_module_textView);
         mModule.setTypeface(DataManager.getInstance().myriadpro_regular);
         mModule.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         mModule.setOnClickListener(this);
 
-        mActivityType = (AppCompatTextView) mainView.findViewById(R.id.new_activity_activitytype_textView);
+        mActivityType = (AppCompatTextView) mMainView.findViewById(R.id.new_activity_activitytype_textView);
         mActivityType.setTypeface(DataManager.getInstance().myriadpro_regular);
         mActivityType.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         mActivityType.setOnClickListener(this);
 
-        mChooseActivity = (AppCompatTextView) mainView.findViewById(R.id.new_activity_choose_textView);
+        mChooseActivity = (AppCompatTextView) mMainView.findViewById(R.id.new_activity_choose_textView);
         mChooseActivity.setTypeface(DataManager.getInstance().myriadpro_regular);
         mChooseActivity.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         mChooseActivity.setOnClickListener(this);
 
-        mReminderTextView = ((EditText) mainView.findViewById(R.id.new_activity_text_timer_1));
+        mReminderTextView = ((EditText) mMainView.findViewById(R.id.new_activity_text_timer_1));
         mReminderTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
         mReminderTextView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -132,22 +132,22 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
             }
         });
 
-        mCountdownTextView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
+        mCountdownTextView = ((TextView) mMainView.findViewById(R.id.new_activity_text_timer_2));
         mCountdownTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView) mainView.findViewById(R.id.new_activity_text_module)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.new_activity_text_choose)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.new_activity_activity_type_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_text_module)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_text_choose)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_activity_type_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView) mainView.findViewById(R.id.new_activity_btn_start_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.new_activity_btn_stop_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_btn_start_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.new_activity_btn_stop_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         if (!DataManager.getInstance().mainActivity.isLandscape) {
-            ((TextView) mainView.findViewById(R.id.new_activity_text_reminder)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) mMainView.findViewById(R.id.new_activity_text_reminder)).setTypeface(DataManager.getInstance().myriadpro_regular);
         } else {
-            ((TextView) mainView.findViewById(R.id.header_1)).setTypeface(DataManager.getInstance().myriadpro_regular);
-            ((TextView) mainView.findViewById(R.id.header_2)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) mMainView.findViewById(R.id.header_1)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) mMainView.findViewById(R.id.header_2)).setTypeface(DataManager.getInstance().myriadpro_regular);
         }
 
 
@@ -177,7 +177,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 });
 
                 if (minutes >= 180) {
-                    mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
+                    mMainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                 }
             }
         };
@@ -202,8 +202,8 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
             mChooseActivity.setText(DataManager.getInstance().choose_activity.get(DataManager.getInstance().activity_type.get(0)).get(0));
         }
 
-        mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
-        mainView.findViewById(R.id.new_activity_btn_pause).setOnClickListener(this);
+        mMainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
+        mMainView.findViewById(R.id.new_activity_btn_pause).setOnClickListener(this);
 
         if (mSaves.contains("pause")) {
             mPause = mSaves.getLong("pause", 0);
@@ -233,36 +233,36 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                     }
                 });
 
-                //mainView.findViewById(R.id.new_activity_btn_pause).callOnClick();
-                mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
-                mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
-                mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
-                ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
+                //mMainView.findViewById(R.id.new_activity_btn_pause).callOnClick();
+                mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
+                mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
+                mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
+                ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
             } else {
-                mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
-                mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.VISIBLE);
-                mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.GONE);
+                mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
+                mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.VISIBLE);
+                mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.GONE);
                 if (mTimestamp > 0) {
-                    mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
-                    mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
+                    mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
+                    mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
                     mTimer.schedule(mTimerTask, 0, 1000);
                 }
             }
         } else {
             if (mTimestamp > 0) {
-                mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
-                mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
-                mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
+                mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
+                mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
+                mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
                 if (mTimestamp > 0)
                     mTimer.schedule(mTimerTask, 0, 1000);
             }
         }
 
 
-//        mainView.findViewById(R.id.new_activity_activityhistory_btn).setOnClickListener(this);
-//        mainView.findViewById(R.id.new_activity_logrecent_btn).setOnClickListener(this);
+//        mMainView.findViewById(R.id.new_activity_activityhistory_btn).setOnClickListener(this);
+//        mMainView.findViewById(R.id.new_activity_logrecent_btn).setOnClickListener(this);
 
-        return mainView;
+        return mMainView;
     }
 
     @Override
@@ -298,8 +298,8 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 Calendar c = Calendar.getInstance();
                 c.setTimeInMillis(System.currentTimeMillis());
 
-                mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.VISIBLE);
-                mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.GONE);
+                mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.VISIBLE);
+                mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.GONE);
 
                 HashMap<String, String> params = new HashMap<>();
                 params.put("student_id", DataManager.getInstance().user.id);
@@ -309,7 +309,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 params.put("activity_date", c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) : (c.get(Calendar.MONTH) + 1)) + "-" + ((c.get(Calendar.DAY_OF_MONTH)) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) : c.get(Calendar.DAY_OF_MONTH)));
                 long duration = ((System.currentTimeMillis() - mTimestamp) / 60000);
                 if (duration == 0) {
-                    Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_canceled_due_to_short_time, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mMainView.findViewById(R.id.container), R.string.activity_canceled_due_to_short_time, Snackbar.LENGTH_LONG).show();
                     new Delete().from(RunningActivity.class).execute();
 
                     mSaves.edit().putLong("timer", 0).apply();
@@ -323,11 +323,11 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
 
                     mCountdownTextView.setText("00:00");
 
-                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                    ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
 
-                    ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
-                    mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
-                    mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
+                    ((CardView) mMainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
+                    mMainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
+                    mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
                     return;
                 }
                 //duration = 1;
@@ -335,7 +335,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
 
                 String responseCode = NetworkManager.getInstance().addActivity(params);
                 if (responseCode.equals("403")) {
-                    Snackbar.make(mainView.findViewById(R.id.container), R.string.already_added_activity, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mMainView.findViewById(R.id.container), R.string.already_added_activity, Snackbar.LENGTH_LONG).show();
                 } else if (!responseCode.equals("200")) {
                     Activity activity = new Activity();
                     activity.student_id = params.get("student_id");
@@ -353,7 +353,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
 
                 mSaves.edit().putLong("timer", 0).apply();
                 mSaves.edit().putLong("pause", 0).apply();
-                ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
 
                 Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
                 mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
@@ -361,12 +361,12 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 mAlarmManager.cancel(mPendingIntent);
 
 
-                Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_stopped, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mMainView.findViewById(R.id.container), R.string.activity_stopped, Snackbar.LENGTH_LONG).show();
                 mCountdownTextView.setText("00:00");
 
-                ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
-                mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
-                mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
+                ((CardView) mMainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
+                mMainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
+                mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
 
                 DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                     @Override
@@ -377,7 +377,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 break;
             }
             case R.id.new_activity_btn_pause: {
-                if (((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.pause))) {
+                if (((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.pause))) {
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
                     mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                             intent, PendingIntent.FLAG_ONE_SHOT);
@@ -387,9 +387,9 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
 
                     mTimer.cancel();
 
-                    Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_paused, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mMainView.findViewById(R.id.container), R.string.activity_paused, Snackbar.LENGTH_LONG).show();
 
-                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
+                    ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
                 } else {
                     Long _pause = System.currentTimeMillis() - mSaves.getLong("pause", 0);
                     mTimestamp += _pause;
@@ -421,7 +421,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                             });
 
                             if (minutes >= 180) {
-                                mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
+                                mMainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                             }
                         }
                     };
@@ -435,9 +435,9 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                     mTimer.schedule(mTimerTask, 0, 1000);
                     mSaves.edit().putLong("timer", mTimestamp).apply();
 
-                    Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_resumed, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mMainView.findViewById(R.id.container), R.string.activity_resumed, Snackbar.LENGTH_LONG).show();
 
-                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                    ((TextView) mMainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
                 }
                 break;
             }
@@ -458,14 +458,14 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 }
 
                 if (mModule.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.no_module))) {
-                    Snackbar.make(mainView.findViewById(R.id.container), R.string.no_module_selected, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mMainView.findViewById(R.id.container), R.string.no_module_selected, Snackbar.LENGTH_LONG).show();
                     return;
                 }
-                mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
-                mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
-                mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
+                mMainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
+                mMainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
+                mMainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
 
-                Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_started, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mMainView.findViewById(R.id.container), R.string.activity_started, Snackbar.LENGTH_LONG).show();
 
                 mTimestamp = System.currentTimeMillis();
                 int reminder = Integer.parseInt(mReminderTextView.getText().toString());
@@ -495,7 +495,7 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                         });
 
                         if (minutes >= 180) {
-                            mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
+                            mMainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                         }
                     }
                 };
@@ -512,8 +512,8 @@ public class LogNewActivityFragment extends Fragment implements View.OnClickList
                 activity.activity_date = c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) : (c.get(Calendar.MONTH) + 1)) + "-" + ((c.get(Calendar.DAY_OF_MONTH)) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) : c.get(Calendar.DAY_OF_MONTH));
                 activity.save();
 
-                ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.light_grey));//getResources().getColor(R.color.light_grey));
-                mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(null);
+                ((CardView) mMainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.light_grey));//getResources().getColor(R.color.light_grey));
+                mMainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(null);
 
                 if (reminder != 0) {
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
