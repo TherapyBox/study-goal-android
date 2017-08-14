@@ -47,7 +47,7 @@ import com.studygoal.jisc.Fragments.CheckInFragment;
 import com.studygoal.jisc.Fragments.FeedFragment;
 import com.studygoal.jisc.Fragments.FriendsFragment;
 import com.studygoal.jisc.Fragments.LogActivityHistoryFragment;
-import com.studygoal.jisc.Fragments.LogNewActivity;
+import com.studygoal.jisc.Fragments.LogNewActivityFragment;
 import com.studygoal.jisc.Fragments.Settings;
 import com.studygoal.jisc.Fragments.StatsLandscapeFragment;
 import com.studygoal.jisc.Fragments.StatsPortraitFragment;
@@ -623,7 +623,7 @@ public class MainActivity extends FragmentActivity {
                         @Override
                         public void onClick(View v) {
                             DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new LogNewActivity(), "newActivity")
+                                    .replace(R.id.main_fragment, new LogNewActivityFragment(), "newActivity")
                                     .addToBackStack(null)
                                     .commit();
                         }

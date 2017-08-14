@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import com.activeandroid.query.Select;
-import com.studygoal.jisc.Fragments.LogNewActivity;
+import com.studygoal.jisc.Fragments.LogNewActivityFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.RunningActivity;
@@ -72,7 +72,7 @@ public class Syncronize extends IntentService {
                             NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
                         }
                         if(DataManager.getInstance().mainActivity != null) {
-                            LogNewActivity fragment = (LogNewActivity) DataManager.getInstance().mainActivity.getSupportFragmentManager().findFragmentByTag("newActivity");
+                            LogNewActivityFragment fragment = (LogNewActivityFragment) DataManager.getInstance().mainActivity.getSupportFragmentManager().findFragmentByTag("newActivity");
                             if (fragment != null)
                                 DataManager.getInstance().mainActivity.onBackPressed();
                         }

@@ -47,7 +47,7 @@
 //            @Override
 //            public void onClick(View v) {
 //                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.main_fragment, new LogNewActivity(), "newActivity")
+//                        .replace(R.id.main_fragment, new LogNewActivityFragment(), "newActivity")
 //                        .addToBackStack(null)
 //                        .commit();
 //            }

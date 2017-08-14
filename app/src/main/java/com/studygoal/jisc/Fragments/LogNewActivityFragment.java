@@ -38,10 +38,12 @@ import com.studygoal.jisc.Adapters.ChooseActivityAdapter;
 import com.studygoal.jisc.Adapters.ModuleAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.NotificationAlarm;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Activity;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.RunningActivity;
+import com.studygoal.jisc.NotificationAlarm;
 import com.studygoal.jisc.R;
 
 import java.util.Calendar;
@@ -50,34 +52,26 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class LogNewActivity extends Fragment implements View.OnClickListener {
+public class LogNewActivityFragment extends Fragment implements View.OnClickListener {
 
-    View mainView;
-    AppCompatTextView chooseActivity;
-    AppCompatTextView module;
-    AppCompatTextView activityType;
+    private View mainView;
+    private AppCompatTextView mChooseActivity;
+    private AppCompatTextView mModule;
+    private AppCompatTextView mActivityType;
 
-    EditText reminder_textView;
-    TextView countdown_textView;
+    private EditText mReminderTextView;
+    private TextView mCountdownTextView;
 
-    AlarmManager am;
-    PendingIntent pendingIntent;
-    Timer timer;
-    TimerTask timertask;
-    Long timestamp;
-    Long _pause;
+    private AlarmManager mAlarmManager;
+    private PendingIntent mPendingIntent;
+    private Timer mTimer;
+    private TimerTask mTimerTask;
+    private Long mTimestamp;
+    private Long mPause;
 
-    SharedPreferences saves;
+    private SharedPreferences mSaves;
 
-    RelativeLayout addModuleLayout;
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.report_activity_title));
-        DataManager.getInstance().mainActivity.hideAllButtons();
-        DataManager.getInstance().mainActivity.showCertainButtons(8);
-    }
+    private RelativeLayout mAddModuleLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -86,38 +80,38 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
         DataManager.getInstance().reload();
 
-        addModuleLayout = (RelativeLayout)mainView.findViewById(R.id.add_new_module_layout);
-        addModuleLayout.setVisibility(View.GONE);
+        mAddModuleLayout = (RelativeLayout) mainView.findViewById(R.id.add_new_module_layout);
+        mAddModuleLayout.setVisibility(View.GONE);
 
-        ((EditText)mainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((EditText) mainView.findViewById(R.id.add_module_edit_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.add_module_button_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
         mainView.findViewById(R.id.add_module_button_text).setOnClickListener(this);
 
-        countdown_textView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
-        countdown_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mCountdownTextView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
+        mCountdownTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView)mainView.findViewById(R.id.new_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_text_minutes)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        am = (AlarmManager) DataManager.getInstance().mainActivity.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = (AlarmManager) DataManager.getInstance().mainActivity.getSystemService(Context.ALARM_SERVICE);
 
-        module = (AppCompatTextView) mainView.findViewById(R.id.new_activity_module_textView);
-        module.setTypeface(DataManager.getInstance().myriadpro_regular);
-        module.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
-        module.setOnClickListener(this);
+        mModule = (AppCompatTextView) mainView.findViewById(R.id.new_activity_module_textView);
+        mModule.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mModule.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
+        mModule.setOnClickListener(this);
 
-        activityType = (AppCompatTextView) mainView.findViewById(R.id.new_activity_activitytype_textView);
-        activityType.setTypeface(DataManager.getInstance().myriadpro_regular);
-        activityType.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
-        activityType.setOnClickListener(this);
+        mActivityType = (AppCompatTextView) mainView.findViewById(R.id.new_activity_activitytype_textView);
+        mActivityType.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mActivityType.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
+        mActivityType.setOnClickListener(this);
 
-        chooseActivity = (AppCompatTextView) mainView.findViewById(R.id.new_activity_choose_textView);
-        chooseActivity.setTypeface(DataManager.getInstance().myriadpro_regular);
-        chooseActivity.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
-        chooseActivity.setOnClickListener(this);
+        mChooseActivity = (AppCompatTextView) mainView.findViewById(R.id.new_activity_choose_textView);
+        mChooseActivity.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mChooseActivity.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
+        mChooseActivity.setOnClickListener(this);
 
-        reminder_textView = ((EditText) mainView.findViewById(R.id.new_activity_text_timer_1));
-        reminder_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
-        reminder_textView.addTextChangedListener(new TextWatcher() {
+        mReminderTextView = ((EditText) mainView.findViewById(R.id.new_activity_text_timer_1));
+        mReminderTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mReminderTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -128,28 +122,28 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.toString().length() != 0) {
+                if (s.toString().length() != 0) {
                     int value = Integer.parseInt(s.toString());
                     if (value < 0 || value > 60) {
-                        reminder_textView.setText("");
-                        reminder_textView.setSelection(reminder_textView.getText().length());
+                        mReminderTextView.setText("");
+                        mReminderTextView.setSelection(mReminderTextView.getText().length());
                     }
                 }
             }
         });
 
-        countdown_textView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
-        countdown_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mCountdownTextView = ((TextView) mainView.findViewById(R.id.new_activity_text_timer_2));
+        mCountdownTextView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView)mainView.findViewById(R.id.new_activity_text_module)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.new_activity_text_choose)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.new_activity_activity_type_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_text_module)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_text_choose)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_activity_type_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        ((TextView)mainView.findViewById(R.id.new_activity_btn_start_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView)mainView.findViewById(R.id.new_activity_btn_stop_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_btn_start_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.new_activity_btn_stop_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        if(!DataManager.getInstance().mainActivity.isLandscape) {
+        if (!DataManager.getInstance().mainActivity.isLandscape) {
             ((TextView) mainView.findViewById(R.id.new_activity_text_reminder)).setTypeface(DataManager.getInstance().myriadpro_regular);
         } else {
             ((TextView) mainView.findViewById(R.id.header_1)).setTypeface(DataManager.getInstance().myriadpro_regular);
@@ -157,20 +151,20 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
         }
 
 
-        timer = new Timer();
-        timertask = new TimerTask() {
+        mTimer = new Timer();
+        mTimerTask = new TimerTask() {
             @Override
             public void run() {
-                Long elapsed_time = System.currentTimeMillis() - timestamp;
+                Long elapsed_time = System.currentTimeMillis() - mTimestamp;
                 Long seconds = (elapsed_time / 1000) % 60;
                 Long minutes = elapsed_time / 60000;
 
                 String value = "";
-                if(minutes < 10)
+                if (minutes < 10)
                     value += "0" + minutes + ":";
                 else
                     value += minutes + ":";
-                if(seconds < 10)
+                if (seconds < 10)
                     value += "0" + seconds;
                 else
                     value += seconds;
@@ -178,56 +172,56 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        countdown_textView.setText(f_value);
+                        mCountdownTextView.setText(f_value);
                     }
                 });
 
-                if(minutes >= 180) {
+                if (minutes >= 180) {
                     mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                 }
             }
         };
 
 
-        saves = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
-        timestamp = saves.getLong("timer", 0);
+        mSaves = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
+        mTimestamp = mSaves.getLong("timer", 0);
 
 
         RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
-        if(activity != null) {
-            module.setText(((Module) new Select().from(Module.class).where("module_id = ?", activity.module_id).executeSingle()).name);
-            activityType.setText(activity.activity_type);
-            chooseActivity.setText(activity.activity);
+        if (activity != null) {
+            mModule.setText(((Module) new Select().from(Module.class).where("module_id = ?", activity.module_id).executeSingle()).name);
+            mActivityType.setText(activity.activity_type);
+            mChooseActivity.setText(activity.activity);
         } else {
             List<Module> list_module = new Select().from(Module.class).execute();
-            if(list_module.size() > 0)
-                module.setText((list_module.get(0)).name);
+            if (list_module.size() > 0)
+                mModule.setText((list_module.get(0)).name);
             else
-                module.setText(DataManager.getInstance().mainActivity.getString(R.string.no_module));
-            activityType.setText(DataManager.getInstance().activity_type.get(0));
-            chooseActivity.setText(DataManager.getInstance().choose_activity.get(DataManager.getInstance().activity_type.get(0)).get(0));
+                mModule.setText(DataManager.getInstance().mainActivity.getString(R.string.no_module));
+            mActivityType.setText(DataManager.getInstance().activity_type.get(0));
+            mChooseActivity.setText(DataManager.getInstance().choose_activity.get(DataManager.getInstance().activity_type.get(0)).get(0));
         }
 
         mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
         mainView.findViewById(R.id.new_activity_btn_pause).setOnClickListener(this);
 
-        if(saves.contains("pause")) {
-            _pause = saves.getLong("pause", 0);
-            if(timestamp == 0) {
-                _pause = (long)0;
-                saves.edit().putLong("pause", 0).apply();
+        if (mSaves.contains("pause")) {
+            mPause = mSaves.getLong("pause", 0);
+            if (mTimestamp == 0) {
+                mPause = (long) 0;
+                mSaves.edit().putLong("pause", 0).apply();
             }
-            if(_pause > 0) {
-                Long elapsed_time = _pause - timestamp;
+            if (mPause > 0) {
+                Long elapsed_time = mPause - mTimestamp;
                 Long seconds = (elapsed_time / 1000) % 60;
                 Long minutes = elapsed_time / 60000;
 
                 String value = "";
-                if(minutes < 10)
+                if (minutes < 10)
                     value += "0" + minutes + ":";
                 else
                     value += minutes + ":";
-                if(seconds < 10)
+                if (seconds < 10)
                     value += "0" + seconds;
                 else
                     value += seconds;
@@ -235,7 +229,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        countdown_textView.setText(f_value);
+                        mCountdownTextView.setText(f_value);
                     }
                 });
 
@@ -243,24 +237,24 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
                 mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
                 mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
-                ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
+                ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
             } else {
                 mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
                 mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.VISIBLE);
                 mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.GONE);
-                if(timestamp > 0) {
+                if (mTimestamp > 0) {
                     mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
                     mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
-                    timer.schedule(timertask, 0, 1000);
+                    mTimer.schedule(mTimerTask, 0, 1000);
                 }
             }
         } else {
-            if (timestamp > 0) {
+            if (mTimestamp > 0) {
                 mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(this);
                 mainView.findViewById(R.id.new_activity_btn_start).setVisibility(View.GONE);
                 mainView.findViewById(R.id.new_activity_btn_pause).setVisibility(View.VISIBLE);
-                if (timestamp > 0)
-                    timer.schedule(timertask, 0, 1000);
+                if (mTimestamp > 0)
+                    mTimer.schedule(mTimerTask, 0, 1000);
             }
         }
 
@@ -272,22 +266,33 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.report_activity_title));
+        DataManager.getInstance().mainActivity.hideAllButtons();
+        DataManager.getInstance().mainActivity.showCertainButtons(8);
+
+        String module = (mModule != null && mModule.getText() != null) ? mModule.getText().toString() : null;
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.AddTimedLog, module);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        timer.cancel();
+        mTimer.cancel();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.new_activity_btn_stop: {
-                if(saves.getLong("pause", 0) > 0) {
-                    Long _pause = System.currentTimeMillis() - saves.getLong("pause", 0);
-                    timestamp -= _pause;
-                    saves.edit().putLong("pause", 0).apply();
+                if (mSaves.getLong("pause", 0) > 0) {
+                    Long _pause = System.currentTimeMillis() - mSaves.getLong("pause", 0);
+                    mTimestamp -= _pause;
+                    mSaves.edit().putLong("pause", 0).apply();
                 }
 
-                timer.cancel();
+                mTimer.cancel();
 //                    timer = new Timer();
 
                 Calendar c = Calendar.getInstance();
@@ -298,29 +303,29 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
                 HashMap<String, String> params = new HashMap<>();
                 params.put("student_id", DataManager.getInstance().user.id);
-                params.put("module_id", ((Module) (new Select().from(Module.class).where("module_name = ?", module.getText().toString()).executeSingle())).id);
-                params.put("activity_type", DataManager.getInstance().api_values.get(activityType.getText().toString()));
-                params.put("activity", DataManager.getInstance().api_values.get(chooseActivity.getText().toString()));
+                params.put("module_id", ((Module) (new Select().from(Module.class).where("module_name = ?", mModule.getText().toString()).executeSingle())).id);
+                params.put("activity_type", DataManager.getInstance().api_values.get(mActivityType.getText().toString()));
+                params.put("activity", DataManager.getInstance().api_values.get(mChooseActivity.getText().toString()));
                 params.put("activity_date", c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) : (c.get(Calendar.MONTH) + 1)) + "-" + ((c.get(Calendar.DAY_OF_MONTH)) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) : c.get(Calendar.DAY_OF_MONTH)));
-                long duration = ((System.currentTimeMillis() - timestamp) / 60000);
+                long duration = ((System.currentTimeMillis() - mTimestamp) / 60000);
                 if (duration == 0) {
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_canceled_due_to_short_time, Snackbar.LENGTH_LONG).show();
                     new Delete().from(RunningActivity.class).execute();
 
-                    saves.edit().putLong("timer", 0).apply();
-                    saves.edit().putLong("pause", 0).apply();
+                    mSaves.edit().putLong("timer", 0).apply();
+                    mSaves.edit().putLong("pause", 0).apply();
 
 
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
-                    pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
+                    mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                             intent, PendingIntent.FLAG_ONE_SHOT);
-                    am.cancel(pendingIntent);
+                    mAlarmManager.cancel(mPendingIntent);
 
-                    countdown_textView.setText("00:00");
+                    mCountdownTextView.setText("00:00");
 
-                    ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
 
-                    ((CardView)mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
+                    ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
                     mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
                     mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
                     return;
@@ -346,20 +351,20 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
                 new Delete().from(RunningActivity.class).execute();
 
-                saves.edit().putLong("timer", 0).apply();
-                saves.edit().putLong("pause", 0).apply();
-                ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                mSaves.edit().putLong("timer", 0).apply();
+                mSaves.edit().putLong("pause", 0).apply();
+                ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
 
                 Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
-                pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
+                mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                         intent, PendingIntent.FLAG_ONE_SHOT);
-                am.cancel(pendingIntent);
+                mAlarmManager.cancel(mPendingIntent);
 
 
                 Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_stopped, Snackbar.LENGTH_LONG).show();
-                countdown_textView.setText("00:00");
+                mCountdownTextView.setText("00:00");
 
-                ((CardView)mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
+                ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.default_blue));//getResources().getColor(R.color.default_blue));
                 mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(this);
                 mainView.findViewById(R.id.new_activity_btn_stop).setOnClickListener(null);
 
@@ -372,38 +377,38 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 break;
             }
             case R.id.new_activity_btn_pause: {
-                if(((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.pause))) {
+                if (((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.pause))) {
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
-                    pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
+                    mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                             intent, PendingIntent.FLAG_ONE_SHOT);
-                    am.cancel(pendingIntent);
+                    mAlarmManager.cancel(mPendingIntent);
 
-                    saves.edit().putLong("pause", System.currentTimeMillis()).apply();
+                    mSaves.edit().putLong("pause", System.currentTimeMillis()).apply();
 
-                    timer.cancel();
+                    mTimer.cancel();
 
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_paused, Snackbar.LENGTH_LONG).show();
 
-                    ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
+                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.resume));
                 } else {
-                    Long _pause = System.currentTimeMillis() - saves.getLong("pause", 0);
-                    timestamp += _pause;
-                    saves.edit().putLong("pause", 0).apply();
-                    int reminder = (Integer.parseInt(reminder_textView.getText().toString().split(":")[0]) * 60) + Integer.parseInt(reminder_textView.getText().toString().split(":")[1]);
-                    timer = new Timer();
-                    timertask = new TimerTask() {
+                    Long _pause = System.currentTimeMillis() - mSaves.getLong("pause", 0);
+                    mTimestamp += _pause;
+                    mSaves.edit().putLong("pause", 0).apply();
+                    int reminder = (Integer.parseInt(mReminderTextView.getText().toString().split(":")[0]) * 60) + Integer.parseInt(mReminderTextView.getText().toString().split(":")[1]);
+                    mTimer = new Timer();
+                    mTimerTask = new TimerTask() {
                         @Override
                         public void run() {
-                            Long elapsed_time = System.currentTimeMillis() - timestamp;
+                            Long elapsed_time = System.currentTimeMillis() - mTimestamp;
                             Long seconds = (elapsed_time / 1000) % 60;
                             Long minutes = elapsed_time / 60000;
 
                             String value = "";
-                            if(minutes < 10)
+                            if (minutes < 10)
                                 value += "0" + minutes + ":";
                             else
                                 value += minutes + ":";
-                            if(seconds < 10)
+                            if (seconds < 10)
                                 value += "0" + seconds;
                             else
                                 value += seconds;
@@ -411,35 +416,35 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                             DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    countdown_textView.setText(f_value);
+                                    mCountdownTextView.setText(f_value);
                                 }
                             });
 
-                            if(minutes >= 180) {
+                            if (minutes >= 180) {
                                 mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                             }
                         }
                     };
-                    if(reminder != 0) {
+                    if (reminder != 0) {
                         Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
-                        pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
+                        mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        am.set(AlarmManager.RTC_WAKEUP,
-                                System.currentTimeMillis() + reminder * 1000, pendingIntent);
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis() + reminder * 1000, mPendingIntent);
                     }
-                    timer.schedule(timertask, 0, 1000);
-                    saves.edit().putLong("timer", timestamp).apply();
+                    mTimer.schedule(mTimerTask, 0, 1000);
+                    mSaves.edit().putLong("timer", mTimestamp).apply();
 
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_resumed, Snackbar.LENGTH_LONG).show();
 
-                    ((TextView)mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
+                    ((TextView) mainView.findViewById(R.id.new_activity_btn_pause_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.pause));
                 }
                 break;
             }
             case R.id.new_activity_btn_start: {
 
-                if(DataManager.getInstance().user.isDemo) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogNewActivity.this.getActivity());
+                if (DataManager.getInstance().user.isDemo) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogNewActivityFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addactivitylog) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
@@ -452,7 +457,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     return;
                 }
 
-                if(module.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.no_module))) {
+                if (mModule.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.no_module))) {
                     Snackbar.make(mainView.findViewById(R.id.container), R.string.no_module_selected, Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -462,22 +467,22 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
 
                 Snackbar.make(mainView.findViewById(R.id.container), R.string.activity_started, Snackbar.LENGTH_LONG).show();
 
-                timestamp = System.currentTimeMillis();
-                int reminder = Integer.parseInt(reminder_textView.getText().toString());
-                timer = new Timer();
-                timertask = new TimerTask() {
+                mTimestamp = System.currentTimeMillis();
+                int reminder = Integer.parseInt(mReminderTextView.getText().toString());
+                mTimer = new Timer();
+                mTimerTask = new TimerTask() {
                     @Override
                     public void run() {
-                        Long elapsed_time = System.currentTimeMillis() - timestamp;
+                        Long elapsed_time = System.currentTimeMillis() - mTimestamp;
                         Long seconds = (elapsed_time / 1000) % 60;
                         Long minutes = elapsed_time / 60000;
 
                         String value = "";
-                        if(minutes < 10)
+                        if (minutes < 10)
                             value += "0" + minutes + ":";
                         else
                             value += minutes + ":";
-                        if(seconds < 10)
+                        if (seconds < 10)
                             value += "0" + seconds;
                         else
                             value += seconds;
@@ -485,37 +490,37 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                         DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                countdown_textView.setText(f_value);
+                                mCountdownTextView.setText(f_value);
                             }
                         });
 
-                        if(minutes >= 180) {
+                        if (minutes >= 180) {
                             mainView.findViewById(R.id.new_activity_btn_stop).callOnClick();
                         }
                     }
                 };
-                timer.schedule(timertask, 0, 1000);
-                saves.edit().putLong("timer", timestamp).apply();
+                mTimer.schedule(mTimerTask, 0, 1000);
+                mSaves.edit().putLong("timer", mTimestamp).apply();
 
 
                 Calendar c = Calendar.getInstance();
                 RunningActivity activity = new RunningActivity();
                 activity.student_id = DataManager.getInstance().user.id;
-                activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", module.getText().toString()).executeSingle())).id;
-                activity.activity_type = activityType.getText().toString();
-                activity.activity = chooseActivity.getText().toString();
-                activity.activity_date = c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH)+1)<10?"0"+(c.get(Calendar.MONTH)+1):(c.get(Calendar.MONTH)+1)) + "-" + ((c.get(Calendar.DAY_OF_MONTH))<10?"0" + c.get(Calendar.DAY_OF_MONTH):c.get(Calendar.DAY_OF_MONTH));
+                activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", mModule.getText().toString()).executeSingle())).id;
+                activity.activity_type = mActivityType.getText().toString();
+                activity.activity = mChooseActivity.getText().toString();
+                activity.activity_date = c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) : (c.get(Calendar.MONTH) + 1)) + "-" + ((c.get(Calendar.DAY_OF_MONTH)) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) : c.get(Calendar.DAY_OF_MONTH));
                 activity.save();
 
-                ((CardView)mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.light_grey));//getResources().getColor(R.color.light_grey));
+                ((CardView) mainView.findViewById(R.id.new_activity_btn_start)).setCardBackgroundColor(ContextCompat.getColor(DataManager.getInstance().mainActivity, R.color.light_grey));//getResources().getColor(R.color.light_grey));
                 mainView.findViewById(R.id.new_activity_btn_start).setOnClickListener(null);
 
-                if(reminder != 0) {
+                if (reminder != 0) {
                     Intent intent = new Intent(DataManager.getInstance().mainActivity, NotificationAlarm.class);
                     //TODO: Bug Samsung devices - old code works on all except samsung
-                    pendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
+                    mPendingIntent = PendingIntent.getBroadcast(DataManager.getInstance().mainActivity, 0,
                             intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + reminder * 1000, pendingIntent);
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + reminder * 1000, mPendingIntent);
 
                     //TODO: BUGFIX
                 }
@@ -527,7 +532,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 dialog.setContentView(R.layout.timespent_layout);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -537,10 +542,10 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     dialog.getWindow().setAttributes(params);
                 }
 
-                int hour = Integer.parseInt(reminder_textView.getText().toString().split(":")[0]);
-                int minute = Integer.parseInt(reminder_textView.getText().toString().split(":")[1]);
+                int hour = Integer.parseInt(mReminderTextView.getText().toString().split(":")[0]);
+                int minute = Integer.parseInt(mReminderTextView.getText().toString().split(":")[1]);
 
-                final NumberPicker hourPicker = (NumberPicker)dialog.findViewById(R.id.hour_picker);
+                final NumberPicker hourPicker = (NumberPicker) dialog.findViewById(R.id.hour_picker);
                 hourPicker.setMinValue(0);
                 hourPicker.setMaxValue(180);
                 hourPicker.setValue(hour);
@@ -553,7 +558,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                             return value + "";
                     }
                 });
-                final NumberPicker minutePicker = (NumberPicker)dialog.findViewById(R.id.minute_picker);
+                final NumberPicker minutePicker = (NumberPicker) dialog.findViewById(R.id.minute_picker);
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(59);
                 minutePicker.setValue(minute);
@@ -567,7 +572,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     }
                 });
 
-                ((TextView)dialog.findViewById(R.id.timespent_save_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                ((TextView) dialog.findViewById(R.id.timespent_save_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
                 dialog.findViewById(R.id.timespent_save_btn).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -582,11 +587,11 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                             clock += "0" + minute;
                         else
                             clock += minute;
-                        reminder_textView.setText(clock);
+                        mReminderTextView.setText(clock);
                         dialog.dismiss();
                     }
                 });
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
 
                 dialog.show();
                 break;
@@ -596,7 +601,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.custom_spinner_layout);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -606,29 +611,29 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     dialog.getWindow().setAttributes(params);
                 }
 
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
 
-                final ModuleAdapter moduleAdapter = new ModuleAdapter(DataManager.getInstance().mainActivity, module.getText().toString());
+                final ModuleAdapter moduleAdapter = new ModuleAdapter(DataManager.getInstance().mainActivity, mModule.getText().toString());
                 final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
                 listView.setAdapter(moduleAdapter);
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        if(DataManager.getInstance().user.isSocial
+                        if (DataManager.getInstance().user.isSocial
                                 && position == moduleAdapter.moduleList.size() - 1) {
                             //add new module
-                            EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
+                            EditText add_module_edit_text = (EditText) mAddModuleLayout.findViewById(R.id.add_module_edit_text);
                             add_module_edit_text.setText("");
-                            addModuleLayout.setVisibility(View.VISIBLE);
+                            mAddModuleLayout.setVisibility(View.VISIBLE);
                             dialog.dismiss();
                         } else {
-                            module.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                            mModule.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
                             RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
                             if (activity != null) {
                                 activity.student_id = DataManager.getInstance().user.id;
-                                activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", module.getText().toString()).executeSingle())).id;
+                                activity.module_id = ((Module) (new Select().from(Module.class).where("module_name = ?", mModule.getText().toString()).executeSingle())).id;
                                 activity.save();
                             }
                             dialog.dismiss();
@@ -644,7 +649,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.custom_spinner_layout);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -654,21 +659,21 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     dialog.getWindow().setAttributes(params);
                 }
 
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_activity_type);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_activity_type);
 
                 final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(new ActivityTypeAdapter(DataManager.getInstance().mainActivity, activityType.getText().toString()));
+                listView.setAdapter(new ActivityTypeAdapter(DataManager.getInstance().mainActivity, mActivityType.getText().toString()));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        activityType.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
-                        chooseActivity.setText(DataManager.getInstance().choose_activity.get(activityType.getText().toString()).get(0));
+                        mActivityType.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                        mChooseActivity.setText(DataManager.getInstance().choose_activity.get(mActivityType.getText().toString()).get(0));
 
                         RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
-                        if(activity != null) {
-                            activity.activity_type = activityType.getText().toString();
-                            activity.activity = chooseActivity.getText().toString();
+                        if (activity != null) {
+                            activity.activity_type = mActivityType.getText().toString();
+                            activity.activity = mChooseActivity.getText().toString();
                             activity.save();
                         }
                         dialog.dismiss();
@@ -683,7 +688,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.custom_spinner_layout);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -693,19 +698,19 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     dialog.getWindow().setAttributes(params);
                 }
 
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_activity);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_activity);
 
                 final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(new ChooseActivityAdapter(DataManager.getInstance().mainActivity, chooseActivity.getText().toString(), activityType.getText().toString()));
+                listView.setAdapter(new ChooseActivityAdapter(DataManager.getInstance().mainActivity, mChooseActivity.getText().toString(), mActivityType.getText().toString()));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        chooseActivity.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                        mChooseActivity.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
 
                         RunningActivity activity = new Select().from(RunningActivity.class).executeSingle();
-                        if(activity != null) {
-                            activity.activity = chooseActivity.getText().toString();
+                        if (activity != null) {
+                            activity.activity = mChooseActivity.getText().toString();
                             activity.save();
                         }
                         dialog.dismiss();
@@ -716,9 +721,9 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                 break;
             }
             case R.id.add_module_button_text: {
-                EditText add_module_edit_text = (EditText)addModuleLayout.findViewById(R.id.add_module_edit_text);
+                EditText add_module_edit_text = (EditText) mAddModuleLayout.findViewById(R.id.add_module_edit_text);
                 final String moduleName = add_module_edit_text.getText().toString();
-                if(moduleName.length() == 0) {
+                if (moduleName.length() == 0) {
                     Snackbar.make(DataManager.getInstance().mainActivity.findViewById(R.id.drawer_layout), R.string.module_name_invalid, Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -751,7 +756,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
                     }
                 }).start();
 
-                addModuleLayout.setVisibility(View.GONE);
+                mAddModuleLayout.setVisibility(View.GONE);
 
                 return;
             }

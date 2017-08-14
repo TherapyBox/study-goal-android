@@ -18,7 +18,7 @@ import com.activeandroid.query.Select;
 import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Fragments.LogActivityHistoryFragment;
 import com.studygoal.jisc.Fragments.LogLogActivity;
-import com.studygoal.jisc.Fragments.LogNewActivity;
+import com.studygoal.jisc.Fragments.LogNewActivityFragment;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.LinguisticManager;
@@ -207,7 +207,7 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                     @Override
                     public void onClick(View v) {
                         DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.main_fragment, new LogNewActivity(), "newActivity")
+                                .replace(R.id.main_fragment, new LogNewActivityFragment(), "newActivity")
                                 .addToBackStack(null)
                                 .commit();
                     }
