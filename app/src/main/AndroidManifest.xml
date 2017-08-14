@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.studygoal.jisc">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -28,8 +29,10 @@
             android:stopWithTask="true" />
 
         <meta-data
-            android:name="com.inthecheesefactory.lab.glidepicasso.GlideConfiguration"
-            android:value=".GlideModule" />
+            android:name="com.studygoal.jisc.Utils.GlideConfig.GlideConfiguration"
+            android:value="GlideModule"
+            tools:node="remove" />
+
         <meta-data
             android:name="AA_DB_NAME"
             android:value="learninganalitycs31.db" />
@@ -42,7 +45,7 @@
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+            android:value="@string/facebook_app_id" />
 
         <activity
             android:name=".MainActivity"
@@ -53,7 +56,7 @@
             android:name=".LoginActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustUnspecified"/>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustUnspecified" />
         <activity
             android:name=".TrophyDetails"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -67,9 +70,13 @@
         <activity android:name=".SplashCustom">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="jisc" android:host="studygoal" />
+
+                <data
+                    android:host="studygoal"
+                    android:scheme="jisc" />
             </intent-filter>
         </activity>
 
@@ -81,8 +88,8 @@
 
         <service
             android:name="com.studygoal.jisc.Utils.PushNotifications.MyGcmListenerService"
-            android:exported="true"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

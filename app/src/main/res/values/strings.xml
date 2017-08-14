@@ -361,7 +361,7 @@
     <string name="edit_stretch_target">Edit Stretch Target</string>
     <string name="enter_your_email_address">Please enter your email address</string>
     <string name="please_set_a_time_for_your_stretch_target">Please set a time for your stretch target</string>
-    <string name="because">because</string>
+    <string name="because">Because</string>
     <string name="accept_the_terms_and_conditions">I accept</string>
     <string name="confirmation">Confirmation</string>
     <string name="are_you_sure_you_want_to_delete_this_activity_log">Are you sure you want to delete this activity log?</string>
@@ -442,5 +442,11 @@
     <string name="send_to">Send to</string>
     <string name="gps_network_not_enabled">Turn on location services to use this feature.</string>
     <string name="open_location_settings">Take me to settings</string>
+
+    <string name="target_add_recurring">Recurring</string>
+    <string name="target_add_single">Single</string>
+    <string name="my_goal">My goal is to ...</string>
+    <string name="add_a_reason_to_keep_this_target_single">Type here your message</string>
+    <string name="by">By</string>
 
 </resources>

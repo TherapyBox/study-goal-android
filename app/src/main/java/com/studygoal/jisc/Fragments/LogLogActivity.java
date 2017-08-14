@@ -1,6 +1,5 @@
 package com.studygoal.jisc.Fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -9,14 +8,12 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -634,8 +631,12 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
                 break;
             }
             case R.id.log_activity_date: {
-                DialogFragment newFragment = new DatePickerFragment();
-                ((DatePickerFragment) newFragment).fragment = this;
+                DatePickerFragment newFragment = new DatePickerFragment();
+                newFragment.setListener((view, year, monthOfYear, dayOfMonth) -> {
+                    date.setText(Utils.formatDate(year, monthOfYear, dayOfMonth));
+                    date.setTag(year + "-" + ((monthOfYear + 1) < 10 ? "0" + (monthOfYear + 1) : (monthOfYear + 1)) + "-" + (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth));
+                });
+
                 newFragment.show(DataManager.getInstance().mainActivity.getSupportFragmentManager(), "datePicker");
                 break;
             }
