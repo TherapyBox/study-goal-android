@@ -1,6 +1,5 @@
 package com.studygoal.jisc;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,6 +45,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.studygoal.jisc.Adapters.InstitutionsAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Institution;
 import com.studygoal.jisc.Utils.Utils;
 import com.twitter.sdk.android.Twitter;
@@ -55,7 +56,6 @@ import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterAuthClient;
-import com.twitter.sdk.android.core.models.ImageValue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,7 +142,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         loginStep1 = (LinearLayout) findViewById(R.id.login_step_1);
         loginStep3 = (LinearLayout) findViewById(R.id.login_step_3);
 
-        login_next_button = (ImageView)findViewById(R.id.login_next_button);
+        login_next_button = (ImageView) findViewById(R.id.login_next_button);
         login_next_button.setVisibility(View.GONE);
         loginContent.setVisibility(View.VISIBLE);
         loginStep1.setVisibility(View.VISIBLE);
@@ -219,6 +219,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0ODgzNjU2NzcsImp0aSI6IjFtbjhnU3YrWk9mVzJlYXV1NmVrN0Rzbm1MUjA0dDRyT0V0SEQ5Z1BGdk09IiwiaXNzIjoiaHR0cDpcL1wvc3AuZGF0YVwvYXV0aCIsIm5iZiI6MTQ4ODM2NTY2NywiZXhwIjoxNjYyNTY0NTY2NywiZGF0YSI6eyJlcHBuIjoiIiwicGlkIjoiZGVtb3VzZXJAZGVtby5hYy51ayIsImFmZmlsaWF0aW9uIjoic3R1ZGVudEBkZW1vLmFjLnVrIn19.xM6KkBFvHW7vtf6dF-X4f_6G3t_KGPVNylN_rMJROsh1MXIg9sK5j77L0Jzg1JR8fhXZf-0jFMnZz6FMotAeig";
 //                String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0ODg0NDkxNzksImp0aSI6IjdnOHFHVWlDKzRIdTdyN2ZUcTBOcldjaUpGTzByR1wvdUhpZVhvN0NBSjZvPSIsImlzcyI6Imh0dHA6XC9cL3NwLmRhdGFcL2F1dGgiLCJuYmYiOjE0ODg0NDkxNjksImV4cCI6MTQ5MjU5NjM2OSwiZGF0YSI6eyJlcHBuIjoiIiwicGlkIjoiczE1MTI0OTNAZ2xvcy5hYy51ayIsImFmZmlsaWF0aW9uIjoic3RhZmZAZ2xvcy5hYy51ayJ9fQ.xO_Yk6ZgTWgg0UHVXglFKD1tMP2wq98b8IU4alaGQvjtlYcjoz5W8gZbAX0Gcktl0nDs_bkvsB1g5OaYkkY6yg";
                 DataManager.getInstance().set_jwt(token);
+                XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
                 if (NetworkManager.getInstance().checkIfUserRegistered()) {
                     if (NetworkManager.getInstance().login()) {
@@ -245,16 +246,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         // Token can be replaced here for testing individuals.
                         String token = jsonObject.getString("jwt");
                         DataManager.getInstance().set_jwt(token);
+                        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
-                        if(LoginActivity.this.rememberMe) {
+                        if (LoginActivity.this.rememberMe) {
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", DataManager.getInstance().get_jwt()).apply();
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_checked", "yes").apply();
-                            if(LoginActivity.this.isStaff) {
+                            if (LoginActivity.this.isStaff) {
                                 getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_staff", "yes").apply();
                             }
                         }
 
-                        if(LoginActivity.this.isStaff) {
+                        if (LoginActivity.this.isStaff) {
                             if (NetworkManager.getInstance().checkIfStaffRegistered()) {
                                 if (NetworkManager.getInstance().loginStaff()) {
                                     DataManager.getInstance().institution = selectedInstitution.name;
@@ -319,7 +321,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         selectedInstitution.url + "&target=https://sp.data.alpha.jisc.ac.uk/secure/auth.php?u=" +
                         DataManager.getInstance().guid;
 
-                if(LoginActivity.this.rememberMe) {
+                if (LoginActivity.this.rememberMe) {
                     url += "&lt=true";
                 }
 
@@ -360,19 +362,19 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
 
         //check if REMEMBER ME is active
-        String jwt = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("jwt","");
-        String is_checked = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_checked","");
-        String is_staff = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_staff","");
-        String is_institution = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_institution","");
-        if(is_checked.equals("yes") && jwt.length() > 0 ) {
+        String jwt = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("jwt", "");
+        String is_checked = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_checked", "");
+        String is_staff = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_staff", "");
+        String is_institution = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("is_institution", "");
+        if (is_checked.equals("yes") && jwt.length() > 0) {
             try {
                 String jwtDecoded = Utils.jwtDecoded(jwt);
                 JSONObject json = new JSONObject(jwtDecoded);
 
                 Long expiration = Long.parseLong(json.optString("exp"));
-                Long timestamp = System.currentTimeMillis()/1000;
+                Long timestamp = System.currentTimeMillis() / 1000;
 
-                if(expiration < timestamp) {
+                if (expiration < timestamp) {
                     // it is expired
                     getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", "").apply();
                     getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_checked", "").apply();
@@ -381,8 +383,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 } else {
                     //continue with login process
                     DataManager.getInstance().set_jwt(jwt);
+                    XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
-                    if(is_staff.equals("yes")) {
+                    if (is_staff.equals("yes")) {
                         if (NetworkManager.getInstance().checkIfStaffRegistered()) {
                             if (NetworkManager.getInstance().loginStaff()) {
                                 DataManager.getInstance().institution = is_institution;
@@ -425,7 +428,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        ImageView login_with_google = (ImageView)findViewById(R.id.login_with_google);
+        ImageView login_with_google = (ImageView) findViewById(R.id.login_with_google);
         login_with_google.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -439,8 +442,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new Twitter(authConfig));
 
-        mTwitterAuthClient= new TwitterAuthClient();
-        ImageView login_with_twitter = (ImageView)findViewById(R.id.login_with_twitter);
+        mTwitterAuthClient = new TwitterAuthClient();
+        ImageView login_with_twitter = (ImageView) findViewById(R.id.login_with_twitter);
         login_with_twitter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -452,7 +455,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void success(Result<TwitterSession> twitterSessionResult) {
                         // Success
-                        socialID = ""+twitterSessionResult.data.getUserId();
+                        socialID = "" + twitterSessionResult.data.getUserId();
                         mTwitterAuthClient.requestEmail(twitterSessionResult.data, new Callback<String>() {
                             @Override
                             public void success(Result<String> result) {
@@ -501,7 +504,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         callbackManager = CallbackManager.Factory.create();
 
-        ImageView login_with_facebook = (ImageView)findViewById(R.id.login_with_facebook);
+        ImageView login_with_facebook = (ImageView) findViewById(R.id.login_with_facebook);
         login_with_facebook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -514,7 +517,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onSuccess(LoginResult loginResult) {
                 // App code
-                if(!loginResult.getRecentlyGrantedPermissions().contains("email")) {
+                if (!loginResult.getRecentlyGrantedPermissions().contains("email")) {
                     android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
                     alertDialogBuilder.setMessage(R.string.facebook_error_email);
                     alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
@@ -583,7 +586,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(NetworkManager.getInstance().downloadInstitutions()) {
+                if (NetworkManager.getInstance().downloadInstitutions()) {
                     LoginActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -628,7 +631,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
 
-
     public void showProgressBar() {
         findViewById(R.id.blackout).setVisibility(View.VISIBLE);
         findViewById(R.id.blackout).setOnClickListener(null);
@@ -641,7 +643,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(socialType == 1) {
+        if (socialType == 1) {
             callbackManager.onActivityResult(requestCode, resultCode, data);
         } else if (socialType == 2) {
             mTwitterAuthClient.onActivityResult(requestCode, resultCode, data);
@@ -673,14 +675,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e("JISC","connection result: "+connectionResult);
+        Log.e("JISC", "connection result: " + connectionResult);
     }
 
     void loginSocial() {
 
-        Integer response = NetworkManager.getInstance().loginSocial(email,socialID);
+        Integer response = NetworkManager.getInstance().loginSocial(email, socialID);
 
-        if(response == 200) {
+        if (response == 200) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             LoginActivity.this.finish();
