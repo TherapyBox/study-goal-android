@@ -40,13 +40,12 @@ import android.widget.TextView;
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
-import com.bumptech.glide.Glide;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
 import com.studygoal.jisc.Fragments.AddTarget;
 import com.studygoal.jisc.Fragments.CheckInFragment;
 import com.studygoal.jisc.Fragments.FeedFragment;
-import com.studygoal.jisc.Fragments.Friends;
+import com.studygoal.jisc.Fragments.FriendsFragment;
 import com.studygoal.jisc.Fragments.LogActivityHistory;
 import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.Fragments.Settings;
@@ -55,12 +54,10 @@ import com.studygoal.jisc.Fragments.Stats2;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.RunningActivity;
-import com.studygoal.jisc.Utils.CircleTransform;
 
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
@@ -208,7 +205,7 @@ public class MainActivity extends FragmentActivity {
                     dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Friends friendsFragment = new Friends();
+                            FriendsFragment friendsFragment = new FriendsFragment();
 
                             getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.main_fragment, friendsFragment)
@@ -226,7 +223,7 @@ public class MainActivity extends FragmentActivity {
                     });
                     dialog.show();
                 } else {
-                    Friends friendsFragment = new Friends();
+                    FriendsFragment friendsFragment = new FriendsFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, friendsFragment)
                             .addToBackStack(null)

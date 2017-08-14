@@ -3,7 +3,6 @@ package com.studygoal.jisc.Fragments;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -260,7 +259,7 @@ public class Settings extends Fragment {
                 startActivity(Intent.createChooser(emailIntent, "Send email..."));
             } else if (id == R.id.friends_layout) {
                 DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new Friends())
+                        .replace(R.id.main_fragment, new FriendsFragment())
                         .addToBackStack(null)
                         .commit();
             } else if (id == R.id.trophies_layout) {

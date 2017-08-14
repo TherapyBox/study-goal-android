@@ -11,13 +11,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.studygoal.jisc.Fragments.Friends;
+import com.studygoal.jisc.Fragments.FriendsFragment;
 import com.studygoal.jisc.Fragments.HomeScreen;
 import com.studygoal.jisc.Fragments.LanguageScreen;
 import com.studygoal.jisc.Fragments.Trophies;
@@ -179,7 +178,7 @@ public class SettingsActivity extends AppCompatActivity {
                         destination = fragment;
                         break;
                     } case 1: {
-                        destination = new Friends();
+                        destination = new FriendsFragment();
                         break;
                     } case 2: {
                         destination = new HomeScreen();
