@@ -46,7 +46,7 @@ import com.studygoal.jisc.Fragments.AddTarget;
 import com.studygoal.jisc.Fragments.CheckInFragment;
 import com.studygoal.jisc.Fragments.FeedFragment;
 import com.studygoal.jisc.Fragments.FriendsFragment;
-import com.studygoal.jisc.Fragments.LogActivityHistory;
+import com.studygoal.jisc.Fragments.LogActivityHistoryFragment;
 import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.Fragments.Settings;
 import com.studygoal.jisc.Fragments.StatsLandscapeFragment;
@@ -74,7 +74,7 @@ public class MainActivity extends FragmentActivity {
     public DrawerLayout drawer;
     public RelativeLayout friend, settings, addTarget, send, timer, back;
     Settings settings_fragment;
-    LogActivityHistory logFragment;
+    LogActivityHistoryFragment logFragment;
     public FeedFragment feedFragment;
     public boolean isLandscape = DataManager.getInstance().isLandscape;
     private int selectedPosition;
@@ -314,7 +314,7 @@ public class MainActivity extends FragmentActivity {
                         .replace(R.id.main_fragment, new StatsPortraitFragment())
                         .commit();
         } else if (DataManager.getInstance().home_screen.toLowerCase().equals("log")) {
-            logFragment = new LogActivityHistory();
+            logFragment = new LogActivityHistoryFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_fragment, logFragment)
                     .commit();
@@ -389,7 +389,7 @@ public class MainActivity extends FragmentActivity {
                                 .commit();
 
                 } else if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.log))) {
-                    logFragment = new LogActivityHistory();
+                    logFragment = new LogActivityHistoryFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, logFragment)
                             .commit();
@@ -524,7 +524,7 @@ public class MainActivity extends FragmentActivity {
             for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
                 getSupportFragmentManager().popBackStackImmediate();
             }
-            logFragment = new LogActivityHistory();
+            logFragment = new LogActivityHistoryFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_fragment, logFragment)
                     .commit();

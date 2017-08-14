@@ -23,74 +23,34 @@ import com.studygoal.jisc.Adapters.ActivitiesHistoryAdapter;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class LogActivityHistory extends Fragment {
-
-    View mainView;
-    ListView list;
-    ActivitiesHistoryAdapter adapter;
-    SwipeRefreshLayout layout;
-    TextView message;
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.activity_log));
-        DataManager.getInstance().mainActivity.hideAllButtons();
-        DataManager.getInstance().mainActivity.showCertainButtons(3);
-
-        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                DataManager.getInstance().mainActivity.showProgressBar(null);
-            }
-        });
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
-
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        adapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
-                        adapter.notifyDataSetChanged();
-
-                        if(adapter.historyList.size() == 0) {
-                            message.setVisibility(View.VISIBLE);
-                        } else {
-                            message.setVisibility(View.GONE);
-                        }
-                        DataManager.getInstance().mainActivity.hideProgressBar();
-                    }
-                });
-            }
-        }).start();
-    }
+public class LogActivityHistoryFragment extends Fragment {
+    private View mMainView;
+    private ListView mList;
+    private ActivitiesHistoryAdapter mAdapter;
+    private SwipeRefreshLayout mLayout;
+    private TextView mMessage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainView = inflater.inflate(R.layout.log_fragment_activity_history, container, false);
-        layout = (SwipeRefreshLayout) mainView.findViewById(R.id.swipelayout);
-        message = (TextView) mainView.findViewById(R.id.message);
+        mMainView = inflater.inflate(R.layout.log_fragment_activity_history, container, false);
+        mLayout = (SwipeRefreshLayout) mMainView.findViewById(R.id.swipelayout);
+        mMessage = (TextView) mMainView.findViewById(R.id.message);
 
-        ((TextView)mainView.findViewById(R.id.activity_history_title)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mMainView.findViewById(R.id.activity_history_title)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
-        adapter = new ActivitiesHistoryAdapter(LogActivityHistory.this);
-        list = (ListView) mainView.findViewById(R.id.list);
-        list.setAdapter(adapter);
+        mAdapter = new ActivitiesHistoryAdapter(LogActivityHistoryFragment.this);
+        mList = (ListView) mMainView.findViewById(R.id.list);
+        mList.setAdapter(mAdapter);
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
@@ -109,47 +69,47 @@ public class LogActivityHistory extends Fragment {
             }
         });
 
-        layout.setColorSchemeResources(R.color.colorPrimary);
-        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mLayout.setColorSchemeResources(R.color.colorPrimary);
+        mLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id)) {
-                                adapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.notifyDataSetChanged();
-                                        layout.setRefreshing(false);
-                                        if(adapter.historyList.size() == 0)
-                                            message.setVisibility(View.VISIBLE);
-                                        else
-                                            message.setVisibility(View.GONE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id)) {
+                            mAdapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mAdapter.notifyDataSetChanged();
+                                    mLayout.setRefreshing(false);
+                                    if (mAdapter.historyList.size() == 0)
+                                        mMessage.setVisibility(View.VISIBLE);
+                                    else
+                                        mMessage.setVisibility(View.GONE);
 
-                                    }
-                                });
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        layout.setRefreshing(false);
-                                    }
-                                });
-                            }
+                                }
+                            });
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mLayout.setRefreshing(false);
+                                }
+                            });
                         }
-                    }).start();
+                    }
+                }).start();
             }
         });
 
-        return mainView;
+        return mMainView;
     }
 
     public void deleteLog(final ActivityHistory activityHistory, final int finalPosition) {
 
-        if(DataManager.getInstance().user.isDemo) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogActivityHistory.this.getActivity());
+        if (DataManager.getInstance().user.isDemo) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogActivityHistoryFragment.this.getActivity());
             alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deleteactivitylog) + "</font>"));
             alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
@@ -168,29 +128,28 @@ public class LogActivityHistory extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(NetworkManager.getInstance().deleteActivity(params)) {
+                if (NetworkManager.getInstance().deleteActivity(params)) {
                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             activityHistory.delete();
-                            adapter.historyList.remove(finalPosition);
-                            adapter.notifyDataSetChanged();
-                            if(adapter.historyList.size() == 0)
-                                message.setVisibility(View.VISIBLE);
+                            mAdapter.historyList.remove(finalPosition);
+                            mAdapter.notifyDataSetChanged();
+                            if (mAdapter.historyList.size() == 0)
+                                mMessage.setVisibility(View.VISIBLE);
                             else
-                                message.setVisibility(View.GONE);
+                                mMessage.setVisibility(View.GONE);
 
                             DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.record_deleted_successfully, Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(mMainView.findViewById(R.id.parent), R.string.record_deleted_successfully, Snackbar.LENGTH_LONG).show();
                         }
                     });
-                }
-                else {
+                } else {
                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(mMainView.findViewById(R.id.parent), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -204,7 +163,7 @@ public class LogActivityHistory extends Fragment {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.custom_spinner_layout);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        if(DataManager.getInstance().mainActivity.isLandscape) {
+        if (DataManager.getInstance().mainActivity.isLandscape) {
             DisplayMetrics displaymetrics = new DisplayMetrics();
             DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
             int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -243,5 +202,47 @@ public class LogActivityHistory extends Fragment {
             }
         });
         dialog.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.activity_log));
+        DataManager.getInstance().mainActivity.hideAllButtons();
+        DataManager.getInstance().mainActivity.showCertainButtons(3);
+
+        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DataManager.getInstance().mainActivity.showProgressBar(null);
+            }
+        });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
+
+                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        mAdapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
+                        mAdapter.notifyDataSetChanged();
+
+                        if (mAdapter.historyList.size() == 0) {
+                            mMessage.setVisibility(View.VISIBLE);
+                        } else {
+                            mMessage.setVisibility(View.GONE);
+                        }
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                    }
+                });
+            }
+        }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateLog);
     }
 }

@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.activeandroid.query.Select;
 import com.bumptech.glide.Glide;
-import com.studygoal.jisc.Fragments.LogActivityHistory;
+import com.studygoal.jisc.Fragments.LogActivityHistoryFragment;
 import com.studygoal.jisc.Fragments.LogLogActivity;
 import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.MainActivity;
@@ -35,10 +35,10 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
     public List<ActivityHistory> historyList;
     LayoutInflater inflater;
     Context context;
-    LogActivityHistory fragment;
+    LogActivityHistoryFragment fragment;
     Boolean hasRunning = false;
 
-    public ActivitiesHistoryAdapter(LogActivityHistory fragment) {
+    public ActivitiesHistoryAdapter(LogActivityHistoryFragment fragment) {
 
         this.fragment = fragment;
         this.context = fragment.getActivity();
