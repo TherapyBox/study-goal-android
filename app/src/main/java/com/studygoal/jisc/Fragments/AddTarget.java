@@ -35,6 +35,8 @@ import com.studygoal.jisc.Adapters.ChooseActivityAdapter;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
@@ -316,6 +318,9 @@ public class AddTarget extends Fragment {
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(8);
         DataManager.getInstance().addTarget = 1;
+
+        String module = (mBinding.addModuleEditText != null && mBinding.addModuleEditText.getText() != null) ? mBinding.addModuleEditText.getText().toString() : null;
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.AddTarget, module);
     }
 
     private void applyTypeface() {
