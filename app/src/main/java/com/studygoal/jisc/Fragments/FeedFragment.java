@@ -11,12 +11,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -29,6 +27,8 @@ import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.News;
@@ -40,98 +40,22 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FeedFragment extends Fragment {
+    public View mainView;
 
-    public View mainView, tutorial_message;
-    FeedAdapter adapter;
-    SwipeRefreshLayout layout;
+    private View mTutorialMessage;
+
+    private FeedAdapter mAdapter;
+
+    private SwipeRefreshLayout mLayout;
 
     public FeedFragment() {
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        DataManager.getInstance().mainActivity.setTitle(getString(R.string.feed));
-        DataManager.getInstance().mainActivity.hideAllButtons();
-        DataManager.getInstance().mainActivity.showCertainButtons(1);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DataManager.getInstance().mainActivity.showProgressBar(null);
-                    }
-                });
-
-                NetworkManager.getInstance().getNewsFeed();
-                NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id);
-                adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
-                adapter.newsList = new Select().from(News.class).where("read = 0").execute();
-
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyDataSetChanged();
-                        if (adapter.feedList.size() == 0)
-                            tutorial_message.setVisibility(View.VISIBLE);
-                        else
-                            tutorial_message.setVisibility(View.INVISIBLE);
-                        DataManager.getInstance().mainActivity.hideProgressBar();
-                    }
-                });
-            }
-        }).start();
-    }
-
-    public void post() {
-        String message = ((EditText) mainView.findViewById(R.id.message)).getText().toString();
-        HashMap<String, String> map = new HashMap<>();
-        map.put("student_id", DataManager.getInstance().user.id);
-        map.put("message", message);
-        final AppCompatTextView send_to_picker = (AppCompatTextView) mainView.findViewById(R.id.send_to_picker);
-        if(send_to_picker.getText().toString().equals(getString(R.string.everyone))) {
-
-            map.put("from",DataManager.getInstance().user.id);
-            map.put("is_social","yes");
-
-            if (NetworkManager.getInstance().postNotificationMessage(map)) {
-                if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
-                    NetworkManager.getInstance().getNewsFeed();
-                    adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
-                    adapter.newsList = new Select().from(News.class).where("read = 0").execute();
-                    adapter.notifyDataSetChanged();
-                }
-                Snackbar.make(layout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
-            } else {
-                Snackbar.make(layout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
-            }
-
-        } else {
-            if (NetworkManager.getInstance().postFeedMessage(map)) {
-                if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
-                    NetworkManager.getInstance().getNewsFeed();
-                    adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
-                    adapter.newsList = new Select().from(News.class).where("read = 0").execute();
-                    adapter.notifyDataSetChanged();
-                }
-                Snackbar.make(layout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
-            } else {
-                Snackbar.make(layout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
-            }
-        }
-
-        mainView.findViewById(R.id.overlay).callOnClick();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainView = inflater.inflate(R.layout.feed_fragment, container, false);
-        layout = (SwipeRefreshLayout) mainView.findViewById(R.id.swipelayout);
-        tutorial_message = mainView.findViewById(R.id.tutorial_message);
+        mLayout = (SwipeRefreshLayout) mainView.findViewById(R.id.swipelayout);
+        mTutorialMessage = mainView.findViewById(R.id.tutorial_message);
 
         final EditTextCustom myEditText = (EditTextCustom) mainView.findViewById(R.id.message);
         myEditText.fragment = FeedFragment.this;
@@ -166,8 +90,8 @@ public class FeedFragment extends Fragment {
             }
         });
 
-        layout.setColorSchemeResources(R.color.colorPrimary);
-        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mLayout.setColorSchemeResources(R.color.colorPrimary);
+        mLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 new Thread(new Runnable() {
@@ -175,24 +99,24 @@ public class FeedFragment extends Fragment {
                     public void run() {
                         if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
                             NetworkManager.getInstance().getNewsFeed();
-                            adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
-                            adapter.newsList = new Select().from(News.class).where("read = 0").execute();
+                            mAdapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
+                            mAdapter.newsList = new Select().from(News.class).where("read = 0").execute();
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    adapter.notifyDataSetChanged();
-                                    layout.setRefreshing(false);
-                                    if (adapter.feedList.size() == 0)
-                                        tutorial_message.setVisibility(View.VISIBLE);
+                                    mAdapter.notifyDataSetChanged();
+                                    mLayout.setRefreshing(false);
+                                    if (mAdapter.feedList.size() == 0)
+                                        mTutorialMessage.setVisibility(View.VISIBLE);
                                     else
-                                        tutorial_message.setVisibility(View.INVISIBLE);
+                                        mTutorialMessage.setVisibility(View.INVISIBLE);
                                 }
                             });
                         } else {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    layout.setRefreshing(false);
+                                    mLayout.setRefreshing(false);
                                 }
                             });
                         }
@@ -209,8 +133,8 @@ public class FeedFragment extends Fragment {
 
         NetworkManager.getInstance().getFriends(DataManager.getInstance().user.id);
 
-        adapter = new FeedAdapter(DataManager.getInstance().mainActivity, layout);
-        recyclerView.setAdapter(adapter);
+        mAdapter = new FeedAdapter(DataManager.getInstance().mainActivity, mLayout);
+        recyclerView.setAdapter(mAdapter);
 
         ((TextView) mainView.findViewById(R.id.send_to)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
@@ -280,4 +204,83 @@ public class FeedFragment extends Fragment {
         return mainView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        DataManager.getInstance().mainActivity.setTitle(getString(R.string.feed));
+        DataManager.getInstance().mainActivity.hideAllButtons();
+        DataManager.getInstance().mainActivity.showCertainButtons(1);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DataManager.getInstance().mainActivity.showProgressBar(null);
+                    }
+                });
+
+                NetworkManager.getInstance().getNewsFeed();
+                NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id);
+                mAdapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
+                mAdapter.newsList = new Select().from(News.class).where("read = 0").execute();
+
+                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                        if (mAdapter.feedList.size() == 0)
+                            mTutorialMessage.setVisibility(View.VISIBLE);
+                        else
+                            mTutorialMessage.setVisibility(View.INVISIBLE);
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                    }
+                });
+            }
+        }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateActivityFeed);
+    }
+
+    public void post() {
+        String message = ((EditText) mainView.findViewById(R.id.message)).getText().toString();
+        HashMap<String, String> map = new HashMap<>();
+        map.put("student_id", DataManager.getInstance().user.id);
+        map.put("message", message);
+        final AppCompatTextView send_to_picker = (AppCompatTextView) mainView.findViewById(R.id.send_to_picker);
+        if (send_to_picker.getText().toString().equals(getString(R.string.everyone))) {
+
+            map.put("from", DataManager.getInstance().user.id);
+            map.put("is_social", "yes");
+
+            if (NetworkManager.getInstance().postNotificationMessage(map)) {
+                if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
+                    NetworkManager.getInstance().getNewsFeed();
+                    mAdapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
+                    mAdapter.newsList = new Select().from(News.class).where("read = 0").execute();
+                    mAdapter.notifyDataSetChanged();
+                }
+                Snackbar.make(mLayout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
+            } else {
+                Snackbar.make(mLayout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
+            }
+
+        } else {
+            if (NetworkManager.getInstance().postFeedMessage(map)) {
+                if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
+                    NetworkManager.getInstance().getNewsFeed();
+                    mAdapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
+                    mAdapter.newsList = new Select().from(News.class).where("read = 0").execute();
+                    mAdapter.notifyDataSetChanged();
+                }
+                Snackbar.make(mLayout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
+            } else {
+                Snackbar.make(mLayout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
+            }
+        }
+
+        mainView.findViewById(R.id.overlay).callOnClick();
+    }
 }
