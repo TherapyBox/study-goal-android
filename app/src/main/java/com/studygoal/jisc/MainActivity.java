@@ -49,8 +49,8 @@ import com.studygoal.jisc.Fragments.FriendsFragment;
 import com.studygoal.jisc.Fragments.LogActivityHistory;
 import com.studygoal.jisc.Fragments.LogNewActivity;
 import com.studygoal.jisc.Fragments.Settings;
-import com.studygoal.jisc.Fragments.Stats;
-import com.studygoal.jisc.Fragments.Stats2;
+import com.studygoal.jisc.Fragments.StatsLandscapeFragment;
+import com.studygoal.jisc.Fragments.StatsPortraitFragment;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
@@ -90,7 +90,7 @@ public class MainActivity extends FragmentActivity {
 
     public void refreshDrawer() {
         if (adapter != null) {
-            if(DataManager.getInstance().user.isSocial) {
+            if (DataManager.getInstance().user.isSocial) {
                 adapter.values = new String[]{"0", getString(R.string.feed), getString(R.string.log), getString(R.string.target), getString(R.string.logout)};
             } else {
                 adapter.values = new String[]{"0", getString(R.string.feed), getString(R.string.check_in), getString(R.string.stats), getString(R.string.log), getString(R.string.target), getString(R.string.logout)};
@@ -148,7 +148,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                if(DataManager.getInstance().user.isDemo) {
+                if (DataManager.getInstance().user.isDemo) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_postfeed) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -173,7 +173,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                if(v.getTag() != null && v.getTag().equals("from_list")) {
+                if (v.getTag() != null && v.getTag().equals("from_list")) {
 
                     v.setTag("");
                     final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
@@ -260,19 +260,19 @@ public class MainActivity extends FragmentActivity {
             public void run() {
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
-                if(DataManager.getInstance().user.isStaff) {
+                if (DataManager.getInstance().user.isStaff) {
                     ActiveAndroid.beginTransaction();
                     new Delete().from(Module.class).execute();
                     for (int i = 0; i < 3; i++) {
                         Module modules = new Module();
-                        modules.id = "DUMMY_"+(i+1);
-                        modules.name = "Dummy Module "+(i+1);
+                        modules.id = "DUMMY_" + (i + 1);
+                        modules.name = "Dummy Module " + (i + 1);
                         modules.save();
                     }
                     ActiveAndroid.setTransactionSuccessful();
                     ActiveAndroid.endTransaction();
                 } else {
-                    if(DataManager.getInstance().user.isSocial) {
+                    if (DataManager.getInstance().user.isSocial) {
                         NetworkManager.getInstance().getSocialModules();
                     } else {
                         NetworkManager.getInstance().getModules();
@@ -307,11 +307,11 @@ public class MainActivity extends FragmentActivity {
         } else if (DataManager.getInstance().home_screen.toLowerCase().equals("stats")) {
             if (isLandscape)
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new Stats())
+                        .replace(R.id.main_fragment, new StatsLandscapeFragment())
                         .commit();
             else
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new Stats2())
+                        .replace(R.id.main_fragment, new StatsPortraitFragment())
                         .commit();
         } else if (DataManager.getInstance().home_screen.toLowerCase().equals("log")) {
             logFragment = new LogActivityHistory();
@@ -370,33 +370,33 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.feed))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new FeedFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.check_in))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new CheckInFragment())
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.stats))) {
-                            if (isLandscape)
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.main_fragment, new Stats())
-                                        .commit();
-                            else
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.main_fragment, new Stats2())
-                                        .commit();
+                if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.feed))) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, new FeedFragment())
+                            .commit();
+                } else if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.check_in))) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, new CheckInFragment())
+                            .commit();
+                } else if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.stats))) {
+                    if (isLandscape)
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_fragment, new StatsLandscapeFragment())
+                                .commit();
+                    else
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_fragment, new StatsPortraitFragment())
+                                .commit();
 
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.log))) {
-                            logFragment = new LogActivityHistory();
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, logFragment)
-                                    .commit();
-                } else if(adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.target))) {
-                            getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, new TargetFragment())
-                                    .commit();
+                } else if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.log))) {
+                    logFragment = new LogActivityHistory();
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, logFragment)
+                            .commit();
+                } else if (adapter.values[selectedPosition].equals(MainActivity.this.getString(R.string.target))) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, new TargetFragment())
+                            .commit();
                 }
             }
 
@@ -427,7 +427,7 @@ public class MainActivity extends FragmentActivity {
                     selectedPosition = position;
                     drawer.closeDrawer(GravityCompat.START);
 
-                    if(adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
+                    if (adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
                         final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                         dialog.setContentView(R.layout.confirmation_dialog);
@@ -489,8 +489,8 @@ public class MainActivity extends FragmentActivity {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if(sharedPreferences.contains("push_token")
-                && sharedPreferences.getString("push_token","").length() > 0) {
+        if (sharedPreferences.contains("push_token")
+                && sharedPreferences.getString("push_token", "").length() > 0) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -559,7 +559,7 @@ public class MainActivity extends FragmentActivity {
 
 
     public void showProgressBar(@Nullable String text) {
-        if(blackout != null) {
+        if (blackout != null) {
             blackout.setVisibility(View.VISIBLE);
             blackout.requestLayout();
             blackout.setOnClickListener(null);
@@ -567,10 +567,10 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void showProgressBar2(@Nullable String text) {
-        if(blackout != null) {
+        if (blackout != null) {
             blackout.setVisibility(View.VISIBLE);
 
-            if(blackout.findViewById(R.id.progress_bar) != null)
+            if (blackout.findViewById(R.id.progress_bar) != null)
                 blackout.findViewById(R.id.progressbar).setVisibility(View.GONE);
 
             blackout.requestLayout();
@@ -697,13 +697,13 @@ public class MainActivity extends FragmentActivity {
             int nw;
             int nh;
 
-            if(w >= 500 && h >= 500) {
-                if(w > h) {
+            if (w >= 500 && h >= 500) {
+                if (w > h) {
                     nw = 500;
-                    nh = (500 * h/w);
+                    nh = (500 * h / w);
                 } else {
                     nh = 500;
-                    nw = (500 * w/h);
+                    nw = (500 * w / h);
                 }
             } else {
                 nw = w;
@@ -711,7 +711,7 @@ public class MainActivity extends FragmentActivity {
             }
 
             outStream = new FileOutputStream(file);
-            bmp = Bitmap.createScaledBitmap(bmp,nw,nh,false);
+            bmp = Bitmap.createScaledBitmap(bmp, nw, nh, false);
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
             outStream.flush();
             outStream.close();
@@ -739,21 +739,21 @@ public class MainActivity extends FragmentActivity {
 
             Bitmap bitmap_origin = BitmapFactory.decodeFile(url, options);
 
-            if (rotateangle != 0){
+            if (rotateangle != 0) {
                 //Rotate Bitmap
                 int width = bitmap_origin.getWidth();
                 int height = bitmap_origin.getHeight();
                 int newWidth = width;
-                int newHeight  = height;
+                int newHeight = height;
                 // calculate the scale - in this case = 0.4f
                 float scaleWidth = ((float) newWidth) / width;
                 float scaleHeight = ((float) newHeight) / height;
                 Matrix matrix = new Matrix();
                 matrix.postScale(scaleWidth, scaleHeight);
                 matrix.postRotate(rotateangle);
-                Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
+                Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0, width, height, matrix, true);
                 savebitmap(resizedBitmap);
-            }else {
+            } else {
                 savebitmap(bitmap_origin);
             }
             final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
@@ -795,21 +795,21 @@ public class MainActivity extends FragmentActivity {
 
                 Bitmap bitmap_origin = BitmapFactory.decodeFile(imagePath, options);
 
-                if (rotateangle != 0){
+                if (rotateangle != 0) {
                     //Rotate Bitmap
                     int width = bitmap_origin.getWidth();
                     int height = bitmap_origin.getHeight();
                     int newWidth = width;
-                    int newHeight  = height;
+                    int newHeight = height;
                     // calculate the scale - in this case = 0.4f
                     float scaleWidth = ((float) newWidth) / width;
                     float scaleHeight = ((float) newHeight) / height;
                     Matrix matrix = new Matrix();
                     matrix.postScale(scaleWidth, scaleHeight);
                     matrix.postRotate(rotateangle);
-                    Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0,width, height, matrix, true);
+                    Bitmap resizedBitmap = Bitmap.createBitmap(bitmap_origin, 0, 0, width, height, matrix, true);
                     savebitmap(resizedBitmap);
-                }else {
+                } else {
                     savebitmap(bitmap_origin);
                 }
 
@@ -821,11 +821,11 @@ public class MainActivity extends FragmentActivity {
                             MainActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(settings_fragment == null){
+                                    if (settings_fragment == null) {
                                         settings_fragment = new Settings();
                                     }
-                                        settings_fragment.refresh_image();
-                                        hideProgressBar();
+                                    settings_fragment.refresh_image();
+                                    hideProgressBar();
 
                                 }
                             });
@@ -843,16 +843,18 @@ public class MainActivity extends FragmentActivity {
             }
         }
     }
+
     public static String getRealPathFromURI(Context context, Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         CursorLoader cursorLoader = new CursorLoader(context, contentUri, proj, null, null, null);
         Cursor cursor = cursorLoader.loadInBackground();
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
+
     // Get Image Rotation Angle
-    public int getCameraPhotoOrientation(Context context, String imagePath){
+    public int getCameraPhotoOrientation(Context context, String imagePath) {
         int rotate = 0;
         try {
             File imageFile = new File(imagePath);
