@@ -266,6 +266,16 @@ public class Settings extends Fragment {
             }
         });
 
+        mainView.findViewById(R.id.privacy_layout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_fragment, new PrivacyWebViewFragment())
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+
         profile_image = (ImageView) mainView.findViewById(R.id.profile_picture);
         profile_spinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
 //        Glide.with(this)
@@ -340,7 +350,7 @@ public class Settings extends Fragment {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe (threadMode = ThreadMode.MAIN)
     public void onRefreshImageEvenFired(EventReloadImage eventReloadImage) {
         refresh_image();
     }
