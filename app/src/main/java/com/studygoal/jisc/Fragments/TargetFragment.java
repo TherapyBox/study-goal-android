@@ -17,56 +17,21 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.TargetAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
 
 import java.util.HashMap;
 
 public class TargetFragment extends Fragment {
-
     public ListView list;
     public TargetAdapter adapter;
     public View mainView, tutorial_message;
-    SwipeRefreshLayout layout;
+    private SwipeRefreshLayout layout;
 
-    public TargetFragment() {}
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.target));
-        DataManager.getInstance().mainActivity.hideAllButtons();
-        DataManager.getInstance().mainActivity.showCertainButtons(4);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DataManager.getInstance().mainActivity.showProgressBar(null);
-                    }
-                });
-                NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
-                NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
-
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.list = new Select().from(Targets.class).execute();
-                        adapter.notifyDataSetChanged();
-                        if(adapter.list.size() == 0)
-                            tutorial_message.setVisibility(View.VISIBLE);
-                        else
-                            tutorial_message.setVisibility(View.GONE);
-                        DataManager.getInstance().mainActivity.hideProgressBar();
-                    }
-                });
-
-            }
-        }).start();
+    public TargetFragment() {
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -100,14 +65,14 @@ public class TargetFragment extends Fragment {
                     @Override
                     public void run() {
                         NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
-                        if(NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id)) {
+                        if (NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id)) {
                             adapter.list = new Select().from(Targets.class).execute();
                             DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     adapter.notifyDataSetChanged();
                                     layout.setRefreshing(false);
-                                    if(adapter.list.size() == 0)
+                                    if (adapter.list.size() == 0)
                                         tutorial_message.setVisibility(View.VISIBLE);
                                     else
                                         tutorial_message.setVisibility(View.GONE);
@@ -129,9 +94,47 @@ public class TargetFragment extends Fragment {
         return mainView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.target));
+        DataManager.getInstance().mainActivity.hideAllButtons();
+        DataManager.getInstance().mainActivity.showCertainButtons(4);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DataManager.getInstance().mainActivity.showProgressBar(null);
+                    }
+                });
+                NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
+                NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
+
+                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.list = new Select().from(Targets.class).execute();
+                        adapter.notifyDataSetChanged();
+                        if (adapter.list.size() == 0)
+                            tutorial_message.setVisibility(View.VISIBLE);
+                        else
+                            tutorial_message.setVisibility(View.GONE);
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                    }
+                });
+
+            }
+        }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateTargetsMain);
+    }
+
     public void deleteTarget(final Targets target, final int finalPosition) {
 
-        if(DataManager.getInstance().user.isDemo) {
+        if (DataManager.getInstance().user.isDemo) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetFragment.this.getActivity());
             alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deletetarget) + "</font>"));
             alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -152,13 +155,13 @@ public class TargetFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(NetworkManager.getInstance().deleteTarget(params)) {
+                if (NetworkManager.getInstance().deleteTarget(params)) {
                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             target.delete();
                             adapter.list.remove(finalPosition);
-                            if(adapter.list.size() == 0)
+                            if (adapter.list.size() == 0)
                                 tutorial_message.setVisibility(View.VISIBLE);
                             else
                                 tutorial_message.setVisibility(View.GONE);
@@ -167,8 +170,7 @@ public class TargetFragment extends Fragment {
                             Snackbar.make(mainView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
                         }
                     });
-                }
-                else {
+                } else {
                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -179,6 +181,5 @@ public class TargetFragment extends Fragment {
                 }
             }
         }).start();
-
     }
 }
