@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.view.GravityCompat;
@@ -420,9 +421,15 @@ public class MainActivity extends FragmentActivity {
                 }
 
                 if (destination != null) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, destination)
-                            .commit();
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, destination);
+
+                    // allows back
+                    if (isInsideStats(selection)) {
+                        fragmentTransaction.addToBackStack(null);
+                    }
+                    fragmentTransaction.commit();
+//                            .commit();
                 }
             }
 
@@ -467,6 +474,11 @@ public class MainActivity extends FragmentActivity {
                         selectedPosition = position + 3;
                     }
                     drawer.closeDrawer(GravityCompat.START);
+
+                    if (!isInsideStats(adapter.values[selectedPosition])) {
+                        lastSelected = selectedPosition;
+                    }
+
 
                     if (adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
                         final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
@@ -532,6 +544,20 @@ public class MainActivity extends FragmentActivity {
         updateDeviceInfo();
     }
 
+
+    private int lastSelected = 1;
+
+    private boolean isInsideStats(String selection) {
+        if (selection.equals(getString(R.string.attainment))
+                || (selection.equals(getString(R.string.graphs)))
+                || (selection.equals(getString(R.string.points)))
+                || (selection.equals(getString(R.string.events_attended)))
+                || (selection.equals(getString(R.string.attendance)))) {
+            return true;
+        }
+        return false;
+    }
+
     private void updateDeviceInfo() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.contains("push_token")
@@ -590,6 +616,9 @@ public class MainActivity extends FragmentActivity {
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                 backpressed = 0;
                 getSupportFragmentManager().popBackStackImmediate();
+                selectedPosition = lastSelected;
+                DataManager.getInstance().fragment = lastSelected;
+                adapter.notifyDataSetChanged();
             } else if (backpressed == 0) {
                 backpressed = 1;
                 Snackbar.make(findViewById(R.id.main_fragment), R.string.press_back_again_to_exit_app, Snackbar.LENGTH_LONG).show();
