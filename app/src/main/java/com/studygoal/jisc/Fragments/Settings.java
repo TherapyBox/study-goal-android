@@ -183,7 +183,7 @@ public class Settings extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.e("Test", "Click Mamera");
-                if (DataManager.getInstance().user.isDemo) {
+              if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Settings.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_updateprofileimage) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
