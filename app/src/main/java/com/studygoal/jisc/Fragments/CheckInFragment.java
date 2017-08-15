@@ -104,7 +104,7 @@ public class CheckInFragment extends Fragment {
         mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -118,8 +118,8 @@ public class CheckInFragment extends Fragment {
                     return;
                 }
 
-                if (DataManager.getInstance().user.isStaff
-                        || DataManager.getInstance().user.isDemo) {
+                if (DataManager.getInstance().\Staff
+                        || if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
