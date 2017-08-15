@@ -21,7 +21,6 @@ import com.studygoal.jisc.Models.ED;
 import com.studygoal.jisc.R;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -62,6 +61,7 @@ public class StatsAttedance extends Fragment {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         try {
+            Log.e(getClass().getCanonicalName(), "attendance: " + preferences.getString(getString(R.string.attendance), null));
             JSONArray jsonArray = new JSONArray(preferences.getString(getString(R.string.attendance), null));
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -70,7 +70,7 @@ public class StatsAttedance extends Fragment {
                 Log.e(dates.get(i), count.get(i));
             }
 
-        } catch (JSONException je) {
+        } catch (Exception je) {
             je.printStackTrace();
         }
 
