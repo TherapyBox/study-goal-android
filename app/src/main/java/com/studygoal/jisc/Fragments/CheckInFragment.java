@@ -118,8 +118,8 @@ public class CheckInFragment extends Fragment {
                     return;
                 }
 
-                if (DataManager.getInstance().\Staff
-                        || if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().Staff
+                        || (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
