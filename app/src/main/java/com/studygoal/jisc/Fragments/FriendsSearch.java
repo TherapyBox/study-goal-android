@@ -94,7 +94,7 @@ public class FriendsSearch extends Fragment {
             @Override
             public void onClick(View v) {
 
-                if(DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(FriendsSearch.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_sendfriendrequest) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
