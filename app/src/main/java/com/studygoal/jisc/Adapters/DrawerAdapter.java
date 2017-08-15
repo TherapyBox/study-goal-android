@@ -46,10 +46,11 @@ public class DrawerAdapter extends BaseAdapter {
             valuesList.add(con.getString(R.string.friends));
             valuesList.add(con.getString(R.string.stats));
             valuesList.add(con.getString(R.string.graphs));
-            if (prefs.getBoolean(con.getString(R.string.attainmentData), false)) {
-                valuesList.add(con.getString(R.string.attainment));
-                statOpenedNum++;
-            }
+            valuesList.add(con.getString(R.string.attainment));
+//            if (prefs.getBoolean(con.getString(R.string.attainmentData), false)) {
+//                valuesList.add(con.getString(R.string.attainment));
+//                statOpenedNum++;
+//            }
             valuesList.add(con.getString(R.string.points));
             if (prefs.getBoolean(con.getString(R.string.attendanceData), false)) {
 //                valuesList.add(con.getString(R.string.events_attended));
