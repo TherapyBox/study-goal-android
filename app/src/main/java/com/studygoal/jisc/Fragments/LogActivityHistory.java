@@ -148,7 +148,7 @@ public class LogActivityHistory extends Fragment {
 
     public void deleteLog(final ActivityHistory activityHistory, final int finalPosition) {
 
-        if(DataManager.getInstance().user.isDemo) {
+        if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogActivityHistory.this.getActivity());
             alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deleteactivitylog) + "</font>"));
             alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
