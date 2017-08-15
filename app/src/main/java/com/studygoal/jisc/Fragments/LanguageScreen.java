@@ -62,7 +62,7 @@ public class LanguageScreen extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().equals(selected_value)) {
 
-                    if (DataManager.getInstance().user.isDemo) {
+                    if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LanguageScreen.this.getActivity());
                         alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_changeappsettings) + "</font>"));
                         alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
