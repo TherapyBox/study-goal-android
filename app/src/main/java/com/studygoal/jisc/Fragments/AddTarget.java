@@ -499,7 +499,7 @@ public class AddTarget extends Fragment implements View.OnClickListener {
 
                 if(isInEditMode) {
 
-                    if(DataManager.getInstance().user.isDemo) {
+                    if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
                         alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
                         alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -581,7 +581,7 @@ public class AddTarget extends Fragment implements View.OnClickListener {
                     }
                 } else {
 
-                    if(DataManager.getInstance().user.isDemo) {
+                    if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
                         alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addtarget) + "</font>"));
                         alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
