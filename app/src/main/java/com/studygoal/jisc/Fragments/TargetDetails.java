@@ -99,7 +99,7 @@ public class TargetDetails extends Fragment {
 
     public void deleteTarget(final Targets target, final int finalPosition) {
 
-        if(DataManager.getInstance().user.isDemo) {
+        if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetDetails.this.getActivity());
             alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deletetarget) + "</font>"));
             alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
