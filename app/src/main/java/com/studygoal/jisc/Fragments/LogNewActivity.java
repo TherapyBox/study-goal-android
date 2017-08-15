@@ -438,7 +438,7 @@ public class LogNewActivity extends Fragment implements View.OnClickListener {
             }
             case R.id.new_activity_btn_start: {
 
-                if(DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogNewActivity.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addactivitylog) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
