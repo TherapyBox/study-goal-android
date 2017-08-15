@@ -100,7 +100,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             @Override
             public void onClick(View v) {
 
-                if (DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                     feedViewHolder.close.callOnClick();
                     removeItem(feedViewHolder.getAdapterPosition());
                     Snackbar.make(layout, R.string.post_hidden_message, Snackbar.LENGTH_LONG).show();
@@ -151,7 +151,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 @Override
                 public void onClick(View v) {
 
-                    if (DataManager.getInstance().user.isDemo) {
+                    if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(DataManager.getInstance().mainActivity);
                         alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + DataManager.getInstance().mainActivity.getString(R.string.demo_mode_deletefeedlog) + "</font>"));
                         alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
