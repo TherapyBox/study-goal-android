@@ -773,7 +773,7 @@ public class Stats3 extends Fragment {
 
                 String name = getString(R.string.me);
                 String id = DataManager.getInstance().user.jisc_student_id;
-                if(DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -785,7 +785,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - 518400000;
                 c.setTimeInMillis(curr);
 
-                if(DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
@@ -846,7 +846,7 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 String id = DataManager.getInstance().user.jisc_student_id;
-                if(DataManager.getInstance().user.isDemo) {
+               if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -858,7 +858,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - (3 * 518400000);
                 c.setTimeInMillis(curr);
 
-                if(DataManager.getInstance().user.isDemo) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
