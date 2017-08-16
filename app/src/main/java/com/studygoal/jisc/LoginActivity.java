@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -47,8 +49,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.studygoal.jisc.Adapters.InstitutionsAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
-import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Institution;
 import com.studygoal.jisc.Utils.Utils;
 import com.twitter.sdk.android.Twitter;
@@ -93,6 +93,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private boolean rememberMe;
 
     private Institution selectedInstitution;
+
+    private int refreshCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,7 +224,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0ODgzNjU2NzcsImp0aSI6IjFtbjhnU3YrWk9mVzJlYXV1NmVrN0Rzbm1MUjA0dDRyT0V0SEQ5Z1BGdk09IiwiaXNzIjoiaHR0cDpcL1wvc3AuZGF0YVwvYXV0aCIsIm5iZiI6MTQ4ODM2NTY2NywiZXhwIjoxNjYyNTY0NTY2NywiZGF0YSI6eyJlcHBuIjoiIiwicGlkIjoiZGVtb3VzZXJAZGVtby5hYy51ayIsImFmZmlsaWF0aW9uIjoic3R1ZGVudEBkZW1vLmFjLnVrIn19.xM6KkBFvHW7vtf6dF-X4f_6G3t_KGPVNylN_rMJROsh1MXIg9sK5j77L0Jzg1JR8fhXZf-0jFMnZz6FMotAeig";
 //                String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0ODg0NDkxNzksImp0aSI6IjdnOHFHVWlDKzRIdTdyN2ZUcTBOcldjaUpGTzByR1wvdUhpZVhvN0NBSjZvPSIsImlzcyI6Imh0dHA6XC9cL3NwLmRhdGFcL2F1dGgiLCJuYmYiOjE0ODg0NDkxNjksImV4cCI6MTQ5MjU5NjM2OSwiZGF0YSI6eyJlcHBuIjoiIiwicGlkIjoiczE1MTI0OTNAZ2xvcy5hYy51ayIsImFmZmlsaWF0aW9uIjoic3RhZmZAZ2xvcy5hYy51ayJ9fQ.xO_Yk6ZgTWgg0UHVXglFKD1tMP2wq98b8IU4alaGQvjtlYcjoz5W8gZbAX0Gcktl0nDs_bkvsB1g5OaYkkY6yg";
                 DataManager.getInstance().set_jwt(token);
-                XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
                 new Thread(new Runnable() {
                     @Override
@@ -240,7 +241,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             }
                         }
                         SafeToast.makeText(getApplicationContext(),
-                                "You have a slow network connection at the moment, please wait and try again with a stronger internet connection",
+                                getString(R.string.slow_internet),
                                 Toast.LENGTH_SHORT).show();
                         showProgressDialog(false);
                     }
@@ -263,7 +264,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         // Token can be replaced here for testing individuals.
                         String token = jsonObject.getString("jwt");
                         DataManager.getInstance().set_jwt(token);
-                        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
                         if (LoginActivity.this.rememberMe) {
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", DataManager.getInstance().get_jwt()).apply();
@@ -400,7 +400,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 } else {
                     //continue with login process
                     DataManager.getInstance().set_jwt(jwt);
-                    XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.SuccessfulLogin);
 
                     if (is_staff.equals("yes")) {
                         if (NetworkManager.getInstance().checkIfStaffRegistered()) {
@@ -586,6 +585,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
+        Log.d("calling refresh", "onCreate: calling refresh ");
         refreshData();
     }
 
@@ -632,12 +632,30 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             adapter.notifyDataSetChanged();
                         }
                     });
+                    refreshCounter = 0;
                 } else {
+                    ConnectivityManager cm = (ConnectivityManager) LoginActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                    boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+                    final String dialogText;
+                    if(isConnected) {
+                        refreshCounter++;
+                        if(refreshCounter < 3){
+                            refreshData();
+                        }else {
+                            refreshCounter = 0;
+                        }
+                        dialogText = getString(R.string.slow_internet);
+                    } else {
+                        dialogText = getString(R.string.no_internet);
+                    }
+
                     LoginActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.no_internet) + "</font>"));
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
                             alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
