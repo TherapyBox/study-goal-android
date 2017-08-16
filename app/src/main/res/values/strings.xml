@@ -357,7 +357,7 @@
 
     <string name="confirm_logout_message">Are you sure you want to logout?</string>
     <string name="no_internet">Check your internet connection and try again later</string>
-    <string name="slow_internet">You have a slow network connection at the moment, please wait and try again with a stronger internet connection</string>
+    <string name="slow_internet">Weak internet connectivity; trying to connect.</string>
 
     <string name="target_saved">Target saved. To edit or delete this target, swipe left across the target title in your target list.</string>
     <string name="failed_tochangefriend">Failed to change friend settings</string>
