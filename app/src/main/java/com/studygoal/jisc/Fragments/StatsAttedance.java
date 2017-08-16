@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.ED;
 import com.studygoal.jisc.R;
 
@@ -48,6 +50,8 @@ public class StatsAttedance extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.attendance));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateAttendanceGraph);
     }
 
     @Override

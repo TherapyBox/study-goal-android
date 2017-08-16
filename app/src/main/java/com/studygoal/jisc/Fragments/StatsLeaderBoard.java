@@ -16,45 +16,20 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
-import com.studygoal.jisc.Models.ED;
-import com.studygoal.jisc.Models.Friend;
-import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.R;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 public class StatsLeaderBoard extends Fragment {
 
@@ -63,7 +38,7 @@ public class StatsLeaderBoard extends Fragment {
     private ListView rankListView;
 
 
-    static final String[] EVENTS = new String[] { "Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101" };
+    static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
 
     @Override
     public void onResume() {
@@ -71,6 +46,8 @@ public class StatsLeaderBoard extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.leader_board));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateLeaderboard);
     }
 
     @Override
@@ -78,7 +55,7 @@ public class StatsLeaderBoard extends Fragment {
         final View mainView = inflater.inflate(R.layout.stats_leaderboard, container, false);
 
         rankListView = (ListView) mainView.findViewById(R.id.stats_leaderBoard_listView);
-        ViewGroup header = (ViewGroup)inflater.inflate(R.layout.stats_event_attendance_list_view_header, rankListView, false);
+        ViewGroup header = (ViewGroup) inflater.inflate(R.layout.stats_event_attendance_list_view_header, rankListView, false);
         rankListView.addHeaderView(header);
         rankListView.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, EVENTS));
 
@@ -102,7 +79,7 @@ public class StatsLeaderBoard extends Fragment {
         return mainView;
     }
 
-    private void setUpModule(View mainView){
+    private void setUpModule(View mainView) {
         module = (AppCompatTextView) mainView.findViewById(R.id.module_list);
         module.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         module.setTypeface(DataManager.getInstance().myriadpro_regular);
@@ -153,7 +130,7 @@ public class StatsLeaderBoard extends Fragment {
 
                         for (int j = 0; j < coursesList.size(); j++) {
                             String courseName = coursesList.get(j).name;
-                            if(courseName.equals(titleText)) {
+                            if (courseName.equals(titleText)) {
                                 return;
                             }
                         }
@@ -177,7 +154,7 @@ public class StatsLeaderBoard extends Fragment {
         period_segmented.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(selectedPeriod.equals(getString(R.string.last_7_days))) {
+                if (selectedPeriod.equals(getString(R.string.last_7_days))) {
                     selectedPeriod = getString(R.string.last_30_days);
                     last_30d_text_view.setTextColor(Color.parseColor("#ffffff"));
                     last_30d_text_view.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.circle_background_blue_right));

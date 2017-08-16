@@ -10,21 +10,16 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Adapters.AttainmentAdapter;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.SocialManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Attainment;
 import com.studygoal.jisc.R;
-
-import java.util.Timer;
 
 public class StatsAttainment extends Fragment {
 
@@ -62,6 +57,8 @@ public class StatsAttainment extends Fragment {
                 });
             }
         }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateAttainment);
     }
 
     @Override

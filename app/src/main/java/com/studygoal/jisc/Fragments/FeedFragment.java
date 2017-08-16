@@ -18,6 +18,8 @@ import com.activeandroid.util.Log;
 import com.studygoal.jisc.Adapters.FeedAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.EditTextCustom;
@@ -66,6 +68,8 @@ public class FeedFragment extends Fragment {
                 });
             }
         }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateActivityFeed);
     }
 
     public void post() {

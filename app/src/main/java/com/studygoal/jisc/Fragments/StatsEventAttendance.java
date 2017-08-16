@@ -21,6 +21,8 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.R;
 
@@ -31,7 +33,7 @@ public class StatsEventAttendance extends Fragment {
     private AppCompatTextView moduleTextView;
     private ListView actLisiview;
 
-    static final String[] EVENTS = new String[] { "Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101" };
+    static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
 
     @Override
     public void onResume() {
@@ -39,6 +41,8 @@ public class StatsEventAttendance extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.events_attended));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateEventsAttended);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class StatsEventAttendance extends Fragment {
 
         actLisiview = (ListView) mainView.findViewById(R.id.event_attendance_listView);
         LayoutInflater i = getActivity().getLayoutInflater();
-        ViewGroup header = (ViewGroup)i.inflate(R.layout.stats_event_attendance_list_view_header, actLisiview, false);
+        ViewGroup header = (ViewGroup) i.inflate(R.layout.stats_event_attendance_list_view_header, actLisiview, false);
         actLisiview.addHeaderView(header, null, false);
         actLisiview.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, EVENTS));
         // ((MainActivity) getActivity()).showProgressBar(null);
@@ -109,7 +113,7 @@ public class StatsEventAttendance extends Fragment {
 
                         for (int j = 0; j < coursesList.size(); j++) {
                             String courseName = coursesList.get(j).name;
-                            if(courseName.equals(titleText)) {
+                            if (courseName.equals(titleText)) {
                                 return;
                             }
                         }
@@ -137,6 +141,6 @@ public class StatsEventAttendance extends Fragment {
 //                });
 //            }
 //        }).start();
-        }
+    }
 
- }
+}

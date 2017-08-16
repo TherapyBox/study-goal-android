@@ -30,6 +30,8 @@ import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.Models.ED;
 import com.studygoal.jisc.Models.Friend;
@@ -66,11 +68,14 @@ public class Stats3 extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.engagement_graph));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
+
+        String moduleName = (module != null && module.getText() != null) ? module.getText().toString() : null;
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.ViewedGraphModule, moduleName);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View mainView = inflater .inflate(R.layout.stats3, container, false);
+        final View mainView = inflater.inflate(R.layout.stats3, container, false);
 
         isBar = false;
         webView = (WebView) mainView.findViewById(R.id.chart_web);
@@ -81,7 +86,7 @@ public class Stats3 extends Fragment {
         webView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                webviewHeight = Utils.pxToDp(webView.getHeight()-40);
+                webviewHeight = Utils.pxToDp(webView.getHeight() - 40);
             }
         });
 
@@ -292,7 +297,7 @@ public class Stats3 extends Fragment {
 
                         for (int j = 0; j < coursesList.size(); j++) {
                             String courseName = coursesList.get(j).name;
-                            if(courseName.equals(titleText)) {
+                            if (courseName.equals(titleText)) {
                                 return;
                             }
                         }
@@ -300,7 +305,7 @@ public class Stats3 extends Fragment {
                         dialog.dismiss();
                         module.setText(titleText);
 
-                        if(!module.getText().toString().equals(getString(R.string.anymodule))) {
+                        if (!module.getText().toString().equals(getString(R.string.anymodule))) {
                             compareTo.setOnClickListener(compareToListener);
                             compareTo.setAlpha(1.0f);
                         } else {
@@ -315,7 +320,7 @@ public class Stats3 extends Fragment {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (module.getText().toString().replace(" -", "").equals(getString(R.string.anymodule)) && (compareTo.getText().toString().equals(getString(R.string.average)) || compareTo.getText().toString().equals(getString(R.string.top10))) ){
+                                        if (module.getText().toString().replace(" -", "").equals(getString(R.string.anymodule)) && (compareTo.getText().toString().equals(getString(R.string.average)) || compareTo.getText().toString().equals(getString(R.string.top10)))) {
                                             compareTo.setText(R.string.no_one);
                                         }
                                         getData();
@@ -351,7 +356,7 @@ public class Stats3 extends Fragment {
                         });
                     }
                 });
-                
+
                 if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
@@ -407,18 +412,18 @@ public class Stats3 extends Fragment {
             }
         });
 
-        ((ImageView)mainView.findViewById(R.id.change_graph_btn)).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
+        ((ImageView) mainView.findViewById(R.id.change_graph_btn)).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
         mainView.findViewById(R.id.change_graph_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //switch between bar / graph
-                if (isBar){
+                if (isBar) {
                     isBar = false;
-                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
+                    ((ImageView) v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
 
                 } else {
                     isBar = true;
-                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
+                    ((ImageView) v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
                 }
 
                 setData();
@@ -441,14 +446,14 @@ public class Stats3 extends Fragment {
 
     private void getData() {
 
-        if(DataManager.getInstance().user.isStaff) {
+        if (DataManager.getInstance().user.isStaff) {
             list = new ArrayList<>();
 
             if (compareTo.getText().toString().equals(getString(R.string.no_one))) {
                 if (period.getText().toString().equals(getString(R.string.last_7_days))) {
                     for (int i = 0; i < 7; i++) {
                         ED item = new ED();
-                        item.day = "" + (i+1);
+                        item.day = "" + (i + 1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
 
                         list.add(item);
@@ -464,7 +469,7 @@ public class Stats3 extends Fragment {
 
                     for (int i = 0; i < 30; i++) {
                         ED item = new ED();
-                        item.day = "" + (i+1);
+                        item.day = "" + (i + 1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
 
                         list.add(item);
@@ -476,7 +481,7 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                }  else if (period.getText().toString().equals(getString(R.string.overall))) {
+                } else if (period.getText().toString().equals(getString(R.string.overall))) {
 
                     try {
 
@@ -515,13 +520,13 @@ public class Stats3 extends Fragment {
                 if (period.getText().toString().equals(getString(R.string.last_7_days))) {
                     for (int i = 0; i < 7; i++) {
                         ED item = new ED();
-                        item.day = "" + (i+1);
+                        item.day = "" + (i + 1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item.student_id = DataManager.getInstance().user.jisc_student_id;
                         list.add(item);
 
                         ED item1 = new ED();
-                        item1.day = "" + (i+1);
+                        item1.day = "" + (i + 1);
                         item1.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item1.student_id = "";
                         list.add(item1);
@@ -537,13 +542,13 @@ public class Stats3 extends Fragment {
 
                     for (int i = 0; i < 30; i++) {
                         ED item = new ED();
-                        item.day = "" + (i+1);
+                        item.day = "" + (i + 1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item.student_id = DataManager.getInstance().user.jisc_student_id;
                         list.add(item);
 
                         ED item1 = new ED();
-                        item1.day = "" + (i+1);
+                        item1.day = "" + (i + 1);
                         item1.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item1.student_id = "";
                         list.add(item1);
@@ -555,7 +560,7 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                }  else if (period.getText().toString().equals(getString(R.string.overall))) {
+                } else if (period.getText().toString().equals(getString(R.string.overall))) {
 
                     try {
 
@@ -633,12 +638,10 @@ public class Stats3 extends Fragment {
                 && !compareTo.getText().toString().equals(getString(R.string.average))) {
             compareValue = ((Friend) new Select().from(Friend.class).where("name = ?", compareTo.getText().toString()).executeSingle()).jisc_student_id.replace("[", "").replace("]", "").replace("\"", "");
             compareType = "friend";
-        }
-        else if (compareTo.getText().toString().equals(getString(R.string.average))){
+        } else if (compareTo.getText().toString().equals(getString(R.string.average))) {
             compareValue = "";
             compareType = "average";
-        }
-        else {
+        } else {
             compareType = "";
             compareValue = "";
         }
@@ -678,7 +681,7 @@ public class Stats3 extends Fragment {
 
     private void setData() {
 
-        if(list == null) {
+        if (list == null) {
             list = new ArrayList<>();
         }
 
@@ -694,7 +697,7 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 Date date = new Date();
-                date.setTime(date.getTime() - 6*86400000);
+                date.setTime(date.getTime() - 6 * 86400000);
 
                 Collections.reverse(tempList);
 
@@ -702,17 +705,17 @@ public class Stats3 extends Fragment {
                 for (int i = 0; i < tempList.size(); i++) {
                     String day = dateFormat.format(date);
                     date.setTime(date.getTime() + 86400000);
-                    vals1.add(""+tempList.get(i).activity_points+"");
-                    xVals.add("\'"+day+"\'");
+                    vals1.add("" + tempList.get(i).activity_points + "");
+                    xVals.add("\'" + day + "\'");
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",",xVals);
-                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]}]";
+                webData += TextUtils.join(",", xVals);
+                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
-                html = html.replace("height:1000px","height:"+webviewHeight+"px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
+                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
 
@@ -736,13 +739,13 @@ public class Stats3 extends Fragment {
 
                 for (int i = 0; i < tempList.size(); i++) {
                     val1 = val1 + tempList.get(i).activity_points;
-                    if (i == 6 || i == 13 || i == 20 || i == 27){
-                        vals1.add(""+val1);
+                    if (i == 6 || i == 13 || i == 20 || i == 27) {
+                        vals1.add("" + val1);
 
                         calendar.add(Calendar.DATE, 6);
                         day = dateFormat.format(calendar.getTime());
                         calendar.add(Calendar.DATE, 1);
-                        xVals.add("\'"+day+"\'");
+                        xVals.add("\'" + day + "\'");
                         val1 = 0;
                     }
                 }
@@ -750,14 +753,14 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",",xVals);
-                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]}]";
+                webData += TextUtils.join(",", xVals);
+                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
-                html = html.replace("height:1000px","height:"+webviewHeight+"px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
+                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
 
-                Log.e("JISC", "HTML: "+html);
+                Log.e("JISC", "HTML: " + html);
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
             }
         } else {
@@ -773,7 +776,7 @@ public class Stats3 extends Fragment {
 
                 String name = getString(R.string.me);
                 String id = DataManager.getInstance().user.jisc_student_id;
-                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -785,7 +788,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - 518400000;
                 c.setTimeInMillis(curr);
 
-                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
@@ -811,25 +814,25 @@ public class Stats3 extends Fragment {
                 Collections.reverse(vals4);
 
                 Date date = new Date();
-                date.setTime(date.getTime() - 6*86400000);
+                date.setTime(date.getTime() - 6 * 86400000);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM");
 
                 for (int i = 0; i < vals3.size(); i++) {
                     day = dateFormat.format(date);
                     date.setTime(date.getTime() + 86400000);
-                    vals1.add(""+vals3.get(i));
-                    vals2.add(""+vals4.get(i));
-                    xVals.add("\'"+day+"\'");
+                    vals1.add("" + vals3.get(i));
+                    vals2.add("" + vals4.get(i));
+                    xVals.add("\'" + day + "\'");
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",",xVals);
-                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]},{name:\'"+compareTo.getText().toString()+"\',data: ["+TextUtils.join(",",vals2)+"]}]";
+                webData += TextUtils.join(",", xVals);
+                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]},{name:\'" + compareTo.getText().toString() + "\',data: [" + TextUtils.join(",", vals2) + "]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
-                html = html.replace("height:1000px","height:"+webviewHeight+"px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
+                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
 
@@ -846,7 +849,7 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 String id = DataManager.getInstance().user.jisc_student_id;
-               if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -858,7 +861,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - (3 * 518400000);
                 c.setTimeInMillis(curr);
 
-                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
@@ -887,7 +890,7 @@ public class Stats3 extends Fragment {
                 Integer val2 = 0;
 
                 Date date = new Date();
-                long time = date.getTime() - 21*86400000;
+                long time = date.getTime() - 21 * 86400000;
                 date.setTime(time);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -898,12 +901,12 @@ public class Stats3 extends Fragment {
                     if (i == 6 || i == 13 || i == 20 || i == 27) {
 
                         label = dateFormat.format(date);
-                        date.setTime(date.getTime() + 7*86400000);
+                        date.setTime(date.getTime() + 7 * 86400000);
 
-                        vals1.add(""+val1);
-                        vals2.add(""+val2);
+                        vals1.add("" + val1);
+                        vals2.add("" + val2);
 
-                        xVals.add("\'"+label+"\'");
+                        xVals.add("\'" + label + "\'");
 
                         val1 = 0;
                         val2 = 0;
@@ -911,12 +914,12 @@ public class Stats3 extends Fragment {
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",",xVals);
-                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]},{name:\'"+compareTo.getText().toString()+"\',data: ["+TextUtils.join(",",vals2)+"]}]";
+                webData += TextUtils.join(",", xVals);
+                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]},{name:\'" + compareTo.getText().toString() + "\',data: [" + TextUtils.join(",", vals2) + "]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
-                html = html.replace("height:1000px","height:"+webviewHeight+"px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
+                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
             }
@@ -928,7 +931,7 @@ public class Stats3 extends Fragment {
         try {
 
             String path;
-            if(isBar) {
+            if (isBar) {
                 path = "highcharts/bargraph.html";
             } else {
                 path = "highcharts/linegraph.html";
@@ -938,7 +941,7 @@ public class Stats3 extends Fragment {
             InputStream json = DataManager.getInstance().mainActivity.getAssets().open(path);
             BufferedReader in = new BufferedReader(new InputStreamReader(json, "UTF-8"));
             String str;
-            while ((str=in.readLine()) != null) {
+            while ((str = in.readLine()) != null) {
                 buf.append(str);
             }
             in.close();

@@ -9,30 +9,23 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Adapters.ActivityPointsAdapter;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.SocialManager;
+import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.ActivityPoints;
 import com.studygoal.jisc.R;
 
@@ -60,6 +53,8 @@ public class StatsPoints extends Fragment {
         a.showCertainButtons(5);
 
         refreshView();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigatePoints);
     }
 
     @Override
@@ -71,8 +66,8 @@ public class StatsPoints extends Fragment {
         pieChartSwitch = (Switch) mainView.findViewById(R.id.pie_chart_switch);
         pieChartSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                upperContainer.setVisibility(isChecked? View.VISIBLE : View.INVISIBLE);
-                piChartWebView.setVisibility(isChecked? View.INVISIBLE : View.VISIBLE);
+                upperContainer.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
+                piChartWebView.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
             }
         });
 
@@ -118,10 +113,10 @@ public class StatsPoints extends Fragment {
                     }] */
 
                     String data = "";
-                    for(ActivityPoints p: DataManager.getInstance().user.points) {
+                    for (ActivityPoints p : DataManager.getInstance().user.points) {
                         data += "{";
-                        data += "name:"+ "\'" + p.activity + "\',";
-                        data += "y:"+ p.points;
+                        data += "name:" + "\'" + p.activity + "\',";
+                        data += "y:" + p.points;
                         data += "},";
                     }
 
@@ -136,14 +131,14 @@ public class StatsPoints extends Fragment {
             e.printStackTrace();
         }
     }
-    
+
     private void refreshView() {
         DataManager.getInstance().mainActivity.showProgressBar(null);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager.getInstance().getStudentActivityPoint(isThisWeek?"7d":"overall");
+                NetworkManager.getInstance().getStudentActivityPoint(isThisWeek ? "7d" : "overall");
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -161,7 +156,7 @@ public class StatsPoints extends Fragment {
         adapter.notifyDataSetChanged();
 
         int sum = 0;
-        for(ActivityPoints p: DataManager.getInstance().user.points) {
+        for (ActivityPoints p : DataManager.getInstance().user.points) {
             sum += Integer.parseInt(p.points);
         }
         activity_points_value.setText(String.valueOf(sum));
