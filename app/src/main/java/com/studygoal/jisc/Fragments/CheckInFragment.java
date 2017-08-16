@@ -2,6 +2,7 @@ package com.studygoal.jisc.Fragments;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,6 +37,8 @@ public class CheckInFragment extends Fragment {
     boolean gps_enabled = false;
     boolean network_enabled = false;
 
+    private ProgressDialog progressDialog;
+    
     @Override
     public void onResume() {
         super.onResume();
@@ -104,7 +107,9 @@ public class CheckInFragment extends Fragment {
         mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                   showProgressDialog(true);
                 if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
+                                        showProgressDialog(false);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -120,6 +125,7 @@ public class CheckInFragment extends Fragment {
 
                 if (DataManager.getInstance().user.isStaff
                         || DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                                        showProgressDialog(false);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -135,6 +141,7 @@ public class CheckInFragment extends Fragment {
 
                 final String pin_text_edit_text = pin_text_edit.getText().toString();
                 if (pin_text_edit_text.length() == 0) {
+                                        showProgressDialog(false);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -174,6 +181,7 @@ public class CheckInFragment extends Fragment {
                                     message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
                                 }
 
+                                                                showProgressDialog(false);
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                                 alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
                                 alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -220,5 +228,23 @@ public class CheckInFragment extends Fragment {
         }
 
         return mainView;
+        }
+    private void showProgressDialog(final boolean show) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(getActivity());
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setMessage("Validating PIN...");
+                    progressDialog.setCancelable(false);
+                }
+                if (show) {
+                    progressDialog.show();
+                } else {
+                    progressDialog.dismiss();
+                }
+            }
+        });
     }
 }
