@@ -3841,7 +3841,7 @@ public class NetworkManager {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
                 Calendar cal = GregorianCalendar.getInstance();
                 cal.setTime(new Date());
-                cal.add(Calendar.DAY_OF_YEAR, -28);
+                cal.add(Calendar.DAY_OF_YEAR, -29);
                 Date daysBeforeDate = cal.getTime();
                 String current = sdf.format(new Date());
                 String past = sdf.format(daysBeforeDate);
