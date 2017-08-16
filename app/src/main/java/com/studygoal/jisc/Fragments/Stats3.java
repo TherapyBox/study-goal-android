@@ -3,6 +3,8 @@ package com.studygoal.jisc.Fragments;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -30,8 +32,6 @@ import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
-import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.Models.ED;
 import com.studygoal.jisc.Models.Friend;
@@ -53,8 +53,8 @@ import java.util.Random;
 
 public class Stats3 extends Fragment {
 
+    private View mainView;
     AppCompatTextView module;
-    AppCompatTextView period;
     AppCompatTextView compareTo;
     RelativeLayout chart_layout;
     List<ED> list;
@@ -62,20 +62,21 @@ public class Stats3 extends Fragment {
     WebView webView;
     float webviewHeight;
 
+    boolean isSevenDays = true;
+    boolean isOverall = false;
+    TextView description;
+
     @Override
     public void onResume() {
         super.onResume();
         DataManager.getInstance().mainActivity.setTitle(getString(R.string.engagement_graph));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
-
-        String moduleName = (module != null && module.getText() != null) ? module.getText().toString() : null;
-        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.ViewedGraphModule, moduleName);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View mainView = inflater.inflate(R.layout.stats3, container, false);
+        mainView = inflater .inflate(R.layout.stats3, container, false);
 
         isBar = false;
         webView = (WebView) mainView.findViewById(R.id.chart_web);
@@ -86,7 +87,7 @@ public class Stats3 extends Fragment {
         webView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                webviewHeight = Utils.pxToDp(webView.getHeight() - 40);
+                webviewHeight = Utils.pxToDp(webView.getHeight()-40);
             }
         });
 
@@ -99,10 +100,9 @@ public class Stats3 extends Fragment {
         module.setTypeface(DataManager.getInstance().myriadpro_regular);
         module.setText(R.string.anymodule);
 
-        period = (AppCompatTextView) mainView.findViewById(R.id.period_list);
-        period.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
-        period.setTypeface(DataManager.getInstance().myriadpro_regular);
-        period.setText(R.string.last_7_days);
+        SegmentClickListener listener = new SegmentClickListener();
+        mainView.findViewById(R.id.segment_button_seven_days).setOnClickListener(listener);
+        mainView.findViewById(R.id.segment_button_twentyeight_days).setOnClickListener(listener);
 
         compareTo = (AppCompatTextView) mainView.findViewById(R.id.compareto);
         compareTo.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
@@ -243,7 +243,7 @@ public class Stats3 extends Fragment {
             }
         };
 
-        final TextView description = (TextView) mainView.findViewById(R.id.description);
+        description = (TextView) mainView.findViewById(R.id.description);
         description.setTypeface(DataManager.getInstance().myriadpro_regular);
         description.setText(R.string.last_week);
 
@@ -297,7 +297,7 @@ public class Stats3 extends Fragment {
 
                         for (int j = 0; j < coursesList.size(); j++) {
                             String courseName = coursesList.get(j).name;
-                            if (courseName.equals(titleText)) {
+                            if(courseName.equals(titleText)) {
                                 return;
                             }
                         }
@@ -305,7 +305,7 @@ public class Stats3 extends Fragment {
                         dialog.dismiss();
                         module.setText(titleText);
 
-                        if (!module.getText().toString().equals(getString(R.string.anymodule))) {
+                        if(!module.getText().toString().equals(getString(R.string.anymodule))) {
                             compareTo.setOnClickListener(compareToListener);
                             compareTo.setAlpha(1.0f);
                         } else {
@@ -320,7 +320,7 @@ public class Stats3 extends Fragment {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (module.getText().toString().replace(" -", "").equals(getString(R.string.anymodule)) && (compareTo.getText().toString().equals(getString(R.string.average)) || compareTo.getText().toString().equals(getString(R.string.top10)))) {
+                                        if (module.getText().toString().replace(" -", "").equals(getString(R.string.anymodule)) && (compareTo.getText().toString().equals(getString(R.string.average)) || compareTo.getText().toString().equals(getString(R.string.top10))) ){
                                             compareTo.setText(R.string.no_one);
                                         }
                                         getData();
@@ -337,93 +337,18 @@ public class Stats3 extends Fragment {
             }
         });
 
-        period.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.custom_spinner_layout);
-                dialog.setCancelable(true);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        dialog.dismiss();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).hideProgressBar();
-                            }
-                        });
-                    }
-                });
-
-                if (DataManager.getInstance().mainActivity.isLandscape) {
-                    DisplayMetrics displaymetrics = new DisplayMetrics();
-                    DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                    int width = (int) (displaymetrics.widthPixels * 0.3);
-
-                    WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                    params.width = width;
-                    dialog.getWindow().setAttributes(params);
-                }
-
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.time_period);
-
-                ArrayList<String> items = new ArrayList<>();
-//                items.add(getString(R.string.last_24_hours));
-                items.add(getString(R.string.last_7_days));
-                items.add(getString(R.string.last_30_days));
-                //items.add(getString(R.string.Overall));
-                final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(new GenericAdapter(DataManager.getInstance().mainActivity, period.getText().toString(), items));
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        period.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
-//                        if(period.getText().toString().equals(getString(R.string.last_24_hours))) {
-//                            description.setText(R.string.last_day);
-//                        } else
-                        if (period.getText().toString().equals(getString(R.string.last_7_days))) {
-                            description.setText(R.string.last_week_engagement);
-                        } else if (period.getText().toString().equals(getString(R.string.last_30_days))) {
-                            description.setText(R.string.last_month_engagement);
-                        } else if (period.getText().toString().equals(getString(R.string.overall))) {
-                            description.setText(R.string.Overall_engagement);
-                        }
-                        dialog.dismiss();
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        getData();
-                                        ((MainActivity) getActivity()).hideProgressBar();
-                                    }
-                                });
-                            }
-                        }).start();
-
-                    }
-                });
-                ((MainActivity) getActivity()).showProgressBar2("");
-                dialog.show();
-            }
-        });
-
-        ((ImageView) mainView.findViewById(R.id.change_graph_btn)).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
+        ((ImageView)mainView.findViewById(R.id.change_graph_btn)).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
         mainView.findViewById(R.id.change_graph_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //switch between bar / graph
-                if (isBar) {
+                if (isBar){
                     isBar = false;
-                    ((ImageView) v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
+                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
 
                 } else {
                     isBar = true;
-                    ((ImageView) v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
+                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
                 }
 
                 setData();
@@ -446,14 +371,14 @@ public class Stats3 extends Fragment {
 
     private void getData() {
 
-        if (DataManager.getInstance().user.isStaff) {
+        if(DataManager.getInstance().user.isStaff) {
             list = new ArrayList<>();
 
             if (compareTo.getText().toString().equals(getString(R.string.no_one))) {
-                if (period.getText().toString().equals(getString(R.string.last_7_days))) {
+                if (isSevenDays) {
                     for (int i = 0; i < 7; i++) {
                         ED item = new ED();
-                        item.day = "" + (i + 1);
+                        item.day = "" + (i+1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
 
                         list.add(item);
@@ -465,11 +390,11 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                } else if (period.getText().toString().equals(getString(R.string.last_30_days))) {
+                } else if (!isSevenDays) {
 
                     for (int i = 0; i < 30; i++) {
                         ED item = new ED();
-                        item.day = "" + (i + 1);
+                        item.day = "" + (i+1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
 
                         list.add(item);
@@ -481,7 +406,7 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                } else if (period.getText().toString().equals(getString(R.string.overall))) {
+                }  else if (isOverall) {
 
                     try {
 
@@ -517,16 +442,16 @@ public class Stats3 extends Fragment {
                     }
                 }
             } else {
-                if (period.getText().toString().equals(getString(R.string.last_7_days))) {
+                if (isSevenDays) {
                     for (int i = 0; i < 7; i++) {
                         ED item = new ED();
-                        item.day = "" + (i + 1);
+                        item.day = "" + (i+1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item.student_id = DataManager.getInstance().user.jisc_student_id;
                         list.add(item);
 
                         ED item1 = new ED();
-                        item1.day = "" + (i + 1);
+                        item1.day = "" + (i+1);
                         item1.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item1.student_id = "";
                         list.add(item1);
@@ -538,17 +463,17 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                } else if (period.getText().toString().equals(getString(R.string.last_30_days))) {
+                } else if (!isSevenDays) {
 
                     for (int i = 0; i < 30; i++) {
                         ED item = new ED();
-                        item.day = "" + (i + 1);
+                        item.day = "" + (i+1);
                         item.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item.student_id = DataManager.getInstance().user.jisc_student_id;
                         list.add(item);
 
                         ED item1 = new ED();
-                        item1.day = "" + (i + 1);
+                        item1.day = "" + (i+1);
                         item1.activity_points = Math.abs(new Random().nextInt()) % 100;
                         item1.student_id = "";
                         list.add(item1);
@@ -560,7 +485,7 @@ public class Stats3 extends Fragment {
                             return s1.day.compareToIgnoreCase(s2.day);
                         }
                     });
-                } else if (period.getText().toString().equals(getString(R.string.overall))) {
+                }  else if (isOverall) {
 
                     try {
 
@@ -638,15 +563,23 @@ public class Stats3 extends Fragment {
                 && !compareTo.getText().toString().equals(getString(R.string.average))) {
             compareValue = ((Friend) new Select().from(Friend.class).where("name = ?", compareTo.getText().toString()).executeSingle()).jisc_student_id.replace("[", "").replace("]", "").replace("\"", "");
             compareType = "friend";
-        } else if (compareTo.getText().toString().equals(getString(R.string.average))) {
+        }
+        else if (compareTo.getText().toString().equals(getString(R.string.average))){
             compareValue = "";
             compareType = "average";
-        } else {
+        }
+        else {
             compareType = "";
             compareValue = "";
         }
 
-        String scope = DataManager.getInstance().api_values.get(period.getText().toString().toLowerCase()).replace(" ", "_").toLowerCase();
+        String period;
+        if (isSevenDays)
+            period = getString(R.string.last_7_days).toLowerCase();
+        else
+            period = getString(R.string.last_30_days).toLowerCase();
+        //String scope = DataManager.getInstance().api_values.get(period.getText().toString().toLowerCase()).replace(" ", "_").toLowerCase();
+        String scope = DataManager.getInstance().api_values.get(period).replace(" ", "_").toLowerCase();
 
         list = NetworkManager.getInstance().getEngagementGraph(
                 scope,
@@ -681,7 +614,7 @@ public class Stats3 extends Fragment {
 
     private void setData() {
 
-        if (list == null) {
+        if(list == null) {
             list = new ArrayList<>();
         }
 
@@ -689,7 +622,7 @@ public class Stats3 extends Fragment {
         tempList.addAll(list);
 
         if (compareTo.getText().toString().equals(getString(R.string.no_one))) {
-            if (period.getText().toString().equals(getString(R.string.last_7_days))) {
+            if (isSevenDays) {
 
                 final ArrayList<String> xVals = new ArrayList<>();
                 ArrayList<String> vals1 = new ArrayList<>();
@@ -697,7 +630,7 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 Date date = new Date();
-                date.setTime(date.getTime() - 6 * 86400000);
+                date.setTime(date.getTime() - 6*86400000);
 
                 Collections.reverse(tempList);
 
@@ -705,22 +638,22 @@ public class Stats3 extends Fragment {
                 for (int i = 0; i < tempList.size(); i++) {
                     String day = dateFormat.format(date);
                     date.setTime(date.getTime() + 86400000);
-                    vals1.add("" + tempList.get(i).activity_points + "");
-                    xVals.add("\'" + day + "\'");
+                    vals1.add(""+tempList.get(i).activity_points+"");
+                    xVals.add("\'"+day+"\'");
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",", xVals);
-                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]}]";
+                webData += TextUtils.join(",",xVals);
+                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
-                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
+                html = html.replace("height:1000px","height:"+webviewHeight+"px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
 
 
-            } else if (period.getText().toString().equals(getString(R.string.last_30_days))) {
+            } else if (!isSevenDays) {
 
                 ArrayList<String> vals1 = new ArrayList<>();
                 ArrayList<String> xVals = new ArrayList<>();
@@ -735,17 +668,17 @@ public class Stats3 extends Fragment {
 
                 String day;
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM");
 
                 for (int i = 0; i < tempList.size(); i++) {
                     val1 = val1 + tempList.get(i).activity_points;
-                    if (i == 6 || i == 13 || i == 20 || i == 27) {
-                        vals1.add("" + val1);
+                    if (i == 6 || i == 13 || i == 20 || i == 27){
+                        vals1.add(""+val1);
 
                         calendar.add(Calendar.DATE, 6);
                         day = dateFormat.format(calendar.getTime());
                         calendar.add(Calendar.DATE, 1);
-                        xVals.add("\'" + day + "\'");
+                        xVals.add("\'"+day+"\'");
                         val1 = 0;
                     }
                 }
@@ -753,18 +686,18 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",", xVals);
-                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]}]";
+                webData += TextUtils.join(",",xVals);
+                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
-                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
+                html = html.replace("height:1000px","height:"+webviewHeight+"px");
 
-                Log.e("JISC", "HTML: " + html);
+                Log.e("JISC", "HTML: "+html);
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
             }
         } else {
-            if (period.getText().toString().equals(getString(R.string.last_7_days))) {
+            if (isSevenDays) {
 
                 final ArrayList<String> xVals = new ArrayList<>();
 
@@ -776,7 +709,7 @@ public class Stats3 extends Fragment {
 
                 String name = getString(R.string.me);
                 String id = DataManager.getInstance().user.jisc_student_id;
-                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -788,7 +721,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - 518400000;
                 c.setTimeInMillis(curr);
 
-                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
@@ -814,29 +747,29 @@ public class Stats3 extends Fragment {
                 Collections.reverse(vals4);
 
                 Date date = new Date();
-                date.setTime(date.getTime() - 6 * 86400000);
+                date.setTime(date.getTime() - 6*86400000);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM");
 
                 for (int i = 0; i < vals3.size(); i++) {
                     day = dateFormat.format(date);
                     date.setTime(date.getTime() + 86400000);
-                    vals1.add("" + vals3.get(i));
-                    vals2.add("" + vals4.get(i));
-                    xVals.add("\'" + day + "\'");
+                    vals1.add(""+vals3.get(i));
+                    vals2.add(""+vals4.get(i));
+                    xVals.add("\'"+day+"\'");
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",", xVals);
-                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]},{name:\'" + compareTo.getText().toString() + "\',data: [" + TextUtils.join(",", vals2) + "]}]";
+                webData += TextUtils.join(",",xVals);
+                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]},{name:\'"+compareTo.getText().toString()+"\',data: ["+TextUtils.join(",",vals2)+"]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
-                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
+                html = html.replace("height:1000px","height:"+webviewHeight+"px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
 
-            } else if (period.getText().toString().equals(getString(R.string.last_30_days))) {
+            } else if (!isSevenDays) {
 
                 final ArrayList<String> xVals = new ArrayList<>();
 
@@ -849,7 +782,7 @@ public class Stats3 extends Fragment {
                 String name = getString(R.string.me);
 
                 String id = DataManager.getInstance().user.jisc_student_id;
-                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+               if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     id = "demouser";
                 }
 
@@ -861,7 +794,7 @@ public class Stats3 extends Fragment {
                 Long curr = c.getTimeInMillis() - (3 * 518400000);
                 c.setTimeInMillis(curr);
 
-                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     for (int i = 0; i < tempList.size(); i++) {
                         if (tempList.get(i).student_id.equals(id)) {
                             value_1 = tempList.get(i).activity_points;
@@ -890,7 +823,7 @@ public class Stats3 extends Fragment {
                 Integer val2 = 0;
 
                 Date date = new Date();
-                long time = date.getTime() - 21 * 86400000;
+                long time = date.getTime() - 21*86400000;
                 date.setTime(time);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -901,12 +834,12 @@ public class Stats3 extends Fragment {
                     if (i == 6 || i == 13 || i == 20 || i == 27) {
 
                         label = dateFormat.format(date);
-                        date.setTime(date.getTime() + 7 * 86400000);
+                        date.setTime(date.getTime() + 7*86400000);
 
-                        vals1.add("" + val1);
-                        vals2.add("" + val2);
+                        vals1.add(""+val1);
+                        vals2.add(""+val2);
 
-                        xVals.add("\'" + label + "\'");
+                        xVals.add("\'"+label+"\'");
 
                         val1 = 0;
                         val2 = 0;
@@ -914,12 +847,12 @@ public class Stats3 extends Fragment {
                 }
 
                 String webData = "xAxis: { title: {text:null}, categories:[";
-                webData += TextUtils.join(",", xVals);
-                webData += "]}, series:[{name:\'" + name + "\',data: [" + TextUtils.join(",", vals1) + "]},{name:\'" + compareTo.getText().toString() + "\',data: [" + TextUtils.join(",", vals2) + "]}]";
+                webData += TextUtils.join(",",xVals);
+                webData += "]}, series:[{name:\'"+name+"\',data: ["+TextUtils.join(",",vals1)+"]},{name:\'"+compareTo.getText().toString()+"\',data: ["+TextUtils.join(",",vals2)+"]}]";
 
                 String html = getHighhartsString();
-                html = html.replace("<<<REPLACE_DATA_HERE>>>", webData);
-                html = html.replace("height:1000px", "height:" + webviewHeight + "px");
+                html = html.replace("<<<REPLACE_DATA_HERE>>>",webData);
+                html = html.replace("height:1000px","height:"+webviewHeight+"px");
 
                 webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
             }
@@ -931,7 +864,7 @@ public class Stats3 extends Fragment {
         try {
 
             String path;
-            if (isBar) {
+            if(isBar) {
                 path = "highcharts/bargraph.html";
             } else {
                 path = "highcharts/linegraph.html";
@@ -941,7 +874,7 @@ public class Stats3 extends Fragment {
             InputStream json = DataManager.getInstance().mainActivity.getAssets().open(path);
             BufferedReader in = new BufferedReader(new InputStreamReader(json, "UTF-8"));
             String str;
-            while ((str = in.readLine()) != null) {
+            while ((str=in.readLine()) != null) {
                 buf.append(str);
             }
             in.close();
@@ -950,5 +883,51 @@ public class Stats3 extends Fragment {
             return "";
         }
 
+    }
+
+    private class SegmentClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            isSevenDays = !isSevenDays;
+
+            TextView segment_button_seven_days = (TextView) mainView.findViewById(R.id.segment_button_seven_days);
+            TextView segment_button_twentyeight_days = (TextView) mainView.findViewById(R.id.segment_button_twentyeight_days);
+
+            if (isSevenDays) {
+                Drawable activeDrawable = ContextCompat.getDrawable(getContext(), R.drawable.round_corners_segmented_active);
+                segment_button_seven_days.setBackground(activeDrawable);
+                segment_button_seven_days.setTextColor(Color.WHITE);
+
+                segment_button_twentyeight_days.setBackground(null);
+                segment_button_twentyeight_days.setBackgroundColor(Color.TRANSPARENT);
+                segment_button_twentyeight_days.setTextColor(Color.parseColor("#3792ef"));
+            } else {
+                Drawable activeDrawable = ContextCompat.getDrawable(getContext(), R.drawable.round_corners_segmented_active_right);
+                segment_button_twentyeight_days.setBackground(activeDrawable);
+                segment_button_twentyeight_days.setTextColor(Color.WHITE);
+
+                segment_button_seven_days.setBackground(null);
+                segment_button_seven_days.setBackgroundColor(Color.TRANSPARENT);
+                segment_button_seven_days.setTextColor(Color.parseColor("#3792ef"));
+            }
+
+            if (isSevenDays) {
+                description.setText(R.string.last_week_engagement);
+            } else {
+                description.setText(R.string.last_month_engagement);
+            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getData();
+                            ((MainActivity) getActivity()).hideProgressBar();
+                        }
+                    });
+                }
+            }).start();
+        }
     }
 }
