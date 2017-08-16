@@ -641,7 +641,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     final String dialogText;
                     if(isConnected) {
                         refreshCounter++;
-                        if(refreshCounter < 3){
+                       //refreshCounter is increased to 99 to improve the chance of a connection being made.
+                        if(refreshCounter < 99){
                             refreshData();
                         }else {
                             refreshCounter = 0;
