@@ -91,8 +91,6 @@ public class MainActivity extends FragmentActivity {
     public DrawerAdapter adapter;
     View menu, blackout;
     
-    
-    private LayoutInflater inflater;
     private Context context;
     private int statOpenedNum = 4;
     //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
