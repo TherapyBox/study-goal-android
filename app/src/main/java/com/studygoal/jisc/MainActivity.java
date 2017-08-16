@@ -90,6 +90,12 @@ public class MainActivity extends FragmentActivity {
     ListView navigationView;
     public DrawerAdapter adapter;
     View menu, blackout;
+    
+    
+    private LayoutInflater inflater;
+    private Context context;
+    private int statOpenedNum = 4;
+    //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
 
     @Override
     protected void onResume() {
@@ -470,8 +476,8 @@ public class MainActivity extends FragmentActivity {
                     }
 
                     selectedPosition = position;
-                    if (!adapter.statsOpened && position > 2) {
-                        selectedPosition = position + 3;
+                    if (!adapter.statsOpened && position > 3) {
+                        selectedPosition = position + statOpenedNum;
                     }
                     drawer.closeDrawer(GravityCompat.START);
 
