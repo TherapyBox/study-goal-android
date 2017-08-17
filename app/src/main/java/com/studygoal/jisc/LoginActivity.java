@@ -639,13 +639,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
                     boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
                     final String dialogText;
-                    if(isConnected) {
-                        refreshCounter++;
-                       //refreshCounter is increased to 99 to improve the chance of a connection being made.
-                        if(refreshCounter < 99){
-                            refreshData();
-                        }else {
-                            refreshCounter = 0;
+                    if (isConnected) {
+                        //refreshCounter is increased to 99 to improve the chance of a connection being made.
+                        while (refreshCounter < 99) {
+                            if (NetworkManager.getInstance().downloadInstitutions()) {
+                                refreshCounter = 0;
+                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        adapter.institutions = new Select().from(Institution.class).orderBy("name").execute();
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                                return;
+                            } else {
+                                refreshCounter++;
+                            }
+                            try {
+                                wait(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                         dialogText = getString(R.string.slow_internet);
                     } else {
@@ -671,7 +685,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     });
                 }
             }
-        }).start();
+        }).
+
+                start();
+
     }
 
     @Override
