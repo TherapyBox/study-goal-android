@@ -99,12 +99,20 @@ public class DrawerAdapter extends BaseAdapter {
             email.setText(DataManager.getInstance().user.email);
             TextView name = (TextView) convertView.findViewById(R.id.drawer_name);
             name.setTypeface(DataManager.getInstance().myriadpro_regular);
-            profile_pic = (ImageView) convertView.findViewById(R.id.imageView);
             name.setText(DataManager.getInstance().user.name);
-            if (DataManager.getInstance().user.profile_pic.equals(""))
-                Glide.with(context).load(R.drawable.profilenotfound2).transform(new CircleTransform(context)).into((ImageView) convertView.findViewById(R.id.imageView));
-            else
-                Glide.with(context).load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic).transform(new CircleTransform(context)).into((ImageView) convertView.findViewById(R.id.imageView));
+            profile_pic = (ImageView) convertView.findViewById(R.id.imageView);
+
+            if (DataManager.getInstance().user.profile_pic.equals("")) {
+                Glide.with(context)
+                        .load(R.drawable.profilenotfound2)
+                        .transform(new CircleTransform(context))
+                        .into(profile_pic);
+            } else {
+                Glide.with(context)
+                        .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                        .transform(new CircleTransform(context))
+                        .into(profile_pic);
+            }
         } else {
             if (statsOpened && position > 3 && position <= 3 + statOpenedNum) {
                 convertView = inflater.inflate(R.layout.nav_item_sub, parent, false);
@@ -204,6 +212,7 @@ public class DrawerAdapter extends BaseAdapter {
                 }
             }
         }
+
         return convertView;
     }
 }

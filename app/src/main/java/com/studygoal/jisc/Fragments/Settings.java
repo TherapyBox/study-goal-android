@@ -47,13 +47,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 
 public class Settings extends Fragment {
-
     TextView home_value;
     TextView language_value;
     ImageView profile_image;
     public Uri imageUri;
     ProgressBar profile_spinner;
-
 
     @Override
     public void onResume() {
@@ -183,7 +181,7 @@ public class Settings extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.e("Test", "Click Mamera");
-              if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Settings.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_updateprofileimage) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -291,28 +289,28 @@ public class Settings extends Fragment {
     }
 
     private void loadImageView(final DataManager manager) {
-        manager.mainActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                profile_spinner.setVisibility(View.VISIBLE);
+        manager.mainActivity.runOnUiThread(() -> {
+            profile_spinner.setVisibility(View.VISIBLE);
 
-                Glide.with(manager.mainActivity)
-                        .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
-                        .listener(new RequestListener<String, GlideDrawable>() {
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                return false;
-                            }
+            Glide.with(manager.mainActivity)
+                    .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                    .listener(new RequestListener<String, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
 
-                            @Override
-                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                profile_spinner.setVisibility(View.INVISIBLE);
-                                return false;
-                            }
-                        })
-                        .into(profile_image);
-                Glide.with(manager.mainActivity).load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic).transform(new CircleTransform(manager.mainActivity)).into(manager.mainActivity.adapter.profile_pic);
-            }
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            profile_spinner.setVisibility(View.INVISIBLE);
+                            return false;
+                        }
+                    })
+                    .into(profile_image);
+            Glide.with(manager.mainActivity)
+                    .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                    .transform(new CircleTransform(manager.mainActivity))
+                    .into(manager.mainActivity.adapter.profile_pic);
         });
     }
 
@@ -350,7 +348,7 @@ public class Settings extends Fragment {
         }
     }
 
-    @Subscribe (threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRefreshImageEvenFired(EventReloadImage eventReloadImage) {
         refresh_image();
     }

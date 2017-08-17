@@ -101,7 +101,10 @@ public class MainActivity extends FragmentActivity {
         DataManager.getInstance().checkForbidden = true;
 
         try {
-            Glide.with(DataManager.getInstance().mainActivity).load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic).transform(new CircleTransform(DataManager.getInstance().mainActivity)).into(DataManager.getInstance().mainActivity.adapter.profile_pic);
+            Glide.with(DataManager.getInstance().mainActivity)
+                    .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                    .transform(new CircleTransform(DataManager.getInstance().mainActivity))
+                    .into(DataManager.getInstance().mainActivity.adapter.profile_pic);
         } catch (Exception ignored) {
         }
     }
