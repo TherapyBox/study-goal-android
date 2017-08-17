@@ -47,20 +47,27 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 
 public class Settings extends Fragment {
-    TextView home_value;
-    TextView language_value;
-    ImageView profile_image;
-    public Uri imageUri;
-    ProgressBar profile_spinner;
+
+    private Uri mImageUri;
+
+    private TextView mHomeValue;
+
+    private TextView mLanguageValue;
+
+    private ImageView mProfileImage;
+
+    private ProgressBar mProfileSpinner;
 
     @Override
     public void onResume() {
         super.onResume();
+
         DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.settings));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(5);
 
         String selected_value = "";
+
         switch (DataManager.getInstance().home_screen.toLowerCase()) {
             case "feed": {
                 selected_value = getActivity().getString(R.string.feed);
@@ -79,8 +86,8 @@ public class Settings extends Fragment {
                 break;
             }
         }
-        home_value.setText(selected_value.toUpperCase());
 
+        mHomeValue.setText(selected_value.toUpperCase());
     }
 
     @Override
@@ -94,8 +101,8 @@ public class Settings extends Fragment {
 
         final TextView home = (TextView) mainView.findViewById(R.id.home);
         home.setTypeface(DataManager.getInstance().myriadpro_regular);
-        home_value = (TextView) mainView.findViewById(R.id.home_value);
-        home_value.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mHomeValue = (TextView) mainView.findViewById(R.id.home_value);
+        mHomeValue.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         String selected_value = "";
         switch (DataManager.getInstance().home_screen.toLowerCase()) {
@@ -116,7 +123,7 @@ public class Settings extends Fragment {
                 break;
             }
         }
-        home_value.setText(selected_value.toUpperCase());
+        mHomeValue.setText(selected_value.toUpperCase());
 
         TextView trophies = (TextView) mainView.findViewById(R.id.trophies);
         trophies.setTypeface(DataManager.getInstance().myriadpro_regular);
@@ -126,8 +133,8 @@ public class Settings extends Fragment {
 
         TextView language = (TextView) mainView.findViewById(R.id.language);
         language.setTypeface(DataManager.getInstance().myriadpro_regular);
-        language_value = (TextView) mainView.findViewById(R.id.language_value);
-        language_value.setTypeface(DataManager.getInstance().myriadpro_regular);
+        mLanguageValue = (TextView) mainView.findViewById(R.id.language_value);
+        mLanguageValue.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         ((TextView) mainView.findViewById(R.id.email_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
@@ -145,7 +152,7 @@ public class Settings extends Fragment {
         });
 
         if (DataManager.getInstance().language != null) {
-            language_value.setText(DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english).toUpperCase() : getString(R.string.welsh).toUpperCase());
+            mLanguageValue.setText(DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english).toUpperCase() : getString(R.string.welsh).toUpperCase());
         }
         mainView.findViewById(R.id.friends_layout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,7 +214,7 @@ public class Settings extends Fragment {
                 list.add(DataManager.getInstance().mainActivity.getString(R.string.camera));
                 list.add(DataManager.getInstance().mainActivity.getString(R.string.library));
 
-                listView.setAdapter(new GenericAdapter(getActivity(), home_value.getText().toString().toUpperCase(), list));
+                listView.setAdapter(new GenericAdapter(getActivity(), mHomeValue.getText().toString().toUpperCase(), list));
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -221,7 +228,7 @@ public class Settings extends Fragment {
                                 values.put(MediaStore.Images.Media.TITLE, "New Picture");
                                 values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
 
-                                imageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                                mImageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
                                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
@@ -274,12 +281,13 @@ public class Settings extends Fragment {
             }
         });
 
-        profile_image = (ImageView) mainView.findViewById(R.id.profile_picture);
-        profile_spinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
-//        Glide.with(this)
-//                .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
-//                .into(profile_image);
-        refresh_image();
+        mProfileImage = (ImageView) mainView.findViewById(R.id.profile_picture);
+        mProfileSpinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
+        mProfileSpinner.setVisibility(View.GONE);
+
+        Glide.with(this)
+                .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                .into(mProfileImage);
         return mainView;
     }
 
@@ -290,7 +298,7 @@ public class Settings extends Fragment {
 
     private void loadImageView(final DataManager manager) {
         manager.mainActivity.runOnUiThread(() -> {
-            profile_spinner.setVisibility(View.VISIBLE);
+            mProfileSpinner.setVisibility(View.VISIBLE);
 
             Glide.with(manager.mainActivity)
                     .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
@@ -302,11 +310,12 @@ public class Settings extends Fragment {
 
                         @Override
                         public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            profile_spinner.setVisibility(View.INVISIBLE);
+                            mProfileSpinner.setVisibility(View.INVISIBLE);
                             return false;
                         }
                     })
-                    .into(profile_image);
+                    .into(mProfileImage);
+
             Glide.with(manager.mainActivity)
                     .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
                     .transform(new CircleTransform(manager.mainActivity))
@@ -314,43 +323,37 @@ public class Settings extends Fragment {
         });
     }
 
-    private void refresh_image() {
+    private void reloadUserProfile() {
         final DataManager manager = DataManager.getInstance();
-        if (manager.user.isSocial) {
-            Integer response = NetworkManager.getInstance().loginSocial(manager.user.email, manager.user.password);
-            if (response != 200) {
-                return;
+
+        new Thread(() -> {
+            boolean needLoadImage = false;
+
+            if (manager.user.isSocial) {
+                Integer response = NetworkManager.getInstance().loginSocial(manager.user.email, manager.user.password);
+
+                if (response != 200) {
+                    return;
+                }
+
+                needLoadImage = true;
             }
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    loadImageView(manager);
-                }
-            }).start();
-        }
-        if (manager.user.isStaff) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    boolean success = NetworkManager.getInstance().loginStaff();
-                    if (success) loadImageView(manager);
-                }
-            }).start();
-        } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Boolean login = NetworkManager.getInstance().login();
-                    if (login)
-                        loadImageView(manager);
-                }
-            }).start();
-        }
+
+            if (manager.user.isStaff) {
+                needLoadImage = NetworkManager.getInstance().loginStaff();
+            } else {
+                needLoadImage = NetworkManager.getInstance().login();
+            }
+
+            if (needLoadImage) {
+                loadImageView(manager);
+            }
+        }).start();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRefreshImageEvenFired(EventReloadImage eventReloadImage) {
-        refresh_image();
+        reloadUserProfile();
     }
 
     @Override
@@ -368,10 +371,10 @@ public class Settings extends Fragment {
                 values.put(MediaStore.Images.Media.TITLE, "New Picture");
                 values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
 
-                imageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                mImageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
                 DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
             }
         }
