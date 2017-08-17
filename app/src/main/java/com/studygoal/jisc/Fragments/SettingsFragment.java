@@ -9,10 +9,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +34,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.studygoal.jisc.Adapters.GenericAdapter;
+import com.studygoal.jisc.Constants;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Friend;
@@ -44,9 +47,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class Settings extends Fragment {
+public class SettingsFragment extends Fragment {
+    private static final String TAG = SettingsFragment.class.getSimpleName();
 
     private Uri mImageUri;
 
@@ -189,7 +195,7 @@ public class Settings extends Fragment {
             public void onClick(View v) {
                 Log.e("Test", "Click Mamera");
                 if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Settings.this.getActivity());
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_updateprofileimage) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
@@ -224,13 +230,7 @@ public class Settings extends Fragment {
                                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
                                         102);
                             } else {
-                                ContentValues values = new ContentValues();
-                                values.put(MediaStore.Images.Media.TITLE, "New Picture");
-                                values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
-
-                                mImageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                Intent intent = getIntentGetPhotoFromCamera();
                                 DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
                             }
                         } else {
@@ -390,5 +390,40 @@ public class Settings extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+    }
+
+    private Intent getIntentGetPhotoFromCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            File photoFile = null;
+
+            try {
+                photoFile = createImageFile();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getActivity(), "com.studygoal.jisc.provider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            }
+        }
+
+        return takePictureIntent;
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                Constants.TEMP_IMAGE_FILE_NAME,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        DataManager manager = DataManager.getInstance();
+        manager.mainActivity.mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 }

@@ -1,5 +1,6 @@
 package com.studygoal.jisc;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -49,7 +50,7 @@ import com.studygoal.jisc.Fragments.FeedFragment;
 import com.studygoal.jisc.Fragments.Friends;
 import com.studygoal.jisc.Fragments.LogActivityHistory;
 import com.studygoal.jisc.Fragments.LogNewActivity;
-import com.studygoal.jisc.Fragments.Settings;
+import com.studygoal.jisc.Fragments.SettingsFragment;
 import com.studygoal.jisc.Fragments.Stats3;
 import com.studygoal.jisc.Fragments.StatsAttainment;
 import com.studygoal.jisc.Fragments.StatsAttedance;
@@ -77,12 +78,13 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 public class MainActivity extends FragmentActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final int CAMERA_REQUEST_CODE = 100;
 
     public DrawerLayout drawer;
     public RelativeLayout friend, settings, addTarget, send, timer, back;
-    Settings settings_fragment;
+    SettingsFragment settings_fragment;
     LogActivityHistory logFragment;
     public FeedFragment feedFragment;
     public boolean isLandscape = DataManager.getInstance().isLandscape;
@@ -94,6 +96,8 @@ public class MainActivity extends FragmentActivity {
     private Context context;
     private int statOpenedNum = 4;
     //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
+
+    public String mCurrentPhotoPath;
 
     @Override
     protected void onResume() {
@@ -253,7 +257,7 @@ public class MainActivity extends FragmentActivity {
                     Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     startActivity(intent);
                 } else {
-                    settings_fragment = new Settings();
+                    settings_fragment = new SettingsFragment();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.main_fragment, settings_fragment)
                             .addToBackStack(null)
@@ -409,7 +413,7 @@ public class MainActivity extends FragmentActivity {
                 } else if (selection.equals(getString(R.string.friends))) {
                     destination = new Friends();
                 } else if (selection.equals(getString(R.string.settings))) {
-                    destination = new Settings();
+                    destination = new SettingsFragment();
                 } else if (selection.equals(getString(R.string.graphs))) {
                     destination = new Stats3();
                 } else if (selection.equals(getString(R.string.points))) {
@@ -757,30 +761,29 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private void savebitmap(Bitmap bmp) {
+    private void saveBitmap(Bitmap bmp) {
         String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
         OutputStream outStream;
-
         File file = new File(extStorageDirectory, "temp.png");
+
         if (file.exists()) {
             file.delete();
             file = new File(extStorageDirectory, "temp.png");
         }
 
         try {
-
             int w = bmp.getWidth();
             int h = bmp.getHeight();
             int nw;
             int nh;
 
-            if (w >= 500 && h >= 500) {
+            if (w >= Constants.DEFAULT_PROFILE_IMAGE_SIZE && h >= Constants.DEFAULT_PROFILE_IMAGE_SIZE) {
                 if (w > h) {
-                    nw = 500;
-                    nh = (500 * h / w);
+                    nw = Constants.DEFAULT_PROFILE_IMAGE_SIZE;
+                    nh = (Constants.DEFAULT_PROFILE_IMAGE_SIZE * h / w);
                 } else {
-                    nh = 500;
-                    nw = (500 * w / h);
+                    nh = Constants.DEFAULT_PROFILE_IMAGE_SIZE;
+                    nw = (Constants.DEFAULT_PROFILE_IMAGE_SIZE * w / h);
                 }
             } else {
                 nw = w;
@@ -792,7 +795,6 @@ public class MainActivity extends FragmentActivity {
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
             outStream.flush();
             outStream.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -801,23 +803,20 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        if (intent == null) return;
 
-        if (requestCode == 100) {
+        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
             showProgressBar(null);
             Bitmap bitmap = null;
+            String path = mCurrentPhotoPath;
 
-            if (intent.getData() != null) {
-                final String path = getRealPathFromURI(MainActivity.this, intent.getData());
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                bitmap = BitmapFactory.decodeFile(path, options);
+            if (path != null) {
+                bitmap = BitmapFactory.decodeFile(path);
             } else if (intent.getExtras() != null && intent.getExtras().containsKey("data")) {
                 bitmap = (Bitmap) intent.getExtras().get("data");
             }
 
             if (bitmap != null) {
-                savebitmap(bitmap);
+                saveBitmap(bitmap);
                 final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
 
                 new Thread(() -> {
@@ -831,14 +830,16 @@ public class MainActivity extends FragmentActivity {
                     MainActivity.this.runOnUiThread(() -> hideProgressBar());
                 }).start();
             }
+
+            mCurrentPhotoPath = null;
         } else if (requestCode == 101) {
-            if (intent.getData() != null) {
+            if (intent != null && intent.getData() != null) {
                 showProgressBar(null);
                 final String path = getRealPathFromURI(MainActivity.this, intent.getData());
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(path, options);
-                savebitmap(bitmap);
+                saveBitmap(bitmap);
                 final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
 
                 new Thread(() -> {

@@ -448,7 +448,7 @@ public class NetworkManager {
 
                 Bitmap bm = BitmapFactory.decodeFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);
+                bm.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 
                 wr.write(baos.toByteArray());
                 wr.writeBytes(crlf + twoHyphens + boundary + twoHyphens + crlf);
