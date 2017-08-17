@@ -90,7 +90,7 @@ public class MainActivity extends FragmentActivity {
     ListView navigationView;
     public DrawerAdapter adapter;
     View menu, blackout;
-    
+
     private Context context;
     private int statOpenedNum = 4;
     //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
@@ -159,7 +159,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_postfeed) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -799,68 +799,55 @@ public class MainActivity extends FragmentActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (intent == null) return;
+
         if (requestCode == 100) {
-            Bitmap photo = (Bitmap) intent.getExtras().get("data");
-            savebitmap(photo);
-
-            final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
             showProgressBar(null);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (NetworkManager.getInstance().updateProfileImage(imagePath)) {
-                        MainActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-//                                settings_fragment.refresh_image();
-                                EventBus.getDefault().post(new EventReloadImage());
-                                hideProgressBar();
-                            }
-                        });
-                    }
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            hideProgressBar();
-                        }
-                    });
-                }
-            }).start();
-        } else if (requestCode == 101) {
+            Bitmap bitmap = null;
 
-            if (intent != null) {
-
-                final String imagePath = getRealPathFromURI(MainActivity.this, intent.getData());
-                showProgressBar(null);
-
+            if (intent.getData() != null) {
+                final String path = getRealPathFromURI(MainActivity.this, intent.getData());
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
+                bitmap = BitmapFactory.decodeFile(path, options);
+            } else if (intent.getExtras() != null && intent.getExtras().containsKey("data")) {
+                bitmap = (Bitmap) intent.getExtras().get("data");
+            }
+
+            if (bitmap != null) {
                 savebitmap(bitmap);
+                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
 
-                final String imagePath1 = Environment.getExternalStorageDirectory().toString() + "/temp.png";
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (NetworkManager.getInstance().updateProfileImage(imagePath1)) {
-                            MainActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-//                                    settings_fragment.refresh_image();
-                                    EventBus.getDefault().post(new EventReloadImage());
-                                    hideProgressBar();
-                                }
-                            });
-                        } else {
-
-                        }
-                        MainActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                hideProgressBar();
-                            }
+                new Thread(() -> {
+                    if (NetworkManager.getInstance().updateProfileImage(imagePath)) {
+                        MainActivity.this.runOnUiThread(() -> {
+                            //settings_fragment.refresh_image();
+                            EventBus.getDefault().post(new EventReloadImage());
+                            hideProgressBar();
                         });
                     }
+                    MainActivity.this.runOnUiThread(() -> hideProgressBar());
+                }).start();
+            }
+        } else if (requestCode == 101) {
+            if (intent.getData() != null) {
+                showProgressBar(null);
+                final String path = getRealPathFromURI(MainActivity.this, intent.getData());
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+                savebitmap(bitmap);
+                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
+
+                new Thread(() -> {
+                    if (NetworkManager.getInstance().updateProfileImage(imagePath)) {
+                        MainActivity.this.runOnUiThread(() -> {
+                            //settings_fragment.refresh_image();
+                            EventBus.getDefault().post(new EventReloadImage());
+                            hideProgressBar();
+                        });
+                    }
+
+                    MainActivity.this.runOnUiThread(() -> hideProgressBar());
                 }).start();
             }
         }

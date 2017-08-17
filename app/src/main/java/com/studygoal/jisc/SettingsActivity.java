@@ -6,12 +6,11 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -50,14 +49,14 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new ListMenuAdapter[]{ new ListMenuAdapter(this, 0) };
+        adapter = new ListMenuAdapter[]{new ListMenuAdapter(this, 0)};
         fragment = new ProfileFragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
 
-        ((TextView)findViewById(R.id.settings_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-        (fragmentTitle = (TextView)findViewById(R.id.fragment_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+        ((TextView) findViewById(R.id.settings_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+        (fragmentTitle = (TextView) findViewById(R.id.fragment_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
         list_menu = (ListView) findViewById(R.id.list_menu);
         list_menu.setAdapter(adapter[0]);
         list_menu.setOnItemClickListener(new SettingsItemClickListener());
@@ -67,7 +66,9 @@ public class SettingsActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (intent == null) { return; }
+        if (intent == null) {
+            return;
+        }
 
         if (requestCode == 100) {
             final String imagePath = getRealPathFromURI(fragment.imageUri);
@@ -96,7 +97,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         } else if (requestCode == 101) {
             Uri pickedImage = intent.getData();
-
             String[] filePath = {MediaStore.Images.Media.DATA};
             Cursor cursor = this.getContentResolver().query(pickedImage, filePath, null, null, null);
             cursor.moveToFirst();
@@ -155,7 +155,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private String getRealPathFromURI(Uri uri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = getContentResolver().query(uri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
@@ -178,16 +178,20 @@ public class SettingsActivity extends AppCompatActivity {
                         fragment = new ProfileFragment();
                         destination = fragment;
                         break;
-                    } case 1: {
+                    }
+                    case 1: {
                         destination = new Friends();
                         break;
-                    } case 2: {
+                    }
+                    case 2: {
                         destination = new HomeScreen();
                         break;
-                    } case 3: {
+                    }
+                    case 3: {
                         destination = new Trophies();
                         break;
-                    } case 4: {
+                    }
+                    case 4: {
                         destination = new LanguageScreen();
                         break;
                     }
