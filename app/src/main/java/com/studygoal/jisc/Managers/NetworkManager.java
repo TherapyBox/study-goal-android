@@ -440,15 +440,15 @@ public class NetworkManager {
                 wr.writeBytes(DataManager.getInstance().user.id);
 
                 wr.writeBytes(crlf + twoHyphens + boundary + crlf);
-                header = "Content-Disposition: attachment; name=\"image_data\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".png" + crlf;
+                header = "Content-Disposition: attachment; name=\"image_data\"; filename=" + DataManager.getInstance().user.id + "_" + System.currentTimeMillis() + ".jpg" + crlf;
                 wr.writeBytes(header);
 
-                header = "Content-Type: image/png" + crlf + crlf;
+                header = "Content-Type: image/jpg" + crlf + crlf;
                 wr.writeBytes(header);
 
                 Bitmap bm = BitmapFactory.decodeFile(path);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 
                 wr.write(baos.toByteArray());
                 wr.writeBytes(crlf + twoHyphens + boundary + twoHyphens + crlf);

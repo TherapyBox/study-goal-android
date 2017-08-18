@@ -764,11 +764,11 @@ public class MainActivity extends FragmentActivity {
     private void saveBitmap(Bitmap bmp) {
         String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
         OutputStream outStream;
-        File file = new File(extStorageDirectory, "temp.png");
+        File file = new File(extStorageDirectory, Constants.TEMP_IMAGE_FILE);
 
         if (file.exists()) {
             file.delete();
-            file = new File(extStorageDirectory, "temp.png");
+            file = new File(extStorageDirectory, Constants.TEMP_IMAGE_FILE);
         }
 
         try {
@@ -817,7 +817,7 @@ public class MainActivity extends FragmentActivity {
 
             if (bitmap != null) {
                 saveBitmap(bitmap);
-                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
+                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/" + Constants.TEMP_IMAGE_FILE;
 
                 new Thread(() -> {
                     if (NetworkManager.getInstance().updateProfileImage(imagePath)) {
@@ -840,7 +840,7 @@ public class MainActivity extends FragmentActivity {
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(path, options);
                 saveBitmap(bitmap);
-                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/temp.png";
+                final String imagePath = Environment.getExternalStorageDirectory().toString() + "/" + Constants.TEMP_IMAGE_FILE;
 
                 new Thread(() -> {
                     if (NetworkManager.getInstance().updateProfileImage(imagePath)) {

@@ -5,6 +5,8 @@ package com.studygoal.jisc;
  */
 public class Constants {
     public static final String TEMP_IMAGE_FILE_NAME = "temp_photo";
+    public static final String TEMP_IMAGE_FILE_EXT = ".jpg";
+    public static final String TEMP_IMAGE_FILE = TEMP_IMAGE_FILE_NAME + TEMP_IMAGE_FILE_EXT;
 
     public static final int DEFAULT_PROFILE_IMAGE_SIZE = 1024;
 }

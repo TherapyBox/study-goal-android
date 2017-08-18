@@ -284,6 +284,13 @@ public class SettingsFragment extends Fragment {
         mProfileImage = (ImageView) mainView.findViewById(R.id.profile_picture);
         mProfileSpinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
         mProfileSpinner.setVisibility(View.GONE);
+        boolean isLandscape = DataManager.getInstance().isLandscape;
+
+        if (isLandscape) {
+            mProfileImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        } else {
+            mProfileImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        }
 
         Glide.with(this)
                 .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
