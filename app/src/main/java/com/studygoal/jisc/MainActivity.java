@@ -12,6 +12,8 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -816,6 +818,7 @@ public class MainActivity extends FragmentActivity {
             }
 
             if (bitmap != null) {
+                bitmap = fixOrientation(path, bitmap);
                 saveBitmap(bitmap);
                 final String imagePath = Environment.getExternalStorageDirectory().toString() + "/" + Constants.TEMP_IMAGE_FILE;
 
@@ -855,6 +858,45 @@ public class MainActivity extends FragmentActivity {
                 }).start();
             }
         }
+    }
+
+    private Bitmap fixOrientation(String filePath, Bitmap bitmap) {
+        Bitmap result = bitmap;
+
+        try {
+            if (bitmap != null) {
+                if (isLandscape) {
+                    // no need rotate
+                } else {
+                    File imageFile = new File(filePath);
+                    ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                    int rotate = 0;
+
+                    switch (orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_270:
+                            rotate = 270;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_180:
+                            rotate = 180;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_90:
+                            rotate = 90;
+                            break;
+                    }
+
+                    if (rotate > 0) {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(rotate);
+                        result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
     }
 
     public static String getRealPathFromURI(Context context, Uri contentUri) {
