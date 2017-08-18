@@ -472,6 +472,15 @@ public class MainActivity extends FragmentActivity {
                     adapter.selected_image.setColorFilter(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
                     adapter.selected_text.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
 
+                     int staticMenuItems = 8;
+                        for(String menuItem: adapter.values){
+                            if (menuItem.equals(getString(R.string.check_in))){
+                                staticMenuItems++;
+                            }
+                        }
+                        int statOpenedNum = adapter.values.length - staticMenuItems;
+
+                    
                     if (adapter.values[position].equals(getString(R.string.stats))) {
                         return;
                     }
