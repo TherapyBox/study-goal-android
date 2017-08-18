@@ -231,7 +231,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         showProgressDialog(true);
                         if (NetworkManager.getInstance().checkIfUserRegistered()) {
                             if (NetworkManager.getInstance().login()) {
-                                DataManager.getInstance().institution = "1"
+                                DataManager.getInstance().institution = "1";
                                 DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk");
                                 showProgressDialog(false);
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
