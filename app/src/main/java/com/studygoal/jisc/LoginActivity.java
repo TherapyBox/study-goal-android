@@ -96,6 +96,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private int refreshCounter = 0;
 
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -589,111 +591,91 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         refreshData();
     }
 
-    private ProgressDialog progressDialog;
-
     private void showProgressDialog(final boolean show) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (progressDialog == null) {
-                    progressDialog = new ProgressDialog(LoginActivity.this);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setMessage("Logging in...");
-                    progressDialog.setCancelable(false);
+        runOnUiThread(() -> {
+            if (!isFinishing()) {
+                if (mProgressDialog == null) {
+                    mProgressDialog = new ProgressDialog(LoginActivity.this);
+                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    mProgressDialog.setMessage("Logging in...");
+                    mProgressDialog.setCancelable(false);
                 }
+
                 if (show) {
-                    progressDialog.show();
+                    if (!mProgressDialog.isShowing()) {
+                        mProgressDialog.show();
+                    }
                 } else {
-                    progressDialog.dismiss();
+                    if (mProgressDialog.isShowing()) {
+                        mProgressDialog.dismiss();
+                    }
                 }
             }
         });
     }
 
     public void refreshData() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                NetworkManager.getInstance().getAllTrophies();
-            }
-        }).start();
-
+        new Thread(() -> NetworkManager.getInstance().getAllTrophies()).start();
         final InstitutionsAdapter adapter = (InstitutionsAdapter) ((ListView) findViewById(R.id.list)).getAdapter();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (NetworkManager.getInstance().downloadInstitutions()) {
-                    LoginActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            adapter.institutions = new Select().from(Institution.class).orderBy("name").execute();
-                            adapter.notifyDataSetChanged();
-                        }
-                    });
-                    refreshCounter = 0;
-                } else {
-                    ConnectivityManager cm = (ConnectivityManager) LoginActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        new Thread(() -> {
+            if (NetworkManager.getInstance().downloadInstitutions()) {
+                LoginActivity.this.runOnUiThread(() -> {
+                    adapter.institutions = new Select().from(Institution.class).orderBy("name").execute();
+                    adapter.notifyDataSetChanged();
+                });
 
-                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                    boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-                    final String dialogText;
-                    if (isConnected) {
-                        //refreshCounter is increased to 99 to improve the chance of a connection being made.
-                        while (refreshCounter < 99) {
-                            if (NetworkManager.getInstance().downloadInstitutions()) {
-                                refreshCounter = 0;
-                                LoginActivity.this.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.institutions = new Select().from(Institution.class).orderBy("name").execute();
-                                        adapter.notifyDataSetChanged();
-                                    }
-                                });
-                                return;
-                            } else {
-                                refreshCounter++;
-                            }
-                            try {
-                                wait(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        dialogText = getString(R.string.slow_internet);
-                    } else {
-                        dialogText = getString(R.string.no_internet);
-                    }
+                refreshCounter = 0;
+            } else {
+                ConnectivityManager cm = (ConnectivityManager) LoginActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+                final String dialogText;
 
-                    LoginActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
-                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    refreshData();
-                                    dialog.dismiss();
-                                }
+                if (isConnected) {
+                    //refreshCounter is increased to 99 to improve the chance of a connection being made.
+                    while (refreshCounter < 99) {
+                        if (NetworkManager.getInstance().downloadInstitutions()) {
+                            refreshCounter = 0;
+
+                            LoginActivity.this.runOnUiThread(() -> {
+                                adapter.institutions = new Select().from(Institution.class).orderBy("name").execute();
+                                adapter.notifyDataSetChanged();
                             });
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
-                            DataManager.getInstance().toast = false;
+                            return;
+                        } else {
+                            refreshCounter++;
                         }
-                    });
+
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    dialogText = getString(R.string.slow_internet);
+                } else {
+                    dialogText = getString(R.string.no_internet);
                 }
+
+                LoginActivity.this.runOnUiThread(() -> {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
+                    alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
+                        refreshData();
+                        dialog.dismiss();
+                    });
+
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    DataManager.getInstance().toast = false;
+                });
             }
-        }).
-
-                start();
-
+        }).start();
     }
 
     @Override
     public void onBackPressed() {
-
         if (loginStep3.getVisibility() == View.VISIBLE) {
             loginStep3.setVisibility(View.GONE);
 
@@ -735,12 +717,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             email = acct.getEmail();
             socialID = acct.getId();
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loginSocial();
-                }
-            });
+            runOnUiThread(() -> loginSocial());
 
         } else {
             Log.e("JISC", "handleSignInResult:" + result.getStatus().getResolution());
@@ -753,7 +730,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     void loginSocial() {
-
         Integer response = NetworkManager.getInstance().loginSocial(email, socialID);
 
         if (response == 200) {
