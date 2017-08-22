@@ -456,4 +456,6 @@
     <string name="gps_network_not_enabled">Turn on location services to use this feature.</string>
     <string name="open_location_settings">Take me to settings</string>
 
+    <string name="attainment_not_data">There is no attainment data to show</string>
+
 </resources>
