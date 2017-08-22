@@ -234,6 +234,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 @Override
                 public void run() {
                     showProgressDialog(true);
+                    
                     if (NetworkManager.getInstance().checkIfUserRegistered()) {
                         if (NetworkManager.getInstance().login()) {
                             DataManager.getInstance().institution = "1";
@@ -245,9 +246,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             return;
                         }
                     }
-                    SafeToast.makeText(getApplicationContext(),
+
+                    runOnUiThread(() -> SafeToast.makeText(getApplicationContext(),
                             getString(R.string.slow_internet),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show());
+
                     showProgressDialog(false);
                 }
             }).start();
@@ -584,7 +587,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         new Thread(() -> NetworkManager.getInstance().getAllTrophies()).start();
         final InstitutionsAdapter adapter = (InstitutionsAdapter) ((ListView) findViewById(R.id.list)).getAdapter();
 
-        // TODO:
         new Thread(() -> {
             List<Institution> items = getInstitution();
 
