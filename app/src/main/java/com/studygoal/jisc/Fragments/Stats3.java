@@ -344,11 +344,11 @@ public class Stats3 extends Fragment {
                 //switch between bar / graph
                 if (isBar){
                     isBar = false;
-                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
+                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
 
                 } else {
                     isBar = true;
-                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bar_graph));
+                    ((ImageView)v).setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.line_graph));
                 }
 
                 setData();
