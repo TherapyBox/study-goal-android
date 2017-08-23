@@ -87,6 +87,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private int mRefreshCounter = 0;
     private String mEmail;
     private String mSocialID;
+    private boolean mIsRefreshing = false;
 
     private Institution mSelectedInstitution;
 
@@ -163,8 +164,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
                         alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
                         alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
+                            mRefreshCounter = 0;
+
                             if (mRefreshCounter >= Constants.LOGIN_COUNT_CONNECTION_TRY) {
-                                mRefreshCounter = 0;
                                 refreshData();
                             }
 
@@ -587,63 +589,70 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         new Thread(() -> NetworkManager.getInstance().getAllTrophies()).start();
         final InstitutionsAdapter adapter = (InstitutionsAdapter) ((ListView) findViewById(R.id.list)).getAdapter();
 
-        new Thread(() -> {
-            List<Institution> items = getInstitution();
+        if (!mIsRefreshing) {
+            mIsRefreshing = true;
+            new Thread(() -> {
+                List<Institution> items = getInstitution();
 
-            if (items != null && items.size() > 0) {
-                LoginActivity.this.runOnUiThread(() -> {
-                    adapter.updateItems(items);
-                });
+                if (items != null && items.size() > 0) {
+                    LoginActivity.this.runOnUiThread(() -> {
+                        adapter.updateItems(items);
+                    });
 
-                mRefreshCounter = 0;
-            } else {
-                final String dialogText;
+                    mRefreshCounter = 0;
+                } else {
+                    final String dialogText;
 
-                if (isConnected()) {
-                    //refreshCounter is increased to 99 to improve the chance of a connection being made.
-                    while (mRefreshCounter < Constants.LOGIN_COUNT_CONNECTION_TRY) {
-                        List<Institution> institution = getInstitution();
+                    if (isConnected()) {
+                        //refreshCounter is increased to 99 to improve the chance of a connection being made.
+                        while (mRefreshCounter < Constants.LOGIN_COUNT_CONNECTION_TRY) {
+                            List<Institution> institution = getInstitution();
 
-                        if (institution != null && institution.size() > 0) {
-                            mRefreshCounter = 0;
+                            if (institution != null && institution.size() > 0) {
+                                mRefreshCounter = 0;
 
-                            LoginActivity.this.runOnUiThread(() -> {
-                                adapter.updateItems(institution);
-                            });
-                            return;
-                        } else {
-                            mRefreshCounter++;
+                                LoginActivity.this.runOnUiThread(() -> {
+                                    adapter.updateItems(institution);
+                                });
+
+                                mIsRefreshing = false;
+                                return;
+                            } else {
+                                mRefreshCounter++;
+                            }
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
 
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        dialogText = getString(R.string.slow_internet);
+                    } else {
+                        dialogText = getString(R.string.no_internet);
                     }
 
-                    dialogText = getString(R.string.slow_internet);
-                } else {
-                    dialogText = getString(R.string.no_internet);
+                    LoginActivity.this.runOnUiThread(() -> {
+                        if (!isFinishing()) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
+                            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
+                                mRefreshCounter = 0;
+                                refreshData();
+                                dialog.dismiss();
+                            });
+
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+                            DataManager.getInstance().toast = false;
+                        }
+                    });
                 }
 
-                LoginActivity.this.runOnUiThread(() -> {
-                    if (!isFinishing()) {
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
-                        alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
-                            mRefreshCounter = 0;
-                            refreshData();
-                            dialog.dismiss();
-                        });
-
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
-                        DataManager.getInstance().toast = false;
-                    }
-                });
-            }
-        }).start();
+                mIsRefreshing = false;
+            }).start();
+        }
     }
 
     @Override
