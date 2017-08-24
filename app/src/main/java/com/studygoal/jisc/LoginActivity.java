@@ -3,7 +3,6 @@ package com.studygoal.jisc;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -11,7 +10,6 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -93,8 +91,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private Institution mSelectedInstitution;
 
-    private Handler mHandler;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,8 +98,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         DataManager.getInstance().context = getApplicationContext();
         DataManager.getInstance().init();
         DataManager.getInstance().currActivity = this;
-
-        mHandler = new Handler();
 
         mIsStaff = false;
         mRememberMe = false;
@@ -238,29 +232,26 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 //                String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0ODg0NDkxNzksImp0aSI6IjdnOHFHVWlDKzRIdTdyN2ZUcTBOcldjaUpGTzByR1wvdUhpZVhvN0NBSjZvPSIsImlzcyI6Imh0dHA6XC9cL3NwLmRhdGFcL2F1dGgiLCJuYmYiOjE0ODg0NDkxNjksImV4cCI6MTQ5MjU5NjM2OSwiZGF0YSI6eyJlcHBuIjoiIiwicGlkIjoiczE1MTI0OTNAZ2xvcy5hYy51ayIsImFmZmlsaWF0aW9uIjoic3RhZmZAZ2xvcy5hYy51ayJ9fQ.xO_Yk6ZgTWgg0UHVXglFKD1tMP2wq98b8IU4alaGQvjtlYcjoz5W8gZbAX0Gcktl0nDs_bkvsB1g5OaYkkY6yg";
             DataManager.getInstance().set_jwt(token);
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    showProgressDialog(true);
+            new Thread(() -> {
+                showProgressDialog(true);
 
-                    if (NetworkManager.getInstance().checkIfUserRegistered()) {
-                        if (NetworkManager.getInstance().login()) {
-                            DataManager.getInstance().institution = "1";
-                            DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk");
-                            showProgressDialog(false);
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            LoginActivity.this.finish();
-                            return;
-                        }
+                if (NetworkManager.getInstance().checkIfUserRegistered()) {
+                    if (NetworkManager.getInstance().login()) {
+                        DataManager.getInstance().institution = "1";
+                        DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk");
+                        showProgressDialog(false);
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        LoginActivity.this.finish();
+                        return;
                     }
-
-                    runOnUiThread(() -> SafeToast.makeText(getApplicationContext(),
-                            getString(R.string.slow_internet),
-                            Toast.LENGTH_SHORT).show());
-
-                    showProgressDialog(false);
                 }
+
+                runOnUiThread(() -> SafeToast.makeText(getApplicationContext(),
+                        getString(R.string.slow_internet),
+                        Toast.LENGTH_SHORT).show());
+
+                showProgressDialog(false);
             }).start();
 
 
@@ -273,6 +264,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if (url.contains("?{")) {
                     mWebView.setVisibility(View.INVISIBLE);
                     String json = url.split("\\?")[1];
+
                     try {
                         JSONObject jsonObject = new JSONObject(java.net.URLDecoder.decode(json, "UTF-8"));
 
@@ -283,43 +275,49 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         if (LoginActivity.this.mRememberMe) {
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", DataManager.getInstance().get_jwt()).apply();
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_checked", "yes").apply();
+
                             if (LoginActivity.this.mIsStaff) {
                                 getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_staff", "yes").apply();
                             }
                         }
 
                         if (LoginActivity.this.mIsStaff) {
-                            if (NetworkManager.getInstance().checkIfStaffRegistered()) {
-                                if (NetworkManager.getInstance().loginStaff()) {
-                                    DataManager.getInstance().institution = mSelectedInstitution.name;
-                                    getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    LoginActivity.this.finish();
+                            new Thread(() -> {
+                                if (NetworkManager.getInstance().checkIfStaffRegistered()) {
+                                    if (NetworkManager.getInstance().loginStaff()) {
+                                        DataManager.getInstance().institution = mSelectedInstitution.name;
+                                        getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        LoginActivity.this.finish();
+                                    } else {
+                                        //TODO: complete login staff workflow
+                                    }
                                 } else {
-                                    //TODO: complete login staff workflow
+                                    //TODO: register staff
                                 }
-                            } else {
-                                //TODO: register staff
-                            }
+                            }).start();
                         } else {
-                            if (NetworkManager.getInstance().checkIfUserRegistered()) {
-                                if (NetworkManager.getInstance().login()) {
-                                    DataManager.getInstance().institution = mSelectedInstitution.name;
-                                    getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    LoginActivity.this.finish();
+                            new Thread(() -> {
+                                if (NetworkManager.getInstance().checkIfUserRegistered()) {
+                                    if (NetworkManager.getInstance().login()) {
+                                        DataManager.getInstance().institution = mSelectedInstitution.name;
+                                        getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        LoginActivity.this.finish();
+                                    } else {
+                                        //TODO: Need more information about the register flow so i can deal with other situations
+                                    }
                                 } else {
-                                    //TODO: Need more information about the register flow so i can deal with other situations
+                                    runOnUiThread(() -> {
+                                        //TODO: register student
+                                        mWebView.loadUrl("https://sp.data.alpha.jisc.ac.uk/Shibboleth.sso/Login?entityID=https://" + mSelectedInstitution.url +
+                                                "&target=https://sp.data.alpha.jisc.ac.uk/secure/register/form.php?u=" + DataManager.getInstance().get_jwt());
+                                        mWebView.setVisibility(View.VISIBLE);
+                                    });
                                 }
-
-                            } else {
-                                //TODO: register student
-                                mWebView.loadUrl("https://sp.data.alpha.jisc.ac.uk/Shibboleth.sso/Login?entityID=https://" + mSelectedInstitution.url +
-                                        "&target=https://sp.data.alpha.jisc.ac.uk/secure/register/form.php?u=" + DataManager.getInstance().get_jwt());
-                                mWebView.setVisibility(View.VISIBLE);
-                            }
+                            }).start();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -411,37 +409,39 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 } else {
                     //continue with login process
                     DataManager.getInstance().set_jwt(jwt);
+                    showProgressBar();
 
-                    if (is_staff.equals("yes")) {
-                        if (NetworkManager.getInstance().checkIfStaffRegistered()) {
-                            if (NetworkManager.getInstance().loginStaff()) {
-                                DataManager.getInstance().institution = is_institution;
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                LoginActivity.this.finish();
+                    new Thread(() -> {
+                        if (is_staff.equals("yes")) {
+                            if (NetworkManager.getInstance().checkIfStaffRegistered()) {
+                                if (NetworkManager.getInstance().loginStaff()) {
+                                    DataManager.getInstance().institution = is_institution;
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    LoginActivity.this.finish();
+                                } else {
+                                    //TODO: complete login staff workflow
+                                }
                             } else {
-                                //TODO: complete login staff workflow
+                                //TODO: register staff workflow
                             }
                         } else {
-                            //TODO: register staff workflow
-                        }
-                    } else {
-                        if (NetworkManager.getInstance().checkIfUserRegistered()) {
-                            if (NetworkManager.getInstance().login()) {
-                                DataManager.getInstance().institution = is_institution;
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                LoginActivity.this.finish();
-                            } else {
-                                //TODO: Need more information about the register flow so i can deal with other situations
-                            }
+                            if (NetworkManager.getInstance().checkIfUserRegistered()) {
+                                if (NetworkManager.getInstance().login()) {
+                                    DataManager.getInstance().institution = is_institution;
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    LoginActivity.this.finish();
+                                } else {
+                                    //TODO: Need more information about the register flow so i can deal with other situations
+                                }
 
-                        } else {
-                            //TODO: register student worflow
+                            } else {
+                                //TODO: register student worflow
+                            }
                         }
-                    }
+                    }).start();
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -523,12 +523,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if (!loginResult.getRecentlyGrantedPermissions().contains("email")) {
                     android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
                     alertDialogBuilder.setMessage(R.string.facebook_error_email);
-                    alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                    alertDialogBuilder.setNegativeButton("OK", (dialog, which) -> dialog.dismiss());
                     android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
                     alertDialog.show();
                     return;
@@ -666,7 +661,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-
     public void showProgressBar() {
         findViewById(R.id.blackout).setVisibility(View.VISIBLE);
         findViewById(R.id.blackout).setOnClickListener(null);
@@ -722,23 +716,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (response == 403) {
             android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
             alertDialogBuilder.setMessage(R.string.social_login_error);
-            alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            alertDialogBuilder.setNegativeButton("OK", (dialog, which) -> dialog.dismiss());
             android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
         } else {
             android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
             alertDialogBuilder.setMessage(R.string.something_went_wrong);
-            alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            alertDialogBuilder.setNegativeButton("OK", (dialog, which) -> dialog.dismiss());
             android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
         }
