@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -88,8 +89,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private String mEmail;
     private String mSocialID;
     private boolean mIsRefreshing = false;
+    private boolean mFistTimeConnectionProblem = true;
 
     private Institution mSelectedInstitution;
+
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +102,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         DataManager.getInstance().context = getApplicationContext();
         DataManager.getInstance().init();
         DataManager.getInstance().currActivity = this;
+
+        mHandler = new Handler();
 
         mIsStaff = false;
         mRememberMe = false;
@@ -601,11 +607,19 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
                     mRefreshCounter = 0;
                 } else {
-                    final String dialogText;
+                    boolean isConnectionIssue = false;
 
-                    if (isConnected()) {
-                        //refreshCounter is increased to 99 to improve the chance of a connection being made.
-                        while (mRefreshCounter < Constants.LOGIN_COUNT_CONNECTION_TRY) {
+                    //refreshCounter is increased to 99 to improve the chance of a connection being made.
+                    while (mRefreshCounter < Constants.LOGIN_COUNT_CONNECTION_TRY) {
+                        if (!isConnected()) {
+                            if (mFistTimeConnectionProblem) {
+                                showBadConnectDialog(getString(R.string.no_internet));
+                            }
+
+                            mFistTimeConnectionProblem = false;
+                            isConnectionIssue = true;
+                            mRefreshCounter++;
+                        } else {
                             List<Institution> institution = getInstitution();
 
                             if (institution != null && institution.size() > 0) {
@@ -621,33 +635,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 mRefreshCounter++;
                             }
 
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                            isConnectionIssue = false;
                         }
 
-                        dialogText = getString(R.string.slow_internet);
-                    } else {
-                        dialogText = getString(R.string.no_internet);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
 
-                    LoginActivity.this.runOnUiThread(() -> {
-                        if (!isFinishing()) {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + dialogText + "</font>"));
-                            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
-                                mRefreshCounter = 0;
-                                refreshData();
-                                dialog.dismiss();
-                            });
-
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            alertDialog.show();
-                            DataManager.getInstance().toast = false;
-                        }
-                    });
+                    final String dialogText = isConnectionIssue ? getString(R.string.no_internet) : getString(R.string.slow_internet);
+                    showBadConnectDialog(dialogText);
                 }
 
                 mIsRefreshing = false;
@@ -773,5 +772,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
 
         return result;
+    }
+
+    private void showBadConnectDialog(String message) {
+        LoginActivity.this.runOnUiThread(() -> {
+            if (!isFinishing()) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
+                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
+                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
+                    mRefreshCounter = 0;
+                    refreshData();
+                    dialog.dismiss();
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+                DataManager.getInstance().toast = false;
+            }
+        });
     }
 }
