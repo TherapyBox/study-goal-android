@@ -16,7 +16,7 @@
             android:layout_margin="16dp"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <RadioButton
                 android:id="@+id/target_recurring"
