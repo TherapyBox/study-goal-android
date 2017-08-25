@@ -106,6 +106,9 @@ public class NetworkManager {
         setCertificate();
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(logging)
+                .connectTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
                 .sslSocketFactory(this.context.getSocketFactory())
                 .build();
     }
@@ -3583,7 +3586,7 @@ public class NetworkManager {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<String> futureResult = executorService.submit(new downloadInstitutions());
         try {
-            String result = futureResult.get();
+            String result = futureResult.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
             return result.equals("Success");
         } catch (Exception e) {
             e.printStackTrace();
