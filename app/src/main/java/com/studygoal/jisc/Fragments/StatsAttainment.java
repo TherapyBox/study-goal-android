@@ -81,9 +81,23 @@ public class StatsAttainment extends Fragment {
             NetworkManager.getInstance().getAssignmentRanking();
             mAdapter.list = new Select().from(Attainment.class).execute();
 
-            for (int i = 0; i < mAdapter.list.size(); i++) {
-                if (Integer.parseInt(mAdapter.list.get(i).percent.substring(0, mAdapter.list.get(i).percent.length() - 1)) == 0) {
-                    mAdapter.list.remove(i);
+            if (mAdapter.list.size() > 0) {
+                for (int i = 0; i < mAdapter.list.size(); i++) {
+                    if (mAdapter.list.get(i).percent != null && !mAdapter.list.get(i).percent.isEmpty()) {
+                        String stringIndex = mAdapter.list.get(i).percent.substring(0, mAdapter.list.get(i).percent.length() - 1);
+
+                        try {
+                            if (stringIndex != null && !stringIndex.isEmpty()) {
+                                int index = Integer.parseInt(stringIndex);
+
+                                if (index == 0) {
+                                    mAdapter.list.remove(i);
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
 
