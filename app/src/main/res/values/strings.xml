@@ -108,11 +108,11 @@
     <string name="language">Language</string>
     <string name="course_engagement">Course Engagement</string>
     <string name="attainment">Attainment</string>
-    <string name="points">Points</string>
+    <string name="points">Activity Points</string>
     <string name="activity_points">Activity Points</string>
-    <string name="leader_board">Leader Board</string>
+    <string name="leader_board">Engagement Leaderboard</string>
     <string name="events_attended">Events Attended</string>
-    <string name="attendance">Attendance</string>
+    <string name="attendance">Attendance Summary</string>
     <string name="this_week">This Week</string>
     <string name="period">Period</string>
     <string name="compare_to">Compare to</string>
@@ -365,7 +365,7 @@
     <string name="friend_privacy_settings">Friend Privacy Settings</string>
     <string name="less_than_1_minute">less than 1 minute</string>
     <string name="of">of</string>
-    <string name="graphs">"Graphs: VLE Activity"</string>
+    <string name="graphs">"VLE Activity"</string>
 
     <string name="attainment_refreshed">Attainments refreshed!</string>
     <string name="activity_paused">Activity paused</string>
