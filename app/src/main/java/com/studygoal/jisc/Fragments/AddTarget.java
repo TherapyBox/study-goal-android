@@ -8,7 +8,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Editable;
 import android.text.Html;
@@ -50,7 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AddTarget extends Fragment {
+public class AddTarget extends BaseFragment {
 
     public Boolean isInEditMode = false;
     public Targets item;
@@ -479,8 +478,10 @@ public class AddTarget extends Fragment {
         final ArrayList<String> items = new ArrayList<>();
         items.add(DataManager.getInstance().mainActivity.getString(R.string.any_module));
         List<Module> modules = new Select().from(Module.class).execute();
-        for (int i = 0; i < modules.size(); i++)
+
+        for (int i = 0; i < modules.size(); i++) {
             items.add(modules.get(i).name);
+        }
 
         if (DataManager.getInstance().user.isSocial) {
             items.add(AddTarget.this.getActivity().getString(R.string.add_module));
@@ -488,8 +489,7 @@ public class AddTarget extends Fragment {
 
         listView.setAdapter(new GenericAdapter(DataManager.getInstance().mainActivity, mIn.getText().toString(), items));
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            if (DataManager.getInstance().user.isSocial
-                    && position == items.size() - 1) {
+            if (DataManager.getInstance().user.isSocial&& position == items.size() - 1) {
                 //add new module
                 EditText add_module_edit_text = (EditText) mAddModuleLayout.findViewById(R.id.add_module_edit_text);
                 add_module_edit_text.setText("");
@@ -497,6 +497,7 @@ public class AddTarget extends Fragment {
                 dialog.dismiss();
             } else {
                 mIn.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                mBinding.addtargetInTextSingle.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
                 dialog.dismiss();
             }
         });
@@ -653,14 +654,14 @@ public class AddTarget extends Fragment {
 
     private void onAddTargetSingleSave() {
         // TODO: need implement saving of single target
-//        View view = getActivity().getCurrentFocus();
-//
-//        if (view != null) {
-//            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-//            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-//        }
-//
-//        if (isInEditMode) {
+        View view = getActivity().getCurrentFocus();
+
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
+        if (isInEditMode) {
 //            if (DataManager.getInstance().user.isDemo) {
 //                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
 //                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
@@ -728,68 +729,72 @@ public class AddTarget extends Fragment {
 //                    }
 //                }).start();
 //            }
-//        } else {
-//            if (DataManager.getInstance().user.isDemo) {
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
-//                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addtarget) + "</font>"));
-//                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
-//                AlertDialog alertDialog = alertDialogBuilder.create();
-//                alertDialog.show();
-//                return;
-//            }
+        } else {
+            if (DataManager.getInstance().user.isDemo) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
+                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addtarget) + "</font>"));
+                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+                return;
+            }
+
+//            Module module = ((new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle()));
+//            String id;
 //
-//            int total_time = Integer.parseInt(mHours.getText().toString()) * 60 + Integer.parseInt(mMinutes.getText().toString());
-//
-//            if (total_time == 0) {
-//                Snackbar.make(mBody, R.string.fail_to_add_target_insufficient_time, Snackbar.LENGTH_LONG).show();
-//                return;
+//            if (module == null) {
+//                id = "";
+//            } else if (module.id == null) {
+//                id = "";
 //            } else {
-//                Module module = ((new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle()));
-//                String id;
-//                if (module == null) id = "";
-//                else if (module.id == null) id = "";
-//                else id = module.id;
-//                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?", mEvery.getText().toString()).and("module_id = ?", id).exists()) {
-//                    Snackbar.make(mBody, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
-//                    return;
-//                }
-//                final HashMap<String, String> params = new HashMap<>();
-//                params.put("student_id", DataManager.getInstance().user.id);
-//                params.put("activity_type", DataManager.getInstance().api_values.get(mActivityType.getText().toString()));
-//                params.put("activity", DataManager.getInstance().api_values.get(mChooseActivity.getText().toString()));
-//                params.put("total_time", total_time + "");
-//                params.put("time_span", DataManager.getInstance().api_values.get(mEvery.getText().toString().toLowerCase()));
-//                if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase()))
-//                    params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
-//                if (mBecause.getText().toString().length() > 0)
-//                    params.put("because", mBecause.getText().toString());
-//
-//                System.out.println("ADD_TARGET: " + params.toString());
-//                DataManager.getInstance().mainActivity.showProgressBar(null);
-//
-//                new Thread(() -> {
-//                    if (NetworkManager.getInstance().addTarget(params)) {
-//                        NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
-//                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                DataManager.getInstance().mainActivity.hideProgressBar();
-//                                DataManager.getInstance().mainActivity.onBackPressed();
-////                                            Snackbar.make(body, R.string.target_saved, Snackbar.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    } else {
-//                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                (DataManager.getInstance().mainActivity).hideProgressBar();
-//                                Snackbar.make(mBody, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    }
-//                }).start();
+//                id = module.id;
 //            }
-//        }
+
+            // TODO: Check if exist in DB.
+//            if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("module_id = ?", id).exists()) {
+//                Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
+//                return;
+//            }
+
+            Calendar calendar = Calendar.getInstance();
+            String endDate = Utils.formatDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("student_id", DataManager.getInstance().user.id);
+            params.put("end_date", endDate);
+
+            if (!mBinding.addtargetInTextViewSingle.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
+                params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mBinding.addtargetInTextViewSingle.getText().toString()).executeSingle())).id);
+            }
+
+            if (mBecause.getText().toString().length() > 0) {
+                params.put("description", mBinding.addtargetEdittextMyGoalSingle.getText().toString());
+            }
+
+            if (mBinding.addtargetEdittextBecauseSingle.getText().toString().length() > 0) {
+                params.put("reason", mBinding.addtargetEdittextBecauseSingle.getText().toString());
+            }
+
+            System.out.println("ADD_SINGLE_TARGET: " + params.toString());
+            DataManager.getInstance().mainActivity.showProgressBar(null);
+
+            new Thread(() -> {
+                if (NetworkManager.getInstance().addToTask(params)) {
+                    // TODO: need update
+                    //NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
+
+                    runOnUiThread(() -> {
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                        DataManager.getInstance().mainActivity.onBackPressed();
+                    });
+                } else {
+                    runOnUiThread(() -> {
+                        (DataManager.getInstance().mainActivity).hideProgressBar();
+                        Snackbar.make(mRoot, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                    });
+                }
+            }).start();
+        }
     }
 
     private void applyTypeface() {

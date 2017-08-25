@@ -2778,6 +2778,72 @@ public class NetworkManager {
         }
     }
 
+    public boolean addToTask(HashMap<String, String> params) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future_result = executorService.submit(new addTodoTask(params));
+
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class addTodoTask implements Callable<Boolean> {
+
+        HashMap<String, String> params;
+
+        addTodoTask(HashMap<String, String> params) {
+            params.put("language", language);
+            this.params = params;
+            if (DataManager.getInstance().user.isSocial)
+                this.params.put("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"));
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_add_todo_task";
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                String urlParameters = "";
+                Iterator it = params.entrySet().iterator();
+                for (int i = 0; it.hasNext(); i++) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    if (i == 0)
+                        urlParameters += entry.getKey() + "=" + entry.getValue();
+                    else
+                        urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
+                }
+
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    Log.e("addTarget", "ResponseCode = " + responseCode);
+                    return false;
+                }
+                System.out.println(urlParameters);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
     public boolean getTargets(String student_id) {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<Boolean> future = executorService.submit(new getTargets(student_id));
