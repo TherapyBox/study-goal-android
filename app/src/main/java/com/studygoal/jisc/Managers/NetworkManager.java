@@ -86,7 +86,6 @@ public class NetworkManager {
     private Context appContext;
     private ExecutorService executorService;
 
-    public String no_https_host = "http://stuapp.analytics.alpha.jisc.ac.uk/";
     public String host = "https://stuapp.analytics.alpha.jisc.ac.uk/";
 
     HttpLoggingInterceptor logging = new HttpLoggingInterceptor()
