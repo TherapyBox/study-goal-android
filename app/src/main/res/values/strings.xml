@@ -244,6 +244,7 @@
     <string name="invalid_email_or_password">Invalid Email or Password</string>
     <string name="press_back_again_to_exit_app">Press back again to exit application</string>
     <string name="in">in</string>
+    <string name="module_in">Choose Module</string>
     <string name="days">days</string>
     <string name="notes">Notes</string>
     <string name="add_notes">Add Notes</string>
