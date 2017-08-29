@@ -383,7 +383,7 @@
                                                     android:layout_gravity="center"
                                                     android:layout_marginStart="10dp"
                                                     android:layout_weight="4.5"
-                                                    android:text="@string/in"
+                                                    android:text="@string/module_in"
                                                     android:textColor="@color/default_blue"
                                                     android:textSize="18sp" />
 
