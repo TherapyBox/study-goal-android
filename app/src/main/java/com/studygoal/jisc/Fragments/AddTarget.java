@@ -42,6 +42,7 @@ import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.studygoal.jisc.databinding.TargetAddTargetBinding;
+import com.studygoal.jisc.Fragments.DatePickerForTargets;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -830,7 +831,7 @@ public class AddTarget extends BaseFragment {
     }
 
     private void onSelectDate() {
-        DatePickerFragment newFragment = new DatePickerFragment();
+        DatePickerForTargets newFragment = new DatePickerForTargets();
         newFragment.setListener((view, year, monthOfYear, dayOfMonth) -> {
             mBinding.addtargetTextDate.setText(Utils.formatDate(year, monthOfYear, dayOfMonth));
             mBinding.addtargetTextDate.setTag(year + "-" + ((monthOfYear + 1) < 10 ? "0" + (monthOfYear + 1) : (monthOfYear + 1)) + "-" + (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth));
