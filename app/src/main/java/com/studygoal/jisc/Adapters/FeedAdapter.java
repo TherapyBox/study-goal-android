@@ -124,9 +124,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             feedViewHolder.share.setVisibility(View.VISIBLE);
             feedViewHolder.open.setVisibility(View.GONE);
             if (!DataManager.getInstance().user.profile_pic.equals("")) {
-                Log.e("TEST", NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic);
+                Log.e("TEST", NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic);
                 Glide.with(feedViewHolder.itemView.getContext())
-                        .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                        .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                         .listener(new RequestListener<String, GlideDrawable>() {
                             @Override
                             public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -230,7 +230,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 Glide.with(context).load(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
             else
                 Glide.with(context)
-                        .load(NetworkManager.getInstance().no_https_host + photo)
+                        .load(NetworkManager.getInstance().host + photo)
                         .transform(new CircleTransform(context))
                         .into(feedViewHolder.profile_pic);
         }
