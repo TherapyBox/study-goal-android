@@ -42,15 +42,18 @@ import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.studygoal.jisc.databinding.TargetAddTargetBinding;
-import com.studygoal.jisc.Fragments.DatePickerForTargets;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AddTarget extends BaseFragment {
+
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
     public Boolean isInEditMode = false;
     public Targets item;
@@ -232,12 +235,16 @@ public class AddTarget extends BaseFragment {
                 }
             }
 
+            String moduleName;
+
             if (item.module_id.equals("")) {
-                mIn.setText(DataManager.getInstance().mainActivity.getString(R.string.any_module));
+                moduleName = DataManager.getInstance().mainActivity.getString(R.string.any_module);
             } else {
-                mIn.setText(((Module) (new Select().from(Module.class).where("module_id = ?", item.module_id).executeSingle())).name);
+                moduleName = ((Module) (new Select().from(Module.class).where("module_id = ?", item.module_id).executeSingle())).name;
             }
 
+            mIn.setText(moduleName);
+            mBinding.addtargetInTextViewSingle.setText(moduleName);
             mBecause.setText(item.because);
         } else {
             mActivityType.setText(DataManager.getInstance().activity_type.get(0));
@@ -246,10 +253,12 @@ public class AddTarget extends BaseFragment {
             mChooseActivity.setOnClickListener(v -> onAddTargetChooseActivity());
             mEvery.setText(DataManager.getInstance().period.get(0));
             mIn.setText(DataManager.getInstance().mainActivity.getString(R.string.any_module));
+            mBinding.addtargetInTextViewSingle.setText(DataManager.getInstance().mainActivity.getString(R.string.any_module));
         }
 
         mEvery.setOnClickListener(v -> onAddTargetEvery());
-        mBinding.addtargetInTextViewSingle.setOnClickListener(v -> onAddTargetIn());
+        mBinding.addtargetInTextViewSingle.setOnClickListener(v -> onAddTargetInSingle());
+        mBinding.addtargetInTextViewSingle.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
         mBinding.addtargetSaveBtn.setOnClickListener(v -> onAddTargetSave());
         mBinding.addtargetSaveBtnSingle.setOnClickListener(v -> onAddTargetSingleSave());
 
@@ -490,7 +499,7 @@ public class AddTarget extends BaseFragment {
 
         listView.setAdapter(new GenericAdapter(DataManager.getInstance().mainActivity, mIn.getText().toString(), items));
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            if (DataManager.getInstance().user.isSocial&& position == items.size() - 1) {
+            if (DataManager.getInstance().user.isSocial && position == items.size() - 1) {
                 //add new module
                 EditText add_module_edit_text = (EditText) mAddModuleLayout.findViewById(R.id.add_module_edit_text);
                 add_module_edit_text.setText("");
@@ -498,7 +507,56 @@ public class AddTarget extends BaseFragment {
                 dialog.dismiss();
             } else {
                 mIn.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
-                mBinding.addtargetInTextSingle.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void onAddTargetInSingle() {
+        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.custom_spinner_layout);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+        if (DataManager.getInstance().mainActivity.isLandscape) {
+            DisplayMetrics displaymetrics = new DisplayMetrics();
+            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+            int width = (int) (displaymetrics.widthPixels * 0.3);
+
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = width;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
+
+        final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
+
+        final ArrayList<String> items = new ArrayList<>();
+        items.add(DataManager.getInstance().mainActivity.getString(R.string.any_module));
+        List<Module> modules = new Select().from(Module.class).execute();
+
+        for (int i = 0; i < modules.size(); i++) {
+            items.add(modules.get(i).name);
+        }
+
+        if (DataManager.getInstance().user.isSocial) {
+            items.add(AddTarget.this.getActivity().getString(R.string.add_module));
+        }
+
+        listView.setAdapter(new GenericAdapter(DataManager.getInstance().mainActivity, mBinding.addtargetInTextViewSingle.getText().toString(), items));
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            if (DataManager.getInstance().user.isSocial && position == items.size() - 1) {
+                //add new module
+                EditText add_module_edit_text = (EditText) mAddModuleLayout.findViewById(R.id.add_module_edit_text);
+                add_module_edit_text.setText("");
+                mAddModuleLayout.setVisibility(View.VISIBLE);
+                dialog.dismiss();
+            } else {
+                mBinding.addtargetInTextViewSingle.setText(((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString());
                 dialog.dismiss();
             }
         });
@@ -758,17 +816,23 @@ public class AddTarget extends BaseFragment {
 //            }
 
             Calendar calendar = Calendar.getInstance();
-            String endDate = Utils.formatDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+            Date date = new Date();
+            date.setTime(calendar.getTimeInMillis());
+            String endDate = sDateFormat.format(date);
 
             final HashMap<String, String> params = new HashMap<>();
             params.put("student_id", DataManager.getInstance().user.id);
             params.put("end_date", endDate);
 
             if (!mBinding.addtargetInTextViewSingle.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
-                params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mBinding.addtargetInTextViewSingle.getText().toString()).executeSingle())).id);
+                Module module = new Select().from(Module.class).where("module_name = ?", mBinding.addtargetInTextViewSingle.getText().toString()).executeSingle();
+
+                if (module != null) {
+                    params.put("module", module.id);
+                }
             }
 
-            if (mBecause.getText().toString().length() > 0) {
+            if (mBinding.addtargetEdittextMyGoalSingle.getText().toString().length() > 0) {
                 params.put("description", mBinding.addtargetEdittextMyGoalSingle.getText().toString());
             }
 
