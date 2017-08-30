@@ -463,5 +463,6 @@
     <string name="add_a_reason_to_keep_this_target_single">Type here your message</string>
     <string name="by">By</string>
     <string name="attainment_not_data">There is no attainment data to show</string>
+    <string name="today">Today</string>
 
 </resources>

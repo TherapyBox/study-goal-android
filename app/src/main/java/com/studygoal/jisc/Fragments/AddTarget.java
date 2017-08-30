@@ -39,6 +39,7 @@ import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.Targets;
+import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.studygoal.jisc.databinding.TargetAddTargetBinding;
@@ -58,6 +59,7 @@ public class AddTarget extends BaseFragment {
     public Boolean isInEditMode = false;
     public Boolean isSingleTarget = false;
     public Targets item;
+    public ToDoTasks itemToDo;
 
     private AppCompatTextView mActivityType;
     private AppCompatTextView mChooseActivity;
@@ -223,37 +225,41 @@ public class AddTarget extends BaseFragment {
         mBinding.addtargetTextDate.setOnClickListener(v -> onSelectDate());
 
         if (isInEditMode) {
-            for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
-                if (entry.getValue().equals(item.activity_type))
-                    mActivityType.setText(entry.getKey());
-            }
-            for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
-                if (entry.getValue().equals(item.activity))
-                    mChooseActivity.setText(entry.getKey());
-            }
-
-            mHours.setText(Integer.parseInt(item.total_time) / 60 > 10 ? "" + Integer.parseInt(item.total_time) / 60 : "0" + Integer.parseInt(item.total_time) / 60);
-            mMinutes.setText(Integer.parseInt(item.total_time) % 60 > 10 ? "" + Integer.parseInt(item.total_time) % 60 : "0" + Integer.parseInt(item.total_time) % 60);
-
-            for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
-                if (entry.getValue().toLowerCase().equals(item.time_span.toLowerCase())) {
-                    String value = entry.getKey();
-                    value = value.substring(0, 1).toUpperCase() + value.substring(1, value.length());
-                    mEvery.setText(value);
-                }
-            }
-
-            String moduleName;
-
-            if (item.module_id.equals("")) {
-                moduleName = DataManager.getInstance().mainActivity.getString(R.string.any_module);
+            if (isSingleTarget) {
+                // TODO: need implement edit for todo item
             } else {
-                moduleName = ((Module) (new Select().from(Module.class).where("module_id = ?", item.module_id).executeSingle())).name;
-            }
+                for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
+                    if (entry.getValue().equals(item.activity_type))
+                        mActivityType.setText(entry.getKey());
+                }
+                for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
+                    if (entry.getValue().equals(item.activity))
+                        mChooseActivity.setText(entry.getKey());
+                }
 
-            mIn.setText(moduleName);
-            mBinding.addtargetInTextViewSingle.setText(moduleName);
-            mBecause.setText(item.because);
+                mHours.setText(Integer.parseInt(item.total_time) / 60 > 10 ? "" + Integer.parseInt(item.total_time) / 60 : "0" + Integer.parseInt(item.total_time) / 60);
+                mMinutes.setText(Integer.parseInt(item.total_time) % 60 > 10 ? "" + Integer.parseInt(item.total_time) % 60 : "0" + Integer.parseInt(item.total_time) % 60);
+
+                for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
+                    if (entry.getValue().toLowerCase().equals(item.time_span.toLowerCase())) {
+                        String value = entry.getKey();
+                        value = value.substring(0, 1).toUpperCase() + value.substring(1, value.length());
+                        mEvery.setText(value);
+                    }
+                }
+
+                String moduleName;
+
+                if (item.module_id.equals("")) {
+                    moduleName = DataManager.getInstance().mainActivity.getString(R.string.any_module);
+                } else {
+                    moduleName = ((Module) (new Select().from(Module.class).where("module_id = ?", item.module_id).executeSingle())).name;
+                }
+
+                mIn.setText(moduleName);
+                mBinding.addtargetInTextViewSingle.setText(moduleName);
+                mBecause.setText(item.because);
+            }
         } else {
             mActivityType.setText(DataManager.getInstance().activity_type.get(0));
             mActivityType.setOnClickListener(v -> onAddTargetActivityType());

@@ -3821,7 +3821,7 @@ public class NetworkManager {
     /**
      * getActivityHistory(String student_id)
      *
-     * @param student_id => the ID of the student for which his list of activities to be retrieved
+     * @param student_id => the ID of the student for which his mList of activities to be retrieved
      * @return true/false if operation has succeed
      */
     public boolean getActivityHistory(String student_id) {

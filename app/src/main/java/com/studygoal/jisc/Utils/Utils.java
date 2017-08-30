@@ -251,7 +251,7 @@ public class Utils {
         List<Map.Entry<String, Integer>> list =
                 new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
 
-        // Sort list with comparator, to compare the Map values
+        // Sort mList with comparator, to compare the Map values
         Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
             public int compare(Map.Entry<String, Integer> o1,
                                Map.Entry<String, Integer> o2) {

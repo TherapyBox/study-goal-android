@@ -14,26 +14,78 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ListView
-                android:id="@+id/list"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RadioGroup
+                    android:id="@+id/target_selector"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="visible">
+
+                    <RadioButton
+                        android:id="@+id/target_recurring"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/radio_button_background_left"
+                        android:button="@null"
+                        android:checked="true"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/target_add_recurring"
+                        android:textColor="@drawable/radio_button_text" />
+
+                    <RadioButton
+                        android:id="@+id/target_single"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/radio_button_background_right"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/target_add_single"
+                        android:textColor="@drawable/radio_button_text" />
+                </RadioGroup>
+
+                <ListView
+                    android:id="@+id/list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <ListView
+                    android:id="@+id/list_todo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="gone" />
+
+                <RelativeLayout
+                    android:id="@+id/tutorial_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:text="@string/empty_target_page_message"
+                        android:textAlignment="center"
+                        android:textColor="@color/dark_grey"
+                        android:textSize="22sp" />
+                </RelativeLayout>
+            </LinearLayout>
         </android.support.v4.widget.SwipeRefreshLayout>
-
-        <RelativeLayout
-            android:id="@+id/tutorial_message"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/empty_target_page_message"
-                android:textAlignment="center"
-                android:textColor="@color/dark_grey"
-                android:textSize="22sp" />
-        </RelativeLayout>
     </RelativeLayout>
 </layout>
