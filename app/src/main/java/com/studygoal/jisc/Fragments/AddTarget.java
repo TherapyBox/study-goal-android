@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AddTarget extends BaseFragment {
+    private static final String TAG = AddTarget.class.getSimpleName();
 
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
@@ -136,6 +137,8 @@ public class AddTarget extends BaseFragment {
     private TargetAddTargetBinding mBinding = null;
 
     private boolean mIsRecurringTarget = true;
+
+    private Calendar mToDoDate = null;
 
     @Override
     public void onResume() {
@@ -222,11 +225,34 @@ public class AddTarget extends BaseFragment {
             return false;
         });
 
+        mToDoDate = Calendar.getInstance();
+        mBinding.addtargetTextDate.setText(Utils.formatDate(mToDoDate.getTimeInMillis()));
         mBinding.addtargetTextDate.setOnClickListener(v -> onSelectDate());
 
         if (isInEditMode) {
             if (isSingleTarget) {
-                // TODO: need implement edit for todo item
+                mBinding.addtargetEdittextMyGoalSingle.setText(itemToDo.description);
+                mBinding.addtargetEdittextBecauseSingle.setText(itemToDo.reason);
+
+                try {
+                    Date date = sDateFormat.parse(itemToDo.endDate);
+                    mToDoDate.setTimeInMillis(date.getTime());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+
+                mBinding.addtargetTextDate.setText(Utils.formatDate(mToDoDate.getTimeInMillis()));
+                String moduleName = "";
+
+                if (itemToDo.module != null && !itemToDo.module.isEmpty()) {
+                    moduleName = ((Module) (new Select().from(Module.class).where("module_name = ?", itemToDo.module).executeSingle())).name;
+                }
+
+                if (moduleName == null || moduleName.isEmpty()) {
+                    moduleName = DataManager.getInstance().mainActivity.getString(R.string.any_module);
+                }
+
+                mBinding.addtargetInTextViewSingle.setText(moduleName);
             } else {
                 for (Map.Entry<String, String> entry : DataManager.getInstance().api_values.entrySet()) {
                     if (entry.getValue().equals(item.activity_type))
@@ -257,7 +283,6 @@ public class AddTarget extends BaseFragment {
                 }
 
                 mIn.setText(moduleName);
-                mBinding.addtargetInTextViewSingle.setText(moduleName);
                 mBecause.setText(item.because);
             }
         } else {
@@ -735,49 +760,43 @@ public class AddTarget extends BaseFragment {
 
         if (isInEditMode) {
             // TODO: need implement saving of single target
+            if (DataManager.getInstance().user.isDemo) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
+                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
+                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+                return;
+            }
 
-//            if (DataManager.getInstance().user.isDemo) {
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
-//                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
-//                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
-//                AlertDialog alertDialog = alertDialogBuilder.create();
-//                alertDialog.show();
-//                return;
-//            }
-//
-//            final int total_time = Integer.parseInt(mHours.getText().toString()) * 60 + Integer.parseInt(mMinutes.getText().toString());
-//            if (total_time == Integer.parseInt(item.total_time)
-//                    && mEvery.getText().toString().toLowerCase().equals(item.time_span.toLowerCase())
-//                    && (item.because.equals(mBecause.getText().toString()))
-//                    && (item.module_id.equals("") && mIn.getText().toString().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module)))) {
-//                DataManager.getInstance().mainActivity.onBackPressed();
-//                return;
-//            }
-//            if (total_time == 0) {
-//                Snackbar.make(mBody, R.string.fail_to_edit_target_insuficient_time, Snackbar.LENGTH_LONG).show();
-//                return;
-//            } else {
-//                final HashMap<String, String> params = new HashMap<>();
-//                params.put("student_id", DataManager.getInstance().user.id);
-//                params.put("target_id", item.target_id);
-//                params.put("total_time", total_time + "");
-//                params.put("time_span", DataManager.getInstance().api_values.get(mEvery.getText().toString().toLowerCase()));
-//                if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase()))
-//                    params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
-//                if (mBecause.getText().toString().length() > 0)
-//                    params.put("because", mBecause.getText().toString());
-//                System.out.println("EDIT_TARGET: " + params.toString());
-//                DataManager.getInstance().mainActivity.showProgressBar(null);
-//                Calendar calendar = Calendar.getInstance();
-//                String modified_date = "";
-//                modified_date += calendar.get(Calendar.YEAR) + "-";
-//                modified_date += (calendar.get(Calendar.MONTH) + 1) < 10 ? "0" + (calendar.get(Calendar.MONTH) + 1) + "-" : (calendar.get(Calendar.MONTH) + 1) + "-";
-//                modified_date += calendar.get(Calendar.DAY_OF_MONTH) < 10 ? "0" + calendar.get(Calendar.DAY_OF_MONTH) + " " : calendar.get(Calendar.DAY_OF_MONTH) + " ";
-//                modified_date += calendar.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + calendar.get(Calendar.HOUR_OF_DAY) + ":" : calendar.get(Calendar.HOUR_OF_DAY) + ":";
-//                modified_date += calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE) + ":" : calendar.get(Calendar.MINUTE) + ":";
-//                modified_date += calendar.get(Calendar.SECOND) < 10 ? "0" + calendar.get(Calendar.SECOND) : calendar.get(Calendar.SECOND);
-//
-//                final String finalModified_date = modified_date;
+            Date date = new Date();
+            date.setTime(mToDoDate.getTimeInMillis());
+            String endDate = sDateFormat.format(date);
+
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("student_id", DataManager.getInstance().user.id);
+            params.put("end_date", endDate);
+            params.put("record_id", itemToDo.taskId);
+
+            if (!mBinding.addtargetInTextViewSingle.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
+                Module module = new Select().from(Module.class).where("module_name = ?", mBinding.addtargetInTextViewSingle.getText().toString()).executeSingle();
+
+                if (module != null) {
+                    params.put("module", module.id);
+                }
+            }
+
+            if (!params.containsKey("module")) {
+                params.put("module", "");
+            }
+
+            if (mBinding.addtargetEdittextMyGoalSingle.getText().toString().length() > 0) {
+                params.put("description", mBinding.addtargetEdittextMyGoalSingle.getText().toString());
+            }
+
+            if (mBinding.addtargetEdittextBecauseSingle.getText().toString().length() > 0) {
+                params.put("reason", mBinding.addtargetEdittextBecauseSingle.getText().toString());
+            }
 //
 //                new Thread(() -> {
 //                    if (NetworkManager.getInstance().editTarget(params)) {
@@ -813,9 +832,8 @@ public class AddTarget extends BaseFragment {
                 return;
             }
 
-            Calendar calendar = Calendar.getInstance();
             Date date = new Date();
-            date.setTime(calendar.getTimeInMillis());
+            date.setTime(mToDoDate.getTimeInMillis());
             String endDate = sDateFormat.format(date);
 
             final HashMap<String, String> params = new HashMap<>();
@@ -898,6 +916,7 @@ public class AddTarget extends BaseFragment {
     private void onSelectDate() {
         DatePickerForTargets newFragment = new DatePickerForTargets();
         newFragment.setListener((view, year, monthOfYear, dayOfMonth) -> {
+            mToDoDate.set(year, monthOfYear, dayOfMonth);
             mBinding.addtargetTextDate.setText(Utils.formatDate(year, monthOfYear, dayOfMonth));
             mBinding.addtargetTextDate.setTag(year + "-" + ((monthOfYear + 1) < 10 ? "0" + (monthOfYear + 1) : (monthOfYear + 1)) + "-" + (dayOfMonth < 10 ? "0" + dayOfMonth : dayOfMonth));
         });

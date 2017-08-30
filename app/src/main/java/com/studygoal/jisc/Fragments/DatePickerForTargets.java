@@ -25,7 +25,7 @@ public class DatePickerForTargets extends DialogFragment {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog dialog = new DatePickerDialog(getActivity(), null, year, month, day);
+        DatePickerDialog dialog = new DatePickerDialog(getActivity(), (view, year1, month1, dayOfMonth) -> mListener.onDateChanged(view, year1, month1, dayOfMonth), year, month, day);
         dialog.getDatePicker().init(year, month, day, mListener);
         dialog.getDatePicker().setMinDate(new Date().getTime());
         return dialog;
