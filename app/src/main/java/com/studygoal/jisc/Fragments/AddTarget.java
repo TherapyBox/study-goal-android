@@ -763,7 +763,6 @@ public class AddTarget extends BaseFragment {
         }
 
         if (isInEditMode) {
-            // TODO: need implement saving of single target
             if (DataManager.getInstance().user.isDemo) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
                 alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
@@ -801,31 +800,21 @@ public class AddTarget extends BaseFragment {
             if (mBinding.addtargetEdittextBecauseSingle.getText().toString().length() > 0) {
                 params.put("reason", mBinding.addtargetEdittextBecauseSingle.getText().toString());
             }
-//
-//                new Thread(() -> {
-//                    if (NetworkManager.getInstance().editTarget(params)) {
-//                        DataManager.getInstance().mainActivity.runOnUiThread(() -> {
-//                            item.total_time = total_time + "";
-//                            item.time_span = DataManager.getInstance().api_values.get(mEvery.getText().toString().toLowerCase());
-//                            if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase()))
-//                                item.module_id = ((Module) new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle()).id;
-//                            else
-//                                item.module_id = "";
-//                            item.because = mBecause.getText().toString();
-//                            item.modified_date = finalModified_date;
-//
-//                            DataManager.getInstance().mainActivity.hideProgressBar();
-//                            DataManager.getInstance().mainActivity.onBackPressed();
-////                                            Snackbar.make(body, R.string.target_saved, Snackbar.LENGTH_LONG).show();
-//                        });
-//                    } else {
-//                        DataManager.getInstance().mainActivity.runOnUiThread(() -> {
-//                            DataManager.getInstance().mainActivity.hideProgressBar();
-//                            Snackbar.make(mBody, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-//                        });
-//                    }
-//                }).start();
-//            }
+
+            new Thread(() -> {
+                if (NetworkManager.getInstance().editToDoTask(params)) {
+                    DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                        DataManager.getInstance().mainActivity.onBackPressed();
+                    });
+                } else {
+                    DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                        DataManager.getInstance().mainActivity.hideProgressBar();
+                        Snackbar.make(mRoot, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                    });
+                }
+            }).start();
+
         } else {
             if (DataManager.getInstance().user.isDemo) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
