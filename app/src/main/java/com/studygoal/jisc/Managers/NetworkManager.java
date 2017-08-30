@@ -26,6 +26,7 @@ import com.studygoal.jisc.Models.PendingRequest;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.StretchTarget;
 import com.studygoal.jisc.Models.Targets;
+import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
@@ -2777,7 +2778,7 @@ public class NetworkManager {
         }
     }
 
-    public boolean addToTask(HashMap<String, String> params) {
+    public boolean addToDoTask(HashMap<String, String> params) {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<Boolean> future_result = executorService.submit(new addTodoTask(params));
 
@@ -2918,6 +2919,98 @@ public class NetworkManager {
                         target.status = jsonObject.getInt("status") + "";
                         target.created_date = jsonObject.getString("created_date");
                         target.modified_date = jsonObject.getString("modified_date");
+                        target.save();
+                    }
+                    ActiveAndroid.setTransactionSuccessful();
+                } finally {
+                    ActiveAndroid.endTransaction();
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+
+    public boolean getToDoTasks(String student_id) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future = executorService.submit(new getToDoTasks(student_id));
+
+        try {
+            return future.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getToDoTasks implements Callable<Boolean> {
+        String student_id;
+
+        getToDoTasks(String student_id) {
+            this.student_id = student_id;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_get_todo_list?student_id=" + student_id + "&language=" + language
+                        + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+
+                if (responseCode != 200) {
+                    if (responseCode == 204) {
+                        Log.i("getTargets", "No records found");
+                        new Delete().from(Targets.class).execute();
+                    } else {
+                        Log.e("getTargets", "Code: " + responseCode);
+                    }
+
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                is.close();
+                JSONArray jsonArray = new JSONArray(sb.toString());
+                ActiveAndroid.beginTransaction();
+
+                try {
+                    new Delete().from(ToDoTasks.class).execute();
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        ToDoTasks target = new ToDoTasks();
+                        target.taskId = jsonObject.getInt("id") + "";
+                        target.studentId = jsonObject.getInt("student_id") + "";
+                        target.module = jsonObject.getString("module");
+                        target.description = jsonObject.getString("description");
+                        target.reason = jsonObject.getString("reason");
+                        target.timeRequired = jsonObject.getString("time_required");
+                        target.endDate = jsonObject.getString("end_date");
+                        target.status = jsonObject.getString("status");
+                        target.fromTutor = jsonObject.getString("from_tutor");
+                        target.isAccepted = jsonObject.getString("is_accepted");
+                        target.reasonForIgnoring = jsonObject.getString("reason_for_ignoring");
+                        target.created = jsonObject.getString("created");
+                        target.modified = jsonObject.getString("modified");
                         target.save();
                     }
                     ActiveAndroid.setTransactionSuccessful();

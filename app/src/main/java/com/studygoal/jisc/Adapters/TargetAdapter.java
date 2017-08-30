@@ -164,6 +164,7 @@ public class TargetAdapter extends BaseAdapter {
                 swipeLayout.close(true);
                 AddTarget fragment = new AddTarget();
                 fragment.isInEditMode = true;
+                fragment.isSingleTarget = false;
                 fragment.item = item;
                 ((MainActivity) context).getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main_fragment, fragment)

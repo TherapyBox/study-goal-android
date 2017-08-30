@@ -56,6 +56,7 @@ public class AddTarget extends BaseFragment {
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
     public Boolean isInEditMode = false;
+    public Boolean isSingleTarget = false;
     public Targets item;
 
     private AppCompatTextView mActivityType;
@@ -139,6 +140,13 @@ public class AddTarget extends BaseFragment {
         super.onResume();
         if (isInEditMode) {
             DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.edit_target));
+            mBinding.targetSelector.setVisibility(View.GONE);
+
+            if (isSingleTarget) {
+                mBinding.targetSelector.check(mBinding.targetSingle.getId());
+            } else {
+                mBinding.targetSelector.check(mBinding.targetRecurring.getId());
+            }
         } else {
             DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.add_target));
         }
@@ -712,7 +720,6 @@ public class AddTarget extends BaseFragment {
     }
 
     private void onAddTargetSingleSave() {
-        // TODO: need implement saving of single target
         View view = getActivity().getCurrentFocus();
 
         if (view != null) {
@@ -721,6 +728,8 @@ public class AddTarget extends BaseFragment {
         }
 
         if (isInEditMode) {
+            // TODO: need implement saving of single target
+
 //            if (DataManager.getInstance().user.isDemo) {
 //                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
 //                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
@@ -798,23 +807,6 @@ public class AddTarget extends BaseFragment {
                 return;
             }
 
-//            Module module = ((new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle()));
-//            String id;
-//
-//            if (module == null) {
-//                id = "";
-//            } else if (module.id == null) {
-//                id = "";
-//            } else {
-//                id = module.id;
-//            }
-
-            // TODO: Check if exist in DB.
-//            if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("module_id = ?", id).exists()) {
-//                Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
-//                return;
-//            }
-
             Calendar calendar = Calendar.getInstance();
             Date date = new Date();
             date.setTime(calendar.getTimeInMillis());
@@ -832,6 +824,10 @@ public class AddTarget extends BaseFragment {
                 }
             }
 
+            if (!params.containsKey("module")) {
+                params.put("module", "");
+            }
+
             if (mBinding.addtargetEdittextMyGoalSingle.getText().toString().length() > 0) {
                 params.put("description", mBinding.addtargetEdittextMyGoalSingle.getText().toString());
             }
@@ -844,9 +840,8 @@ public class AddTarget extends BaseFragment {
             DataManager.getInstance().mainActivity.showProgressBar(null);
 
             new Thread(() -> {
-                if (NetworkManager.getInstance().addToTask(params)) {
-                    // TODO: need update
-                    //NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
+                if (NetworkManager.getInstance().addToDoTask(params)) {
+                    NetworkManager.getInstance().getToDoTasks(DataManager.getInstance().user.id);
 
                     runOnUiThread(() -> {
                         DataManager.getInstance().mainActivity.hideProgressBar();
