@@ -2649,6 +2649,58 @@ public class NetworkManager {
         }
     }
 
+    public boolean deleteToDoTask(HashMap<String, String> params) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future_result = executorService.submit(new deleteToDoTask(params));
+
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class deleteToDoTask implements Callable<Boolean> {
+        HashMap<String, String> params;
+
+        deleteToDoTask(HashMap<String, String> params) {
+            params.put("language", language);
+            this.params = params;
+
+            if (DataManager.getInstance().user.isSocial) {
+                this.params.put("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"));
+            }
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_delete_todo_task?student_id=" + params.get("student_id") + "&record_id=" + params.get("record_id") + "&language=" + language
+                        + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("DELETE");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setDoInput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+
+                if (responseCode != 200) {
+                    Log.e("deleteTarget", "ResponseCode = " + responseCode);
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
     public boolean editTarget(HashMap<String, String> params) {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<Boolean> future_result = executorService.submit(new editTarget(params));

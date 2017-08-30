@@ -179,42 +179,38 @@ public class TargetFragment extends BaseFragment {
         }).start();
     }
 
-    private void deleteToDoTasks(final ToDoTasks target, final int finalPosition) {
-        // TODO: need implement
-//        if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
-//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetFragment.this.getActivity());
-//            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deletetarget) + "</font>"));
-//            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
-//            AlertDialog alertDialog = alertDialogBuilder.create();
-//            alertDialog.show();
-//            return;
-//        }
-//
-//        final HashMap<String, String> params = new HashMap<>();
-//        params.put("student_id", DataManager.getInstance().user.id);
-//        params.put("target_id", target.target_id);
-//        DataManager.getInstance().mainActivity.showProgressBar(null);
-//
-//        new Thread(() -> {
-//            if (NetworkManager.getInstance().deleteTarget(params)) {
-//                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
-//                    target.delete();
-//                    mAdapterTarget.list.remove(finalPosition);
-//                    if (mAdapterTarget.list.size() == 0)
-//                        mTutorialMessage.setVisibility(View.VISIBLE);
-//                    else
-//                        mTutorialMessage.setVisibility(View.GONE);
-//                    mAdapterTarget.notifyDataSetChanged();
-//                    DataManager.getInstance().mainActivity.hideProgressBar();
-//                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
-//                });
-//            } else {
-//                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
-//                    DataManager.getInstance().mainActivity.hideProgressBar();
-//                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
-//                });
-//            }
-//        }).start();
+    private void deleteToDoTasks(final ToDoTasks task, final int finalPosition) {
+        if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetFragment.this.getActivity());
+            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deletetarget) + "</font>"));
+            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            return;
+        }
+
+        final HashMap<String, String> params = new HashMap<>();
+        params.put("student_id", DataManager.getInstance().user.id);
+        params.put("record_id", task.taskId);
+        DataManager.getInstance().mainActivity.showProgressBar(null);
+
+        new Thread(() -> {
+            if (NetworkManager.getInstance().deleteToDoTask(params)) {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    task.delete();
+                    mAdapterToDo.mList.remove(finalPosition);
+                    mAdapterToDo.notifyDataSetChanged();
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    updateTutorialMessage();
+                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
+                });
+            } else {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 
     private void editTarget(Targets item) {
