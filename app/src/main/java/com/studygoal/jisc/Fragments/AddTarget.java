@@ -245,7 +245,11 @@ public class AddTarget extends BaseFragment {
                 String moduleName = "";
 
                 if (itemToDo.module != null && !itemToDo.module.isEmpty()) {
-                    moduleName = ((Module) (new Select().from(Module.class).where("module_name = ?", itemToDo.module).executeSingle())).name;
+                    Module module = new Select().from(Module.class).where("module_name = ?", itemToDo.module).executeSingle();
+
+                    if (module != null) {
+                        moduleName = module.name;
+                    }
                 }
 
                 if (moduleName == null || moduleName.isEmpty()) {
