@@ -1,7 +1,7 @@
 package com.studygoal.jisc.Fragments;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -10,7 +10,6 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.activeandroid.query.Select;
@@ -21,15 +20,20 @@ import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.databinding.TargetFragmentBinding;
 
 import java.util.HashMap;
 
 public class TargetFragment extends Fragment {
+    private static final String TAG = TargetFragment.class.getSimpleName();
 
-    public ListView list;
-    public TargetAdapter adapter;
-    public View mainView, tutorial_message;
-    SwipeRefreshLayout layout;
+    private ListView mList;
+    private TargetAdapter mAdapter;
+    private View mRootView;
+    private View mTutorialMessage;
+    private SwipeRefreshLayout mLayout;
+
+    private TargetFragmentBinding mBinding = null;
 
     public TargetFragment() {
     }
@@ -41,110 +45,80 @@ public class TargetFragment extends Fragment {
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(4);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DataManager.getInstance().mainActivity.showProgressBar(null);
-                    }
-                });
-                NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
-                NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
+        new Thread(() -> {
+            DataManager.getInstance().mainActivity.runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
+            NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
+            NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id);
 
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.list = new Select().from(Targets.class).execute();
-                        adapter.notifyDataSetChanged();
-                        if (adapter.list.size() == 0)
-                            tutorial_message.setVisibility(View.VISIBLE);
-                        else
-                            tutorial_message.setVisibility(View.GONE);
-                        DataManager.getInstance().mainActivity.hideProgressBar();
-                    }
-                });
+            DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                mAdapter.list = new Select().from(Targets.class).execute();
+                mAdapter.notifyDataSetChanged();
 
-            }
+                if (mAdapter.list.size() == 0) {
+                    mTutorialMessage.setVisibility(View.VISIBLE);
+                } else {
+                    mTutorialMessage.setVisibility(View.GONE);
+                }
+
+                DataManager.getInstance().mainActivity.hideProgressBar();
+            });
+
         }).start();
 
         XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateTargetsMain);
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainView = inflater.inflate(R.layout.target_fragment, container, false);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.target_fragment, container, false);
+        mRootView = mBinding.getRoot();
 
-        tutorial_message = mainView.findViewById(R.id.tutorial_message);
-        layout = (SwipeRefreshLayout) mainView.findViewById(R.id.swipelayout);
-        list = (ListView) mainView.findViewById(R.id.list);
+        mTutorialMessage = mRootView.findViewById(R.id.tutorial_message);
+        mLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipelayout);
+        mList = (ListView) mRootView.findViewById(R.id.list);
 
-        adapter = new TargetAdapter(this);
-        list.setAdapter(adapter);
+        mAdapter = new TargetAdapter(this);
+        mList.setAdapter(mAdapter);
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                TargetDetails fragment = new TargetDetails();
-                fragment.list = adapter.list;
-                fragment.position = position;
-                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            }
+        mList.setOnItemClickListener((parent, v, position, id) -> {
+            TargetDetails fragment = new TargetDetails();
+            fragment.list = mAdapter.list;
+            fragment.position = position;
+            DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_fragment, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
-        layout.setColorSchemeResources(R.color.colorPrimary);
-        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
-                        if (NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id)) {
-                            adapter.list = new Select().from(Targets.class).execute();
-                            DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    adapter.notifyDataSetChanged();
-                                    layout.setRefreshing(false);
-                                    if (adapter.list.size() == 0)
-                                        tutorial_message.setVisibility(View.VISIBLE);
-                                    else
-                                        tutorial_message.setVisibility(View.GONE);
-                                }
-                            });
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    layout.setRefreshing(false);
-                                }
-                            });
-                        }
+        mLayout.setColorSchemeResources(R.color.colorPrimary);
+        mLayout.setOnRefreshListener(() -> new Thread(() -> {
+            NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
+            if (NetworkManager.getInstance().getTargets(DataManager.getInstance().user.id)) {
+                mAdapter.list = new Select().from(Targets.class).execute();
+
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    mAdapter.notifyDataSetChanged();
+                    mLayout.setRefreshing(false);
+
+                    if (mAdapter.list.size() == 0) {
+                        mTutorialMessage.setVisibility(View.VISIBLE);
+                    } else {
+                        mTutorialMessage.setVisibility(View.GONE);
                     }
-                }).start();
+                });
+            } else {
+                getActivity().runOnUiThread(() -> mLayout.setRefreshing(false));
             }
-        });
+        }).start());
 
-        return mainView;
+        return mRootView;
     }
 
     public void deleteTarget(final Targets target, final int finalPosition) {
-
         if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetFragment.this.getActivity());
             alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deletetarget) + "</font>"));
-            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
             return;
@@ -154,33 +128,25 @@ public class TargetFragment extends Fragment {
         params.put("student_id", DataManager.getInstance().user.id);
         params.put("target_id", target.target_id);
         DataManager.getInstance().mainActivity.showProgressBar(null);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (NetworkManager.getInstance().deleteTarget(params)) {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            target.delete();
-                            adapter.list.remove(finalPosition);
-                            if (adapter.list.size() == 0)
-                                tutorial_message.setVisibility(View.VISIBLE);
-                            else
-                                tutorial_message.setVisibility(View.GONE);
-                            adapter.notifyDataSetChanged();
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-                }
+
+        new Thread(() -> {
+            if (NetworkManager.getInstance().deleteTarget(params)) {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    target.delete();
+                    mAdapter.list.remove(finalPosition);
+                    if (mAdapter.list.size() == 0)
+                        mTutorialMessage.setVisibility(View.VISIBLE);
+                    else
+                        mTutorialMessage.setVisibility(View.GONE);
+                    mAdapter.notifyDataSetChanged();
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
+                });
+            } else {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
+                });
             }
         }).start();
 
