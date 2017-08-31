@@ -19,6 +19,7 @@ import com.studygoal.jisc.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
     private Context mContext;
 
-    public List<ToDoTasks> mList;
+    private ArrayList<ToDoTasks> mList;
 
     private ToDoTasksAdapterListener mListener;
 
@@ -43,6 +44,50 @@ public class ToDoTasksAdapter extends BaseAdapter {
         mContext = context;
         mListener = listener;
         mList = new ArrayList<>();
+    }
+
+    public void updateList(List<ToDoTasks> list) {
+        if (mList != null) {
+            mList.clear();
+        } else {
+            mList = new ArrayList<>();
+        }
+
+        if (list != null) {
+            mList.addAll(list);
+            notifyDataSetChanged();
+        }
+
+        Collections.sort(mList, (o1, o2) -> {
+            int result = 0;
+
+            if (o1 != null && o2 != null) {
+                if (o1.fromTutor != null && o2.fromTutor != null) {
+                    Boolean tutor1 = o1.fromTutor.toLowerCase().equals("yes");
+                    Boolean tutor2 = o2.fromTutor.toLowerCase().equals("yes");
+                    result = tutor2.compareTo(tutor1);
+                }
+
+                if (result == 0 && o1.isAccepted != null && o2.isAccepted != null) {
+                    Boolean accepted1 = o1.isAccepted.toLowerCase().equals("0");
+                    Boolean accepted2 = o2.isAccepted.toLowerCase().equals("0");
+                    result += accepted2.compareTo(accepted1);
+                }
+
+                if (result == 0 && o1.description != null && o2.description != null) {
+                    result = o1.description.compareTo(o2.description);
+                }
+            }
+
+            return result;
+        });
+    }
+
+    public void deleteItem(int position) {
+        if (mList != null && position < mList.size()) {
+            mList.remove(position);
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -108,6 +153,15 @@ public class ToDoTasksAdapter extends BaseAdapter {
                 mListener.onEdit(item);
             }
         });
+
+        View mainLayout = convertView.findViewById(R.id.mainLayout);
+
+        //if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes") && item.isAccepted.equals("0")) {
+        if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes")) {
+            mainLayout.setBackgroundColor(mContext.getResources().getColor(R.color.to_do_item_tutor_background));
+        } else {
+            mainLayout.setBackgroundColor(mContext.getResources().getColor(R.color.to_do_item_general_background));
+        }
 
         final int finalPosition = position;
         convertView.findViewById(R.id.delete).setOnClickListener(v -> {

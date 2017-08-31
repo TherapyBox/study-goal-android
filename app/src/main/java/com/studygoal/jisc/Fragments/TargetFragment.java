@@ -198,8 +198,7 @@ public class TargetFragment extends BaseFragment {
             if (NetworkManager.getInstance().deleteToDoTask(params)) {
                 DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                     task.delete();
-                    mAdapterToDo.mList.remove(finalPosition);
-                    mAdapterToDo.notifyDataSetChanged();
+                    mAdapterToDo.deleteItem(finalPosition);
                     DataManager.getInstance().mainActivity.hideProgressBar();
                     updateTutorialMessage();
                     Snackbar.make(mRootView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
@@ -250,8 +249,7 @@ public class TargetFragment extends BaseFragment {
             DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                 mAdapterTarget.list = new Select().from(Targets.class).execute();
                 mAdapterTarget.notifyDataSetChanged();
-                mAdapterToDo.mList = new Select().from(ToDoTasks.class).execute();
-                mAdapterToDo.notifyDataSetChanged();
+                mAdapterToDo.updateList(new Select().from(ToDoTasks.class).execute());
 
                 if (showProgress) {
                     DataManager.getInstance().mainActivity.hideProgressBar();
@@ -274,7 +272,7 @@ public class TargetFragment extends BaseFragment {
                     mTutorialMessage.setVisibility(View.VISIBLE);
                 }
             } else if (mBinding.targetSingle.isChecked()) {
-                if (mAdapterToDo != null && mAdapterToDo.mList.size() > 0) {
+                if (mAdapterToDo != null && mAdapterToDo.getCount() > 0) {
                     mTutorialMessage.setVisibility(View.GONE);
                 } else {
                     mTutorialMessage.setVisibility(View.VISIBLE);

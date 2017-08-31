@@ -19,4 +19,7 @@
 
     <color name="color_text">#ffffff</color>
     <color name="color_text_dialog_content">#3791ee</color>
+
+    <color name="to_do_item_general_background">#FBFBFB</color>
+    <color name="to_do_item_tutor_background">#B9D8F4</color>
 </resources>
