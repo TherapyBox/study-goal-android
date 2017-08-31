@@ -440,7 +440,7 @@ public class TargetItem extends Fragment {
             public void onClick(View v) {
                 final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.confirmation_dialog);
+                dialog.setContentView(R.layout.dialog_confirmation);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();

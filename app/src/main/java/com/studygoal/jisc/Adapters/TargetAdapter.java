@@ -174,7 +174,7 @@ public class TargetAdapter extends BaseAdapter {
         convertView.findViewById(R.id.delete).setOnClickListener(v -> {
             final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.confirmation_dialog);
+            dialog.setContentView(R.layout.dialog_confirmation);
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
             if (DataManager.getInstance().mainActivity.isLandscape) {

@@ -75,7 +75,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
                 }
 
                 if (result == 0 && o1.description != null && o2.description != null) {
-                    result = o1.description.compareTo(o2.description);
+                    result = o1.description.toLowerCase().compareTo(o2.description.toLowerCase());
                 }
             }
 
@@ -96,8 +96,8 @@ public class ToDoTasksAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
-        return null;
+    public ToDoTasks getItem(int position) {
+        return mList.get(position);
     }
 
     @Override
@@ -156,8 +156,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         View mainLayout = convertView.findViewById(R.id.mainLayout);
 
-        //if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes") && item.isAccepted.equals("0")) {
-        if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes")) {
+        if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes") && item.isAccepted.equals("0")) {
             mainLayout.setBackgroundColor(mContext.getResources().getColor(R.color.to_do_item_tutor_background));
         } else {
             mainLayout.setBackgroundColor(mContext.getResources().getColor(R.color.to_do_item_general_background));
@@ -167,7 +166,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
         convertView.findViewById(R.id.delete).setOnClickListener(v -> {
             final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.confirmation_dialog);
+            dialog.setContentView(R.layout.dialog_confirmation);
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
             if (DataManager.getInstance().mainActivity.isLandscape) {

@@ -785,7 +785,7 @@ public class AddTarget extends BaseFragment {
                 Module module = new Select().from(Module.class).where("module_name = ?", mBinding.addtargetInTextViewSingle.getText().toString()).executeSingle();
 
                 if (module != null) {
-                    params.put("module", module.id);
+                    params.put("module", module.name);
                 }
             }
 

@@ -198,7 +198,7 @@ public class MainActivity extends FragmentActivity {
                     v.setTag("");
                     final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                     dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialog.setContentView(R.layout.confirmation_dialog);
+                    dialog.setContentView(R.layout.dialog_confirmation);
                     dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                     if (DataManager.getInstance().mainActivity.isLandscape) {
                         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -505,7 +505,7 @@ public class MainActivity extends FragmentActivity {
                     if (adapter.selected_text.getText().toString().equals(MainActivity.this.getString(R.string.logout))) {
                         final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                        dialog.setContentView(R.layout.confirmation_dialog);
+                        dialog.setContentView(R.layout.dialog_confirmation);
                         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                         if (DataManager.getInstance().mainActivity.isLandscape) {
                             DisplayMetrics displaymetrics = new DisplayMetrics();

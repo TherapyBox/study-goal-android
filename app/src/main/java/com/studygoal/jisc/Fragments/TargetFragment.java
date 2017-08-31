@@ -1,16 +1,23 @@
 package com.studygoal.jisc.Fragments;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AbsListView;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.TargetAdapter;
 import com.studygoal.jisc.Adapters.ToDoTasksAdapter;
@@ -109,7 +116,13 @@ public class TargetFragment extends BaseFragment {
         });
 
         mBinding.listTodo.setOnItemClickListener((parent, v, position, id) -> {
-            // no need any action
+            ToDoTasks item = mAdapterToDo.getItem(position);
+
+            if (item != null) {
+                if (item.fromTutor != null && item.isAccepted != null && item.fromTutor.toLowerCase().equals("yes") && item.isAccepted.equals("0")) {
+                    showAcceptTaskDialog(item);
+                }
+            }
         });
 
         mBinding.list.setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -262,7 +275,6 @@ public class TargetFragment extends BaseFragment {
         }).start();
     }
 
-
     private void updateTutorialMessage() {
         runOnUiThread(() -> {
             if (mBinding.targetRecurring.isChecked()) {
@@ -279,5 +291,169 @@ public class TargetFragment extends BaseFragment {
                 }
             }
         });
+    }
+
+    private void showAcceptTaskDialog(ToDoTasks item) {
+        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_accept_task);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+        if (DataManager.getInstance().mainActivity.isLandscape) {
+            DisplayMetrics displaymetrics = new DisplayMetrics();
+            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+            int width = (int) (displaymetrics.widthPixels * 0.45);
+
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = width;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.to_do_task_accept_dialog_title);
+
+        ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.to_do_task_accept_dialog_message);
+
+        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+        ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setText(R.string.cancel);
+
+        dialog.findViewById(R.id.dialog_ok).setOnClickListener(v1 -> {
+            dialog.dismiss();
+            processAcceptTask(item);
+        });
+
+        dialog.findViewById(R.id.dialog_no).setOnClickListener(v12 -> {
+            dialog.dismiss();
+            showDeclineTaskDialog(item);
+        });
+
+        dialog.findViewById(R.id.dialog_cancel).setOnClickListener(v12 -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void showDeclineTaskDialog(ToDoTasks item) {
+        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_decline_task);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+        if (DataManager.getInstance().mainActivity.isLandscape) {
+            DisplayMetrics displaymetrics = new DisplayMetrics();
+            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+            int width = (int) (displaymetrics.widthPixels * 0.45);
+
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = width;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.to_do_task_decline_dialog_title);
+
+        ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.to_do_task_decline_dialog_message);
+
+        ((TextView) dialog.findViewById(R.id.reason)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.reason_title)).setTypeface(DataManager.getInstance().myriadpro_regular);
+
+        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+        final EditText reason = ((EditText) dialog.findViewById(R.id.reason));
+        dialog.findViewById(R.id.dialog_ok).setOnClickListener(v1 -> {
+            dialog.dismiss();
+            processDeclineTask(item, reason.getText().toString());
+        });
+
+        dialog.findViewById(R.id.dialog_no).setOnClickListener(v12 -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void processAcceptTask(ToDoTasks item) {
+        runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
+
+        new Thread(() -> {
+            ActiveAndroid.beginTransaction();
+            item.isAccepted = "1";
+            item.save();
+            ActiveAndroid.setTransactionSuccessful();
+            ActiveAndroid.endTransaction();
+
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("student_id", DataManager.getInstance().user.id);
+            params.put("end_date", item.endDate);
+            params.put("record_id", item.taskId);
+            params.put("module", item.module);
+            params.put("description", item.description);
+            params.put("reason", item.reason);
+            params.put("is_accepted ", item.isAccepted);
+
+            if (NetworkManager.getInstance().editToDoTask(params)) {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                });
+            } else {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        }).start();
+    }
+
+    private void processDeclineTask(ToDoTasks item, String declineReason) {
+        runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
+
+        new Thread(() -> {
+            ActiveAndroid.beginTransaction();
+            item.isAccepted = "2";
+
+            if (declineReason != null) {
+                item.reasonForIgnoring = declineReason;
+            } else {
+                item.reasonForIgnoring = "";
+            }
+
+            item.save();
+            ActiveAndroid.setTransactionSuccessful();
+            ActiveAndroid.endTransaction();
+
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("student_id", DataManager.getInstance().user.id);
+            params.put("end_date", item.endDate);
+            params.put("record_id", item.taskId);
+            params.put("module", item.module);
+            params.put("description", item.description);
+            params.put("reason", item.reason);
+            params.put("is_accepted ", item.isAccepted);
+            params.put("reason_for_ignoring ", item.reasonForIgnoring);
+
+            if (NetworkManager.getInstance().editToDoTask(params)) {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                });
+            } else {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 }

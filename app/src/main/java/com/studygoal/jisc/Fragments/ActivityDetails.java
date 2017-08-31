@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
@@ -29,13 +28,10 @@ import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.Module;
-import com.studygoal.jisc.Models.Trophy;
-import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ActivityDetails extends Fragment {
 
@@ -104,7 +100,7 @@ public class ActivityDetails extends Fragment {
 
                 final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.confirmation_dialog);
+                dialog.setContentView(R.layout.dialog_confirmation);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 if(DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();

@@ -261,6 +261,7 @@
     <string name="add_a_reason_to_keep_this_target">Add a reason to keep this target</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="cancel">CANCEL</string>
     <string name="confirm_delete_title">Confirm deletion</string>
     <string name="confirm_delete_message">Are you sure you want to delete?</string>
     <string name="pause">Pause</string>
@@ -464,5 +465,10 @@
     <string name="by">By</string>
     <string name="attainment_not_data">There is no attainment data to show</string>
     <string name="today">Today</string>
+    <string name="to_do_task_accept_dialog_title">Accept</string>
+    <string name="to_do_task_accept_dialog_message">Do you want to accept this target?</string>
+    <string name="to_do_task_decline_dialog_title">Decline</string>
+    <string name="to_do_task_decline_dialog_message">Give reason for declining the task</string>
+    <string name="to_do_task_decline_reason">Reason</string>
 
 </resources>
