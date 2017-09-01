@@ -10,7 +10,7 @@ import android.widget.DatePicker;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DatePickerFragment extends DialogFragment {
+public class DatePickerForTargets extends DialogFragment {
     private DatePicker.OnDateChangedListener mListener = null;
 
     public void setListener(DatePicker.OnDateChangedListener listener) {
@@ -27,7 +27,7 @@ public class DatePickerFragment extends DialogFragment {
 
         DatePickerDialog dialog = new DatePickerDialog(getActivity(), (view, year1, month1, dayOfMonth) -> mListener.onDateChanged(view, year1, month1, dayOfMonth), year, month, day);
         dialog.getDatePicker().init(year, month, day, mListener);
-        dialog.getDatePicker().setMaxDate(new Date().getTime());
+        dialog.getDatePicker().setMinDate(new Date().getTime());
         return dialog;
     }
 }

@@ -108,11 +108,11 @@
     <string name="language">Language</string>
     <string name="course_engagement">Course Engagement</string>
     <string name="attainment">Attainment</string>
-    <string name="points">Points</string>
+    <string name="points">Activity Points</string>
     <string name="activity_points">Activity Points</string>
-    <string name="leader_board">Leader Board</string>
+    <string name="leader_board">Engagement Leaderboard</string>
     <string name="events_attended">Events Attended</string>
-    <string name="attendance">Attendance</string>
+    <string name="attendance">Attendance Summary</string>
     <string name="this_week">This Week</string>
     <string name="period">Period</string>
     <string name="compare_to">Compare to</string>
@@ -244,6 +244,7 @@
     <string name="invalid_email_or_password">Invalid Email or Password</string>
     <string name="press_back_again_to_exit_app">Press back again to exit application</string>
     <string name="in">in</string>
+    <string name="module_in">Choose Module</string>
     <string name="days">days</string>
     <string name="notes">Notes</string>
     <string name="add_notes">Add Notes</string>
@@ -260,6 +261,7 @@
     <string name="add_a_reason_to_keep_this_target">Add a reason to keep this target</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="cancel">CANCEL</string>
     <string name="confirm_delete_title">Confirm deletion</string>
     <string name="confirm_delete_message">Are you sure you want to delete?</string>
     <string name="pause">Pause</string>
@@ -365,7 +367,7 @@
     <string name="friend_privacy_settings">Friend Privacy Settings</string>
     <string name="less_than_1_minute">less than 1 minute</string>
     <string name="of">of</string>
-    <string name="graphs">"Graphs: VLE Activity"</string>
+    <string name="graphs">"VLE Activity"</string>
 
     <string name="attainment_refreshed">Attainments refreshed!</string>
     <string name="activity_paused">Activity paused</string>
@@ -455,5 +457,18 @@
     <string name="send_to">Send to</string>
     <string name="gps_network_not_enabled">Turn on location services to use this feature.</string>
     <string name="open_location_settings">Take me to settings</string>
+
+    <string name="target_add_recurring">Recurring</string>
+    <string name="target_add_single">Single</string>
+    <string name="my_goal">My goal is to ...</string>
+    <string name="add_a_reason_to_keep_this_target_single">Type here your message</string>
+    <string name="by">By</string>
+    <string name="attainment_not_data">There is no attainment data to show</string>
+    <string name="today">Today</string>
+    <string name="to_do_task_accept_dialog_title">Accept</string>
+    <string name="to_do_task_accept_dialog_message">Do you want to accept this target?</string>
+    <string name="to_do_task_decline_dialog_title">Decline</string>
+    <string name="to_do_task_decline_dialog_message">Give reason for declining the task</string>
+    <string name="to_do_task_decline_reason">Reason</string>
 
 </resources>

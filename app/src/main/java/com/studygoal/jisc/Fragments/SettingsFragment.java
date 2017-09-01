@@ -143,6 +143,7 @@ public class SettingsFragment extends Fragment {
         mLanguageValue.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         ((TextView) mainView.findViewById(R.id.email_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.privacy_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         mainView.findViewById(R.id.email_layout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -293,7 +294,7 @@ public class SettingsFragment extends Fragment {
         }
 
         Glide.with(this)
-                .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                 .into(mProfileImage);
         return mainView;
     }
@@ -308,7 +309,7 @@ public class SettingsFragment extends Fragment {
             mProfileSpinner.setVisibility(View.VISIBLE);
 
             Glide.with(manager.mainActivity)
-                    .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                    .load(NetworkManager.getInstance().host + manager.user.profile_pic)
                     .listener(new RequestListener<String, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -324,7 +325,7 @@ public class SettingsFragment extends Fragment {
                     .into(mProfileImage);
 
             Glide.with(manager.mainActivity)
-                    .load(NetworkManager.getInstance().no_https_host + manager.user.profile_pic)
+                    .load(NetworkManager.getInstance().host + manager.user.profile_pic)
                     .transform(new CircleTransform(manager.mainActivity))
                     .into(manager.mainActivity.adapter.profile_pic);
         });

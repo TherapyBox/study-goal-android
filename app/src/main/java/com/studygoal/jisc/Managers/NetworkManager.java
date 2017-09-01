@@ -26,6 +26,7 @@ import com.studygoal.jisc.Models.PendingRequest;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.StretchTarget;
 import com.studygoal.jisc.Models.Targets;
+import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
@@ -86,7 +87,6 @@ public class NetworkManager {
     private Context appContext;
     private ExecutorService executorService;
 
-    public String no_https_host = "http://stuapp.analytics.alpha.jisc.ac.uk/";
     public String host = "https://stuapp.analytics.alpha.jisc.ac.uk/";
 
     HttpLoggingInterceptor logging = new HttpLoggingInterceptor()
@@ -106,6 +106,9 @@ public class NetworkManager {
         setCertificate();
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(logging)
+                .connectTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(NETWORK_TIMEOUT, TimeUnit.SECONDS)
                 .sslSocketFactory(this.context.getSocketFactory())
                 .build();
     }
@@ -2646,6 +2649,58 @@ public class NetworkManager {
         }
     }
 
+    public boolean deleteToDoTask(HashMap<String, String> params) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future_result = executorService.submit(new deleteToDoTask(params));
+
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class deleteToDoTask implements Callable<Boolean> {
+        HashMap<String, String> params;
+
+        deleteToDoTask(HashMap<String, String> params) {
+            params.put("language", language);
+            this.params = params;
+
+            if (DataManager.getInstance().user.isSocial) {
+                this.params.put("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"));
+            }
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_delete_todo_task?student_id=" + params.get("student_id") + "&record_id=" + params.get("record_id") + "&language=" + language
+                        + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("DELETE");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setDoInput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+
+                if (responseCode != 200) {
+                    Log.e("deleteTarget", "ResponseCode = " + responseCode);
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
     public boolean editTarget(HashMap<String, String> params) {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<Boolean> future_result = executorService.submit(new editTarget(params));
@@ -2710,6 +2765,72 @@ public class NetworkManager {
         }
     }
 
+    public boolean editToDoTask(HashMap<String, String> params) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future_result = executorService.submit(new editToDoTask(params));
+
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class editToDoTask implements Callable<Boolean> {
+        HashMap<String, String> params;
+
+        editToDoTask(HashMap<String, String> params) {
+            params.put("language", language);
+            this.params = params;
+
+            if (DataManager.getInstance().user.isSocial) {
+                this.params.put("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"));
+            }
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_edit_todo_task";
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                String urlParameters = "";
+                Iterator it = params.entrySet().iterator();
+                for (int i = 0; it.hasNext(); i++) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    if (i == 0)
+                        urlParameters += entry.getKey() + "=" + entry.getValue();
+                    else
+                        urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
+                }
+
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    Log.e("editTarget", "ResponseCode = " + responseCode);
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
     public boolean addTarget(HashMap<String, String> params) {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<Boolean> future_result = executorService.submit(new addTarget(params));
@@ -2736,6 +2857,72 @@ public class NetworkManager {
         public Boolean call() {
             try {
                 String apiURL = host + "fn_add_target";
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                String urlParameters = "";
+                Iterator it = params.entrySet().iterator();
+                for (int i = 0; it.hasNext(); i++) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    if (i == 0)
+                        urlParameters += entry.getKey() + "=" + entry.getValue();
+                    else
+                        urlParameters += "&" + entry.getKey() + "=" + entry.getValue();
+                }
+
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    Log.e("addTarget", "ResponseCode = " + responseCode);
+                    return false;
+                }
+                System.out.println(urlParameters);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+    public boolean addToDoTask(HashMap<String, String> params) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future_result = executorService.submit(new addTodoTask(params));
+
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class addTodoTask implements Callable<Boolean> {
+
+        HashMap<String, String> params;
+
+        addTodoTask(HashMap<String, String> params) {
+            params.put("language", language);
+            this.params = params;
+            if (DataManager.getInstance().user.isSocial)
+                this.params.put("is_social", (DataManager.getInstance().user.isSocial ? "yes" : "no"));
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_add_todo_task";
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -2850,6 +3037,98 @@ public class NetworkManager {
                         target.status = jsonObject.getInt("status") + "";
                         target.created_date = jsonObject.getString("created_date");
                         target.modified_date = jsonObject.getString("modified_date");
+                        target.save();
+                    }
+                    ActiveAndroid.setTransactionSuccessful();
+                } finally {
+                    ActiveAndroid.endTransaction();
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+
+    public boolean getToDoTasks(String student_id) {
+        language = LinguisticManager.getInstance().getLanguageCode();
+        Future<Boolean> future = executorService.submit(new getToDoTasks(student_id));
+
+        try {
+            return future.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class getToDoTasks implements Callable<Boolean> {
+        String student_id;
+
+        getToDoTasks(String student_id) {
+            this.student_id = student_id;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_get_todo_list?student_id=" + student_id + "&language=" + language
+                        + ((DataManager.getInstance().user.isSocial) ? "&is_social=yes" : "");
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+
+                if (responseCode != 200) {
+                    if (responseCode == 204) {
+                        Log.i("getTargets", "No records found");
+                        new Delete().from(Targets.class).execute();
+                    } else {
+                        Log.e("getTargets", "Code: " + responseCode);
+                    }
+
+                    return false;
+                }
+
+                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                is.close();
+                JSONArray jsonArray = new JSONArray(sb.toString());
+                ActiveAndroid.beginTransaction();
+
+                try {
+                    new Delete().from(ToDoTasks.class).execute();
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        ToDoTasks target = new ToDoTasks();
+                        target.taskId = jsonObject.getInt("id") + "";
+                        target.studentId = jsonObject.getInt("student_id") + "";
+                        target.module = jsonObject.getString("module");
+                        target.description = jsonObject.getString("description");
+                        target.reason = jsonObject.getString("reason");
+                        target.timeRequired = jsonObject.getString("time_required");
+                        target.endDate = jsonObject.getString("end_date");
+                        target.status = jsonObject.getString("status");
+                        target.fromTutor = jsonObject.getString("from_tutor");
+                        target.isAccepted = jsonObject.getString("is_accepted");
+                        target.reasonForIgnoring = jsonObject.getString("reason_for_ignoring");
+                        target.created = jsonObject.getString("created");
+                        target.modified = jsonObject.getString("modified");
                         target.save();
                     }
                     ActiveAndroid.setTransactionSuccessful();
@@ -3583,7 +3862,7 @@ public class NetworkManager {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<String> futureResult = executorService.submit(new downloadInstitutions());
         try {
-            String result = futureResult.get();
+            String result = futureResult.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
             return result.equals("Success");
         } catch (Exception e) {
             e.printStackTrace();
@@ -3660,7 +3939,7 @@ public class NetworkManager {
     /**
      * getActivityHistory(String student_id)
      *
-     * @param student_id => the ID of the student for which his list of activities to be retrieved
+     * @param student_id => the ID of the student for which his mList of activities to be retrieved
      * @return true/false if operation has succeed
      */
     public boolean getActivityHistory(String student_id) {

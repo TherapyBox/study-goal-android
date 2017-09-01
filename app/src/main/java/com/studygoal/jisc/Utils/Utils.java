@@ -6,7 +6,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Base64;
-import android.util.Log;
 
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.LinguisticManager;
@@ -28,37 +27,27 @@ import java.util.Map;
 
 public class Utils {
 
-    public static boolean validate_email(String email){
-        if(email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"))
-        {
+    public static boolean validate_email(String email) {
+        if (email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
             return true;
         }
         return false;
     }
 
-    public static String getStringBetween(String from, String to, String original)
-    {
-        if(original.contains(from))
-        {
+    public static String getStringBetween(String from, String to, String original) {
+        if (original.contains(from)) {
             String[] _aux = original.split(from);
-            if(_aux[1].contains(to))
-            {
+            if (_aux[1].contains(to)) {
                 String[] _aux2 = _aux[1].split(to);
-                if(_aux2[0] != null) {
+                if (_aux2[0] != null) {
                     return _aux2[0];
-                }
-                else
-                {
+                } else {
                     return "";
                 }
-            }
-            else
-            {
+            } else {
                 return "";
             }
-        }
-        else
-        {
+        } else {
             return "";
         }
     }
@@ -76,10 +65,10 @@ public class Utils {
 
         DecimalFormat df = new DecimalFormat("#.#");
 
-        if(unit.equals("m"))
+        if (unit.equals("m"))
             return df.format(locationA.distanceTo(locationB));
         else
-            return df.format((locationA.distanceTo(locationB)/1000));
+            return df.format((locationA.distanceTo(locationB) / 1000));
     }
 
     public static String MD5(String md5) {
@@ -88,7 +77,7 @@ public class Utils {
             byte[] array = md.digest(md5.getBytes());
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < array.length; ++i) {
-                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+                sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
             }
             return sb.toString();
         } catch (java.security.NoSuchAlgorithmException ignored) {
@@ -96,13 +85,11 @@ public class Utils {
         return null;
     }
 
-    public static int dpToPx(int dp)
-    {
+    public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
-    public static int pxToDp(int px)
-    {
+    public static int pxToDp(int px) {
         return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 
@@ -114,26 +101,25 @@ public class Utils {
     }
 
 
-
     public static String getMinutesToHour(String time_spent) {
         Long minutes = Long.parseLong(time_spent);
-        Long hours = minutes/60;
+        Long hours = minutes / 60;
         minutes = minutes % 60;
-        if(hours == 0 && minutes == 0)
+        if (hours == 0 && minutes == 0)
             return DataManager.getInstance().context.getString(R.string.less_than_1_minute);
-        if(hours == 0 && minutes == 1)
+        if (hours == 0 && minutes == 1)
             return "1 " + DataManager.getInstance().context.getString(R.string.minute);
-        if(hours == 0 && minutes > 1)
+        if (hours == 0 && minutes > 1)
             return minutes + " " + DataManager.getInstance().context.getString(R.string.minutes);
-        if(hours == 1 && minutes == 0)
+        if (hours == 1 && minutes == 0)
             return "1 " + DataManager.getInstance().context.getString(R.string.hour);
-        if(hours == 1 && minutes == 1)
+        if (hours == 1 && minutes == 1)
             return "1 " + DataManager.getInstance().context.getString(R.string.hour) + " " + DataManager.getInstance().context.getString(R.string.and) + " " + minutes + " " + DataManager.getInstance().context.getString(R.string.minute);
-        if(hours == 1 && minutes > 1)
+        if (hours == 1 && minutes > 1)
             return "1 " + DataManager.getInstance().context.getString(R.string.hour) + " " + DataManager.getInstance().context.getString(R.string.and) + " " + minutes + " " + DataManager.getInstance().context.getString(R.string.minutes);
-        if(hours > 1 && minutes == 0)
+        if (hours > 1 && minutes == 0)
             return hours + " " + DataManager.getInstance().context.getString(R.string.hours);
-        if(hours > 1 && minutes == 1)
+        if (hours > 1 && minutes == 1)
             return hours + " " + DataManager.getInstance().context.getString(R.string.hours) + " " + DataManager.getInstance().context.getString(R.string.and) + " 1 " + DataManager.getInstance().context.getString(R.string.minute);
         else
             return hours + " " + DataManager.getInstance().context.getString(R.string.hours) + " " + DataManager.getInstance().context.getString(R.string.and) + " " + minutes + " " + DataManager.getInstance().context.getString(R.string.minutes);
@@ -170,27 +156,45 @@ public class Utils {
         return result;
     }
 
+    public static String formatDate(long time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        String[] suffixes =
+                {"th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        "th", "th", "th", "th", "th", "th", "th", "th", "th", "th",
+                        "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        "th", "st"};
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE d");
+
+        String result = dateFormat.format(calendar.getTime()) + suffixes[day] + " ";
+        dateFormat = new SimpleDateFormat("MMMM yyyy");
+        result += dateFormat.format(calendar.getTime());
+
+        return result;
+    }
 
     public static boolean isInSameWeek(String s) {
         Calendar c = Calendar.getInstance();
-        Long current_date_in_ms =  c.getTimeInMillis();
+        Long current_date_in_ms = c.getTimeInMillis();
         ArrayList<String> dates = new ArrayList<>();
 
         switch (c.get(Calendar.DAY_OF_WEEK)) {
             case Calendar.SUNDAY: {
-                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH)+1) + "-" + c.get(Calendar.DAY_OF_MONTH));
+                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 break;
             }
             case Calendar.MONDAY: {
-                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH)+1) + "-" + c.get(Calendar.DAY_OF_MONTH));
+                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 c.setTimeInMillis(current_date_in_ms - 86400000);
-                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH)+1) + "-" + c.get(Calendar.DAY_OF_MONTH));
+                dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 break;
             }
             case Calendar.TUESDAY: {
                 dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
-                for(int i = 1; i < Calendar.TUESDAY; i++) {
+                for (int i = 1; i < Calendar.TUESDAY; i++) {
                     c.setTimeInMillis(current_date_in_ms -= 86400000);
                     dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 }
@@ -198,7 +202,7 @@ public class Utils {
             }
             case Calendar.WEDNESDAY: {
                 dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
-                for(int i = 1; i < Calendar.WEDNESDAY; i++) {
+                for (int i = 1; i < Calendar.WEDNESDAY; i++) {
                     c.setTimeInMillis(current_date_in_ms -= 86400000);
                     dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 }
@@ -206,7 +210,7 @@ public class Utils {
             }
             case Calendar.THURSDAY: {
                 dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
-                for(int i = 1; i < Calendar.THURSDAY; i++) {
+                for (int i = 1; i < Calendar.THURSDAY; i++) {
                     c.setTimeInMillis(current_date_in_ms -= 86400000);
                     dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 }
@@ -214,7 +218,7 @@ public class Utils {
             }
             case Calendar.FRIDAY: {
                 dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
-                for(int i = 1; i < Calendar.FRIDAY; i++) {
+                for (int i = 1; i < Calendar.FRIDAY; i++) {
                     c.setTimeInMillis(current_date_in_ms -= 86400000);
                     dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 }
@@ -222,7 +226,7 @@ public class Utils {
             }
             case Calendar.SATURDAY: {
                 dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
-                for(int i = 1; i < Calendar.SATURDAY; i++) {
+                for (int i = 1; i < Calendar.SATURDAY; i++) {
                     c.setTimeInMillis(current_date_in_ms -= 86400000);
                     dates.add(c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DAY_OF_MONTH));
                 }
@@ -236,11 +240,11 @@ public class Utils {
     public static String convertToHour(int neccesary_time) {
         String hour = neccesary_time / 60 + "";
         neccesary_time = neccesary_time % 60;
-        if(neccesary_time == 0) return hour;
+        if (neccesary_time == 0) return hour;
 
         hour += ".";
-        String tmp = ((float)neccesary_time/60 + "").split("\\.")[1];
-        if(tmp.length() > 2) hour += tmp.substring(0, 2);
+        String tmp = ((float) neccesary_time / 60 + "").split("\\.")[1];
+        if (tmp.length() > 2) hour += tmp.substring(0, 2);
         else hour += tmp;
         return hour;
     }
@@ -251,7 +255,7 @@ public class Utils {
         List<Map.Entry<String, Integer>> list =
                 new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
 
-        // Sort list with comparator, to compare the Map values
+        // Sort mList with comparator, to compare the Map values
         Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
             public int compare(Map.Entry<String, Integer> o1,
                                Map.Entry<String, Integer> o2) {
@@ -261,7 +265,7 @@ public class Utils {
 
         // Convert sorted map back to a Map
         Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
-        for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it.hasNext(); ) {
             Map.Entry<String, Integer> entry = it.next();
             sortedMap.put(entry.getKey(), entry.getValue());
         }
@@ -273,15 +277,15 @@ public class Utils {
         calendar.setTimeInMillis(timeInMillis);
 
         Calendar firstDay = GregorianCalendar.getInstance();
-        firstDay.setTimeInMillis(timeInMillis - ((calendar.get(Calendar.DAY_OF_WEEK)-calendar.getFirstDayOfWeek()) * 86400000));
+        firstDay.setTimeInMillis(timeInMillis - ((calendar.get(Calendar.DAY_OF_WEEK) - calendar.getFirstDayOfWeek()) * 86400000));
 
         Calendar lastDay = GregorianCalendar.getInstance();
         lastDay.setTimeInMillis(firstDay.getTimeInMillis() + (6 * 86400000));
 
-        if(firstDay.get(Calendar.MONTH) == lastDay.get(Calendar.MONTH))
-            return ((firstDay.get(Calendar.MONTH)+1)<10?"0"+(firstDay.get(Calendar.MONTH)+1):(firstDay.get(Calendar.MONTH)+1)) + "/" + firstDay.get(Calendar.DAY_OF_MONTH) + "-" + lastDay.get(Calendar.DAY_OF_MONTH);
+        if (firstDay.get(Calendar.MONTH) == lastDay.get(Calendar.MONTH))
+            return ((firstDay.get(Calendar.MONTH) + 1) < 10 ? "0" + (firstDay.get(Calendar.MONTH) + 1) : (firstDay.get(Calendar.MONTH) + 1)) + "/" + firstDay.get(Calendar.DAY_OF_MONTH) + "-" + lastDay.get(Calendar.DAY_OF_MONTH);
         else
-            return ((firstDay.get(Calendar.MONTH)+1)<10?"0"+(firstDay.get(Calendar.MONTH)+1):(firstDay.get(Calendar.MONTH)+1)) + "/" + firstDay.get(Calendar.DAY_OF_MONTH) + "-" + ((lastDay.get(Calendar.MONTH)+1)<10?"0"+(lastDay.get(Calendar.MONTH)+1):(lastDay.get(Calendar.MONTH)+1)) + "/" + lastDay.get(Calendar.DAY_OF_MONTH);
+            return ((firstDay.get(Calendar.MONTH) + 1) < 10 ? "0" + (firstDay.get(Calendar.MONTH) + 1) : (firstDay.get(Calendar.MONTH) + 1)) + "/" + firstDay.get(Calendar.DAY_OF_MONTH) + "-" + ((lastDay.get(Calendar.MONTH) + 1) < 10 ? "0" + (lastDay.get(Calendar.MONTH) + 1) : (lastDay.get(Calendar.MONTH) + 1)) + "/" + lastDay.get(Calendar.DAY_OF_MONTH);
     }
 
     public static String attainmentDate(String date) {
@@ -298,7 +302,7 @@ public class Utils {
         }
     }
 
-    private static String getJson(String strEncoded) throws UnsupportedEncodingException{
+    private static String getJson(String strEncoded) throws UnsupportedEncodingException {
         byte[] decodedBytes = Base64.decode(strEncoded, Base64.URL_SAFE);
         return new String(decodedBytes, "UTF-8");
     }

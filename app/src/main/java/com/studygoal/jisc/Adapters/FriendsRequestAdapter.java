@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.studygoal.jisc.Fragments.FriendsSearch;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.ReceivedRequest;
@@ -209,7 +208,7 @@ public class FriendsRequestAdapter extends BaseAdapter {
                 public void onClick(View v) {
                     final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                     dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialog.setContentView(R.layout.confirmation_dialog);
+                    dialog.setContentView(R.layout.dialog_confirmation);
                     dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
                     if (DataManager.getInstance().mainActivity.isLandscape) {

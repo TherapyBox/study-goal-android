@@ -109,7 +109,7 @@ public class DrawerAdapter extends BaseAdapter {
                         .into(profile_pic);
             } else {
                 Glide.with(context)
-                        .load(NetworkManager.getInstance().no_https_host + DataManager.getInstance().user.profile_pic)
+                        .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                         .transform(new CircleTransform(context))
                         .into(profile_pic);
             }

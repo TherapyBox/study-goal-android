@@ -70,7 +70,7 @@ public class TargetItem extends Fragment {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.custom_spinner_layout);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        if(DataManager.getInstance().mainActivity.isLandscape) {
+        if (DataManager.getInstance().mainActivity.isLandscape) {
             DisplayMetrics displaymetrics = new DisplayMetrics();
             DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
             int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -132,7 +132,7 @@ public class TargetItem extends Fragment {
             }
         });
 
-        webView = (WebView)mainView.findViewById(R.id.piechart);
+        webView = (WebView) mainView.findViewById(R.id.piechart);
         webView.setWebChromeClient(new WebChromeClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -143,8 +143,8 @@ public class TargetItem extends Fragment {
         webView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                webviewHeight = Utils.pxToDp(webView.getHeight()-40);
-                webviewWidth = Utils.pxToDp(webView.getWidth()-40);
+                webviewHeight = Utils.pxToDp(webView.getHeight() - 40);
+                webviewWidth = Utils.pxToDp(webView.getWidth() - 40);
             }
         });
         webView.loadDataWithBaseURL("", "<html><head></head><body><div style=\"height:100%;width:100%;background:white;\"></div></body></html>", "text/html", "UTF-8", "");
@@ -161,8 +161,9 @@ public class TargetItem extends Fragment {
 
         try {
             Glide.with(DataManager.getInstance().mainActivity).load(LinguisticManager.getInstance().images.get(target.activity)).into((ImageView) mainView.findViewById(R.id.activity_icon));
-        } catch (Exception ignored) {}
-        if(module != null) {
+        } catch (Exception ignored) {
+        }
+        if (module != null) {
             activityHistoryList = new Select().from(ActivityHistory.class).where("module_id = ?", target.module_id).and("activity = ?", target.activity).execute();
         } else {
             activityHistoryList = new Select().from(ActivityHistory.class).where("activity = ?", target.activity).execute();
@@ -175,7 +176,7 @@ public class TargetItem extends Fragment {
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.stretchtarget_layout);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -185,7 +186,7 @@ public class TargetItem extends Fragment {
                     dialog.getWindow().setAttributes(params);
                 }
 
-                final NumberPicker hourPicker = (NumberPicker)dialog.findViewById(R.id.hour_picker);
+                final NumberPicker hourPicker = (NumberPicker) dialog.findViewById(R.id.hour_picker);
                 hourPicker.setMinValue(0);
                 hourPicker.setMaxValue(10);
                 hourPicker.setFormatter(new NumberPicker.Formatter() {
@@ -197,7 +198,7 @@ public class TargetItem extends Fragment {
                             return value + "";
                     }
                 });
-                final NumberPicker minutePicker = (NumberPicker)dialog.findViewById(R.id.minute_picker);
+                final NumberPicker minutePicker = (NumberPicker) dialog.findViewById(R.id.minute_picker);
                 minutePicker.setMinValue(0);
                 minutePicker.setMaxValue(59);
                 minutePicker.setFormatter(new NumberPicker.Formatter() {
@@ -210,7 +211,7 @@ public class TargetItem extends Fragment {
                     }
                 });
 
-                ((TextView)dialog.findViewById(R.id.timespent_save_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                ((TextView) dialog.findViewById(R.id.timespent_save_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
                 dialog.findViewById(R.id.set_btn).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -227,7 +228,7 @@ public class TargetItem extends Fragment {
                                         DataManager.getInstance().mainActivity.showProgressBar("");
                                     }
                                 });
-                                if(NetworkManager.getInstance().addStretchTarget(map)) {
+                                if (NetworkManager.getInstance().addStretchTarget(map)) {
                                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -246,8 +247,7 @@ public class TargetItem extends Fragment {
                                             dialog.dismiss();
                                         }
                                     });
-                                }
-                                else {
+                                } else {
                                     DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -261,26 +261,26 @@ public class TargetItem extends Fragment {
                         }).start();
                     }
                 });
-                ((TextView)dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
 
                 dialog.show();
             }
         };
 
-        String current_date = c.get(Calendar.YEAR) +  "-";
-        current_date += (c.get(Calendar.MONTH)+1)<10 ? "0" + (c.get(Calendar.MONTH)+1) + "-" : (c.get(Calendar.MONTH)+1) + "-";
-        current_date += c.get(Calendar.DAY_OF_MONTH)<10 ? "0" + c.get(Calendar.DAY_OF_MONTH) + " " : c.get(Calendar.DAY_OF_MONTH) + " ";
-        current_date += c.get(Calendar.HOUR_OF_DAY)<10 ? "0" + c.get(Calendar.HOUR_OF_DAY) + ":" : c.get(Calendar.HOUR_OF_DAY) + ":";
-        current_date += c.get(Calendar.MINUTE)<10? "0" + c.get(Calendar.MINUTE) + ":" : c.get(Calendar.MINUTE) + ":";
-        current_date += c.get(Calendar.SECOND)<10? "0" + c.get(Calendar.SECOND) : c.get(Calendar.SECOND);
+        String current_date = c.get(Calendar.YEAR) + "-";
+        current_date += (c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) + "-" : (c.get(Calendar.MONTH) + 1) + "-";
+        current_date += c.get(Calendar.DAY_OF_MONTH) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) + " " : c.get(Calendar.DAY_OF_MONTH) + " ";
+        current_date += c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + c.get(Calendar.HOUR_OF_DAY) + ":" : c.get(Calendar.HOUR_OF_DAY) + ":";
+        current_date += c.get(Calendar.MINUTE) < 10 ? "0" + c.get(Calendar.MINUTE) + ":" : c.get(Calendar.MINUTE) + ":";
+        current_date += c.get(Calendar.SECOND) < 10 ? "0" + c.get(Calendar.SECOND) : c.get(Calendar.SECOND);
 
 
         switch (target.time_span.toLowerCase()) {
             case "daily": {
                 String time = current_date.split(" ")[0];
                 List<ActivityHistory> tmp = new ArrayList<>();
-                for(int i = 0; i < activityHistoryList.size(); i++) {
-                    if(time.equals(activityHistoryList.get(i).created_date.split(" ")[0]))
+                for (int i = 0; i < activityHistoryList.size(); i++) {
+                    if (time.equals(activityHistoryList.get(i).created_date.split(" ")[0]))
                         tmp.add(activityHistoryList.get(i));
                 }
                 activityHistoryList.clear();
@@ -289,8 +289,8 @@ public class TargetItem extends Fragment {
             }
             case "weekly": {
                 List<ActivityHistory> tmp = new ArrayList<>();
-                for(int i = 0; i < activityHistoryList.size(); i++) {
-                    if(Utils.isInSameWeek(activityHistoryList.get(i).created_date.split(" ")[0]))
+                for (int i = 0; i < activityHistoryList.size(); i++) {
+                    if (Utils.isInSameWeek(activityHistoryList.get(i).created_date.split(" ")[0]))
                         tmp.add(activityHistoryList.get(i));
                 }
                 activityHistoryList.clear();
@@ -300,8 +300,8 @@ public class TargetItem extends Fragment {
             case "monthly": {
                 String time = current_date.split(" ")[0].split("-")[0] + "-" + current_date.split(" ")[0].split("-")[1];
                 List<ActivityHistory> tmp = new ArrayList<>();
-                for(int i = 0; i < activityHistoryList.size(); i++) {
-                    if(time.equals(activityHistoryList.get(i).created_date.split(" ")[0].split("-")[0] + "-" + activityHistoryList.get(i).created_date.split(" ")[0].split("-")[1]))
+                for (int i = 0; i < activityHistoryList.size(); i++) {
+                    if (time.equals(activityHistoryList.get(i).created_date.split(" ")[0].split("-")[0] + "-" + activityHistoryList.get(i).created_date.split(" ")[0].split("-")[1]))
                         tmp.add(activityHistoryList.get(i));
                 }
                 activityHistoryList.clear();
@@ -314,26 +314,26 @@ public class TargetItem extends Fragment {
         neccesary_time = Integer.parseInt(target.total_time);
 
         spent_time = 0;
-        for(int i=0; i < activityHistoryList.size(); i++) {
+        for (int i = 0; i < activityHistoryList.size(); i++) {
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
         }
-        if(spent_time == 0)
+        if (spent_time == 0)
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
-        else if(spent_time >= neccesary_time)
+        else if (spent_time >= neccesary_time)
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
         else
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFff7400);
 
-        if(spent_time == 0 || spent_time < neccesary_time) {
+        if (spent_time == 0 || spent_time < neccesary_time) {
             incomplete_textView = (TextView) mainView.findViewById(R.id.target_item_incomplete_textview);
             incomplete_textView.setVisibility(View.VISIBLE);
             incomplete_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
             incomplete_textView.setText(Utils.convertToHour(spent_time) + "/" + Utils.convertToHour(neccesary_time));
 
-            if(spent_time == 0) {
+            if (spent_time == 0) {
                 View set_stretch = mainView.findViewById(R.id.target_set_stretch_btn);
                 set_stretch.setVisibility(View.VISIBLE);
-                ((TextView)mainView.findViewById(R.id.target_stretch_btn_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.start_your_new_activity));
+                ((TextView) mainView.findViewById(R.id.target_stretch_btn_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.start_your_new_activity));
                 set_stretch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -356,7 +356,7 @@ public class TargetItem extends Fragment {
             complete_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
             complete_textView.setText(Utils.convertToHour(neccesary_time) + "/" + Utils.convertToHour(neccesary_time));
 
-            if(stretch_target != null) {
+            if (stretch_target != null) {
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -386,7 +386,7 @@ public class TargetItem extends Fragment {
                     textView1.setVisibility(View.VISIBLE);
                 }
             } else {
-                if(canStretchTarget()) {
+                if (canStretchTarget()) {
                     View set_stretch = mainView.findViewById(R.id.target_set_stretch_btn);
                     set_stretch.setVisibility(View.VISIBLE);
                     ((TextView) mainView.findViewById(R.id.target_stretch_btn_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.set_stretch_target));
@@ -404,7 +404,7 @@ public class TargetItem extends Fragment {
         int hour = Integer.parseInt(target.total_time) / 60;
         int minute = Integer.parseInt(target.total_time) % 60;
         text += (hour == 1) ? "1 " + DataManager.getInstance().mainActivity.getString(R.string.hour) + " " : hour + " " + DataManager.getInstance().mainActivity.getString(R.string.hours) + " ";
-        if(minute > 0)
+        if (minute > 0)
             text += ((minute == 1) ? " " + DataManager.getInstance().mainActivity.getString(R.string.and) + " 1 " + DataManager.getInstance().mainActivity.getString(R.string.minute) + " " : " " + DataManager.getInstance().mainActivity.getString(R.string.and) + " " + minute + " " + DataManager.getInstance().mainActivity.getString(R.string.minutes) + " ");
         text += target.time_span.toLowerCase();
         text += module == null ? "" : " " + DataManager.getInstance().mainActivity.getString(R.string.for_text) + " " + module.name;
@@ -426,6 +426,7 @@ public class TargetItem extends Fragment {
                 swipeLayout.close(true);
                 AddTarget fragment = new AddTarget();
                 fragment.isInEditMode = true;
+                fragment.isSingleTarget = false;
                 fragment.item = target;
                 DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main_fragment, fragment)
@@ -439,9 +440,9 @@ public class TargetItem extends Fragment {
             public void onClick(View v) {
                 final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.confirmation_dialog);
+                dialog.setContentView(R.layout.dialog_confirmation);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
+                if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();
                     DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                     int width = (int) (displaymetrics.widthPixels * 0.45);
@@ -486,15 +487,15 @@ public class TargetItem extends Fragment {
 
     private boolean canStretchTarget() {
         boolean eligible = false;
-        if(target.time_span.toLowerCase().equals(getString(R.string.daily).toLowerCase())) {
+        if (target.time_span.toLowerCase().equals(getString(R.string.daily).toLowerCase())) {
 
-        } else if(target.time_span.toLowerCase().equals(getString(R.string.Weekly).toLowerCase())) {
+        } else if (target.time_span.toLowerCase().equals(getString(R.string.Weekly).toLowerCase())) {
             Calendar c = Calendar.getInstance();
-            if(c.get(Calendar.DAY_OF_WEEK) <= Calendar.FRIDAY)
+            if (c.get(Calendar.DAY_OF_WEEK) <= Calendar.FRIDAY)
                 eligible = true;
-        } else if(target.time_span.toLowerCase().equals(getString(R.string.monthly).toLowerCase())) {
+        } else if (target.time_span.toLowerCase().equals(getString(R.string.monthly).toLowerCase())) {
             Calendar c = Calendar.getInstance();
-            if(c.getActualMaximum(Calendar.DAY_OF_MONTH) - c.get(Calendar.DAY_OF_MONTH) > 4)
+            if (c.getActualMaximum(Calendar.DAY_OF_MONTH) - c.get(Calendar.DAY_OF_MONTH) > 4)
                 eligible = true;
         }
 
@@ -503,20 +504,20 @@ public class TargetItem extends Fragment {
 
     protected void loadData() {
         String html = getHighChartsHTML(false);
-        html = html.replace("Y_MAX_VALUE",""+neccesary_time);
-        html = html.replace("Y_VALUE",""+spent_time);
-        html = html.replace("height:1000px","height:"+webviewHeight+"px !important");
-        html = html.replace("width:1000px","width:"+webviewWidth+"px !important");
+        html = html.replace("Y_MAX_VALUE", "" + neccesary_time);
+        html = html.replace("Y_VALUE", "" + spent_time);
+        html = html.replace("height:1000px", "height:" + webviewHeight + "px !important");
+        html = html.replace("width:1000px", "width:" + webviewWidth + "px !important");
 
         webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
     }
 
     protected void loadDataStretch() {
         String html = getHighChartsHTML(true);
-        html = html.replace("Y_VALUE",""+(spent_time - neccesary_time));
-        html = html.replace("Y_MAX_VALUE",""+stretch_target.stretch_time);
-        html = html.replace("height:1000px","height:"+webviewHeight+"px !important");
-        html = html.replace("width:1000px","width:"+webviewWidth+"px !important");
+        html = html.replace("Y_VALUE", "" + (spent_time - neccesary_time));
+        html = html.replace("Y_MAX_VALUE", "" + stretch_target.stretch_time);
+        html = html.replace("height:1000px", "height:" + webviewHeight + "px !important");
+        html = html.replace("width:1000px", "width:" + webviewWidth + "px !important");
 
         webView.loadDataWithBaseURL("", html, "text/html", "UTF-8", "");
     }
@@ -525,7 +526,7 @@ public class TargetItem extends Fragment {
 
         try {
             String path = "highcharts/piegraph.html";
-            if(isStretch) {
+            if (isStretch) {
                 path = "highcharts/piestretchgraph.html";
             }
 
@@ -533,7 +534,7 @@ public class TargetItem extends Fragment {
             InputStream json = DataManager.getInstance().mainActivity.getAssets().open(path);
             BufferedReader in = new BufferedReader(new InputStreamReader(json, "UTF-8"));
             String str;
-            while ((str=in.readLine()) != null) {
+            while ((str = in.readLine()) != null) {
                 buf.append(str);
             }
             in.close();
