@@ -115,7 +115,10 @@ public class StatsPoints extends Fragment {
                     String data = "";
                     for (ActivityPoints p : DataManager.getInstance().user.points) {
                         data += "{";
-                        data += "name:" + "\'" + p.activity + "\',";
+                        if(p.activity.equals("Loggedin"))
+                            data += "name:" + "\'Logged in\',";
+                        else
+                            data += "name:" + "\'" + p.activity + "\',";
                         data += "y:" + p.points;
                         data += "},";
                     }
