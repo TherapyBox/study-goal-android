@@ -144,7 +144,7 @@ public class TargetFragment extends BaseFragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                int topRowVerticalPosition = (mBinding.list == null || mBinding.list.getChildCount() == 0) ? 0 : mBinding.list.getChildAt(0).getTop();
+                int topRowVerticalPosition = (mBinding.listTodo == null || mBinding.listTodo.getChildCount() == 0) ? 0 : mBinding.listTodo.getChildAt(0).getTop();
                 mLayout.setEnabled(firstVisibleItem == 0 && topRowVerticalPosition >= 0);
             }
         });
