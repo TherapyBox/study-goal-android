@@ -262,7 +262,7 @@ public class TargetFragment extends BaseFragment {
             DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                 mAdapterTarget.list = new Select().from(Targets.class).execute();
                 mAdapterTarget.notifyDataSetChanged();
-                mAdapterToDo.updateList(new Select().from(ToDoTasks.class).execute());
+                mAdapterToDo.updateList(new Select().from(ToDoTasks.class).where("status = ?", 0).execute());
 
                 if (showProgress) {
                     DataManager.getInstance().mainActivity.hideProgressBar();
