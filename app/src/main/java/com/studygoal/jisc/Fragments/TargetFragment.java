@@ -100,6 +100,11 @@ public class TargetFragment extends BaseFragment {
             public void onEdit(ToDoTasks targets) {
                 editToDoTasks(targets);
             }
+
+            @Override
+            public void onAccept(ToDoTasks target) {
+                acceptToDoTask(target);
+            }
         });
 
         mBinding.list.setAdapter(mAdapterTarget);
@@ -247,6 +252,10 @@ public class TargetFragment extends BaseFragment {
                 .replace(R.id.main_fragment, fragment)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private void acceptToDoTask(ToDoTasks item){
+        showAcceptTaskDialog(item);
     }
 
     private void loadData(boolean showProgress) {
