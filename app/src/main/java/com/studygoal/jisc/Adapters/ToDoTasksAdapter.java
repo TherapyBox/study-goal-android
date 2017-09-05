@@ -31,7 +31,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         void onEdit(ToDoTasks targets);
 
-        void onAccept(ToDoTasks target);
+        void onDone(ToDoTasks target);
     }
 
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
@@ -156,11 +156,11 @@ public class ToDoTasksAdapter extends BaseAdapter {
             }
         });
 
-        convertView.findViewById(R.id.accept).setOnClickListener(v -> {
+        convertView.findViewById(R.id.done).setOnClickListener(v -> {
             swipeLayout.close(true);
 
             if (mListener != null) {
-                mListener.onAccept(item);
+                mListener.onDone(item);
             }
         });
 

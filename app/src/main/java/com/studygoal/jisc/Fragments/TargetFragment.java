@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,10 @@ import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.databinding.TargetFragmentBinding;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 public class TargetFragment extends BaseFragment {
     private static final String TAG = TargetFragment.class.getSimpleName();
@@ -102,8 +106,8 @@ public class TargetFragment extends BaseFragment {
             }
 
             @Override
-            public void onAccept(ToDoTasks target) {
-                acceptToDoTask(target);
+            public void onDone(ToDoTasks target) {
+                completeToDoTask(target);
             }
         });
 
@@ -258,6 +262,10 @@ public class TargetFragment extends BaseFragment {
         showAcceptTaskDialog(item);
     }
 
+    private void completeToDoTask(ToDoTasks item) {
+        processCompletionTask(item);
+    }
+
     private void loadData(boolean showProgress) {
         if (showProgress) {
             runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
@@ -271,7 +279,26 @@ public class TargetFragment extends BaseFragment {
             DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                 mAdapterTarget.list = new Select().from(Targets.class).execute();
                 mAdapterTarget.notifyDataSetChanged();
-                mAdapterToDo.updateList(new Select().from(ToDoTasks.class).execute());
+                //mAdapterToDo.updateList(new Select().from(ToDoTasks.class).execute());
+
+                List<ToDoTasks> currentTaskList = new Select().from(ToDoTasks.class).execute();
+                Iterator iterator = currentTaskList.iterator();
+
+                while (iterator.hasNext()){
+                    ToDoTasks currentTask = (ToDoTasks)iterator.next();
+
+                    if(currentTask.status.equals("1")) {
+                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
+                        iterator.remove();
+                    } else if (currentTask.isAccepted.equals("2")) {
+                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
+                        iterator.remove();
+                    } else {
+                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
+                    }
+                }
+                mAdapterToDo.updateList(currentTaskList);
+                mAdapterToDo.notifyDataSetChanged();
 
                 if (showProgress) {
                     DataManager.getInstance().mainActivity.hideProgressBar();
@@ -399,7 +426,7 @@ public class TargetFragment extends BaseFragment {
 
         new Thread(() -> {
             ActiveAndroid.beginTransaction();
-            item.isAccepted = "1";
+            item.isAccepted = "2";
             item.save();
             ActiveAndroid.setTransactionSuccessful();
             ActiveAndroid.endTransaction();
@@ -411,9 +438,10 @@ public class TargetFragment extends BaseFragment {
             params.put("module", item.module);
             params.put("description", item.description);
             params.put("reason", item.reason);
-            params.put("is_accepted ", item.isAccepted);
+            params.put("is_accepted", item.isAccepted);
 
             if (NetworkManager.getInstance().editToDoTask(params)) {
+                loadData(true);
                 DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                     DataManager.getInstance().mainActivity.hideProgressBar();
                 });
@@ -454,6 +482,33 @@ public class TargetFragment extends BaseFragment {
             params.put("reason_for_ignoring ", item.reasonForIgnoring);
 
             if (NetworkManager.getInstance().editToDoTask(params)) {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                });
+            } else {
+                DataManager.getInstance().mainActivity.runOnUiThread(() -> {
+                    DataManager.getInstance().mainActivity.hideProgressBar();
+                    Snackbar.make(mRootView, R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                });
+            }
+        }).start();
+    }
+
+    private void processCompletionTask(ToDoTasks item) {
+        runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
+
+        new Thread(() -> {
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("student_id", DataManager.getInstance().user.id);
+            params.put("end_date", item.endDate);
+            params.put("record_id", item.taskId);
+            params.put("module", item.module);
+            params.put("description", item.description);
+            params.put("reason", item.reason);
+            params.put("is_completed", "1");
+
+            if (NetworkManager.getInstance().editToDoTask(params)) {
+                loadData(true);
                 DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                     DataManager.getInstance().mainActivity.hideProgressBar();
                 });

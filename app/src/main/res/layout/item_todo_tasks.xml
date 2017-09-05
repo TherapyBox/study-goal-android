@@ -10,7 +10,7 @@
         android:weightSum="1">
 
         <RelativeLayout
-            android:id="@+id/accept"
+            android:id="@+id/done"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:background="@color/default_purple">
@@ -19,7 +19,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/accept_image" />
+                android:src="@drawable/done_image" />
         </RelativeLayout>
 
         <RelativeLayout
