@@ -29,12 +29,25 @@
                     android:orientation="horizontal"
                     android:visibility="visible">
 
+          
+                    <RadioButton
+                        android:id="@+id/target_single"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/radio_button_background_left"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/target_add_single"
+                        android:textColor="@drawable/radio_button_text" />        
+                    
                     <RadioButton
                         android:id="@+id/target_recurring"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/radio_button_background_left"
+                        android:background="@drawable/radio_button_background_right"
                         android:button="@null"
                         android:checked="true"
                         android:gravity="center"
@@ -42,17 +55,6 @@
                         android:text="@string/target_add_recurring"
                         android:textColor="@drawable/radio_button_text" />
 
-                    <RadioButton
-                        android:id="@+id/target_single"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@drawable/radio_button_background_right"
-                        android:button="@null"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:text="@string/target_add_single"
-                        android:textColor="@drawable/radio_button_text" />
                 </RadioGroup>
 
                 <ListView
