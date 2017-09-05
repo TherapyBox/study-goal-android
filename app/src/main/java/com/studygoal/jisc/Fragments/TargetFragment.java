@@ -288,13 +288,9 @@ public class TargetFragment extends BaseFragment {
                     ToDoTasks currentTask = (ToDoTasks)iterator.next();
 
                     if(currentTask.status.equals("1")) {
-                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
                         iterator.remove();
                     } else if (currentTask.isAccepted.equals("2")) {
-                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
                         iterator.remove();
-                    } else {
-                        Log.d(TAG, "loadData: isAccepted " + currentTask.isAccepted + " status " + currentTask.status + " description " + currentTask.description);
                     }
                 }
                 mAdapterToDo.updateList(currentTaskList);

@@ -2,6 +2,7 @@ package com.studygoal.jisc.Adapters;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,12 +11,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.R;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,7 +37,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
         void onDone(ToDoTasks target);
     }
 
-    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private Context mContext;
 
@@ -113,6 +116,35 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_todo_tasks, parent, false);
+        }
+
+        ImageView activity_icon = (ImageView) convertView.findViewById(R.id.activity_icon);
+
+        Date currentDate = new Date();
+        currentDate.setTime(Calendar.getInstance().getTimeInMillis());
+        Date itemDate = null;
+        try {
+            itemDate = sDateFormat.parse(item.endDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        int difference = (int)((currentDate.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24)) ;
+
+        Log.d(TAG, "getView: difference " + item.description);
+        Log.d(TAG, "getView: difference " + item.endDate);
+        Log.d(TAG, "getView: difference " + new SimpleDateFormat("yyyy-MM-dd").format(currentDate));
+        Log.d(TAG, "getView: difference " + difference);
+        if (difference == 0) {
+            activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_due_today));
+            Log.d(TAG, "getView: difference due today");
+        } else if (difference == -1 || difference == -2) {
+            activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_2_left));
+        } else if (difference >= -7) {
+            activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_7_left));
+        } else if (difference < -7) {
+            activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_idle));
+        } else {
+            activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.watch_time_overdue));
         }
 
         TextView textView = (TextView) convertView.findViewById(R.id.target_item_text);
