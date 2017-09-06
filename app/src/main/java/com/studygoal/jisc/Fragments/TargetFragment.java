@@ -492,6 +492,14 @@ public class TargetFragment extends BaseFragment {
     }
 
     private void processCompletionTask(ToDoTasks item) {
+        if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TargetFragment.this.getActivity());
+            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_completetarget) + "</font>"));
+            alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            return;
+        }
         runOnUiThread(() -> DataManager.getInstance().mainActivity.showProgressBar(null));
 
         new Thread(() -> {

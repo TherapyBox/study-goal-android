@@ -442,6 +442,7 @@
     <string name="demo_mode_deleteactivitylog">You can\'t delete logs in demo mode.</string>
     <string name="demo_mode_addtarget">To start saving targets, create an account.</string>
     <string name="demo_mode_deletetarget">You can\’t delete targets in demo mode</string>
+    <string name="demo_mode_completetarget">You can\’t mark targets as done in demo mode</string>
     <string name="demo_mode_edittarget">Targets can\’t be edited in demo mode.</string>
     <string name="demo_mode_changeappsettings">Demo mode only. You can\’t change the settings.</string>
     <string name="demo_mode_deletefeedlog">You can\’t delete items from feed in demo mode.</string>
