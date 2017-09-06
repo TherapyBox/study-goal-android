@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import junit.framework.Assert;
 
@@ -66,7 +67,7 @@ public class TrophyDetails extends AppCompatActivity implements View.OnClickList
         Assert.assertNotNull(this);
         Assert.assertNotNull(imageName);
 
-        Glide.with(this)
+        GlideApp.with(this)
                 .load(this.getResources().getIdentifier(imageName, "drawable", this.getPackageName()))
                 .transform(new CircleTransform(this))
                 .into(image);

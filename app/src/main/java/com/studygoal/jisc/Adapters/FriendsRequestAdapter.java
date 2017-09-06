@@ -26,6 +26,7 @@ import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.SettingsActivity;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,12 +84,12 @@ public class FriendsRequestAdapter extends BaseAdapter {
             final ReceivedRequest attendant = list.get(position);
 
             if (attendant.photo.equals("")) {
-                Glide.with(this.context)
+                GlideApp.with(this.context)
                         .load(R.drawable.profilenotfound)
                         .transform(new CircleTransform(context))
                         .into(((ImageView) convertView.findViewById(R.id.portrait)));
             } else {
-                Glide.with(context)
+                GlideApp.with(context)
                         .load(NetworkManager.getInstance().host + attendant.photo)
                         .transform(new CircleTransform(context))
                         .placeholder(R.drawable.profilenotfound)

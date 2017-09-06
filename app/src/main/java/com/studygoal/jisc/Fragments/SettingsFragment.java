@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,8 +30,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.studygoal.jisc.Adapters.GenericAdapter;
@@ -42,6 +43,7 @@ import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -293,7 +295,7 @@ public class SettingsFragment extends Fragment {
             mProfileImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
 
-        Glide.with(this)
+        GlideApp.with(this)
                 .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                 .into(mProfileImage);
         return mainView;
@@ -308,23 +310,23 @@ public class SettingsFragment extends Fragment {
         manager.mainActivity.runOnUiThread(() -> {
             mProfileSpinner.setVisibility(View.VISIBLE);
 
-            Glide.with(manager.mainActivity)
+            GlideApp.with(manager.mainActivity)
                     .load(NetworkManager.getInstance().host + manager.user.profile_pic)
-                    .listener(new RequestListener<String, GlideDrawable>() {
+                    .listener(new RequestListener<Drawable>() {
                         @Override
-                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                             return false;
                         }
 
                         @Override
-                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             mProfileSpinner.setVisibility(View.INVISIBLE);
                             return false;
                         }
                     })
                     .into(mProfileImage);
 
-            Glide.with(manager.mainActivity)
+            GlideApp.with(manager.mainActivity)
                     .load(NetworkManager.getInstance().host + manager.user.profile_pic)
                     .transform(new CircleTransform(manager.mainActivity))
                     .into(manager.mainActivity.adapter.profile_pic);

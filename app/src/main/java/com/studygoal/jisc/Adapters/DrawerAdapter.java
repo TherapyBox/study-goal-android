@@ -16,6 +16,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.ArrayList;
 
@@ -89,7 +90,7 @@ public class DrawerAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (position == 0) {
             convertView = inflater.inflate(R.layout.nav_header_main, parent, false);
-            Glide.with(context).load(R.drawable.menu_header_bg).into((ImageView) convertView.findViewById(R.id.navheader));
+            GlideApp.with(context).load(R.drawable.menu_header_bg).into((ImageView) convertView.findViewById(R.id.navheader));
 
             TextView email = (TextView) convertView.findViewById(R.id.drawer_email);
             TextView studentId = (TextView) convertView.findViewById(R.id.drawer_studentId);
@@ -103,12 +104,12 @@ public class DrawerAdapter extends BaseAdapter {
             profile_pic = (ImageView) convertView.findViewById(R.id.imageView);
 
             if (DataManager.getInstance().user.profile_pic.equals("")) {
-                Glide.with(context)
+                GlideApp.with(context)
                         .load(R.drawable.profilenotfound2)
                         .transform(new CircleTransform(context))
                         .into(profile_pic);
             } else {
-                Glide.with(context)
+                GlideApp.with(context)
                         .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                         .transform(new CircleTransform(context))
                         .into(profile_pic);
@@ -174,7 +175,7 @@ public class DrawerAdapter extends BaseAdapter {
             }
 
             if (iconResID != -1)
-                Glide.with(context).load(iconResID).into(imageView);
+                GlideApp.with(context).load(iconResID).into(imageView);
 
             if (DataManager.getInstance().fragment != null) {
                 if (DataManager.getInstance().fragment == position) {

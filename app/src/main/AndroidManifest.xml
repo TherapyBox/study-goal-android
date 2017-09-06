@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.studygoal.jisc">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,12 +26,6 @@
         <service
             android:name=".Syncronize"
             android:stopWithTask="true" />
-
-        <meta-data
-            android:name="com.studygoal.jisc.Utils.GlideConfig.GlideConfiguration"
-            android:value="GlideModule"
-            tools:node="remove" />
-
 
         <meta-data
             android:name="AA_DB_NAME"

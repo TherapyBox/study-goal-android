@@ -1,6 +1,7 @@
 package com.studygoal.jisc.Utils.GlideConfig;
 
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
@@ -15,60 +16,69 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
-    private final OkHttpClient client;
-    private final GlideUrl url;
-    private InputStream stream;
-    private ResponseBody responseBody;
+    private final OkHttpClient mClient;
+    private final GlideUrl mUrl;
+    private InputStream mStream;
+    private ResponseBody mResponseBody;
 
     public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
-        this.client = client;
-        this.url = url;
+        mClient = client;
+        mUrl = url;
     }
 
     @Override
-    public InputStream loadData(Priority priority) throws Exception {
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(url.toStringUrl());
+    public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+        try {
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(mUrl.toStringUrl());
 
-        for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
-            String key = headerEntry.getKey();
-            requestBuilder.addHeader(key, headerEntry.getValue());
+            for (Map.Entry<String, String> headerEntry : mUrl.getHeaders().entrySet()) {
+                String key = headerEntry.getKey();
+                requestBuilder.addHeader(key, headerEntry.getValue());
+            }
+
+            Request request = requestBuilder.build();
+
+            Response response = mClient.newCall(request).execute();
+            mResponseBody = response.body();
+            if (!response.isSuccessful()) {
+                throw new IOException("Request failed with code: " + response.code());
+            }
+
+            long contentLength = mResponseBody.contentLength();
+            mStream = ContentLengthInputStream.obtain(mResponseBody.byteStream(), contentLength);
+            callback.onDataReady(mStream);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        Request request = requestBuilder.build();
-
-        Response response = client.newCall(request).execute();
-        responseBody = response.body();
-        if (!response.isSuccessful()) {
-            throw new IOException("Request failed with code: " + response.code());
-        }
-
-        long contentLength = responseBody.contentLength();
-        stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
-        return stream;
     }
 
     @Override
     public void cleanup() {
-        if (stream != null) {
+        if (mStream != null) {
             try {
-                stream.close();
+                mStream.close();
             } catch (IOException e) {
                 // Ignored
             }
         }
-        if (responseBody != null) {
-            responseBody.close();
+        if (mResponseBody != null) {
+            mResponseBody.close();
         }
     }
 
     @Override
-    public String getId() {
-        return url.getCacheKey();
+    public void cancel() {
+        // do nothing
     }
 
     @Override
-    public void cancel() {
-        // TODO: call cancel on the client when this method is called on a background thread. See #257
+    public Class<InputStream> getDataClass() {
+        return null;
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return DataSource.REMOTE;
     }
 }

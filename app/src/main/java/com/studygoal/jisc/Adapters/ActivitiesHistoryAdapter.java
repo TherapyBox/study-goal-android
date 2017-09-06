@@ -26,6 +26,7 @@ import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.RunningActivity;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 import com.studygoal.jisc.Utils.Utils;
 
 import java.util.List;
@@ -114,7 +115,7 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
         final ActivityHistory activityHistory = historyList.get(position);
 
         try {
-            Glide.with(context).load(LinguisticManager.getInstance().images.get(activityHistory.activity)).into((ImageView) convertView.findViewById(R.id.activity_icon));
+            GlideApp.with(context).load(LinguisticManager.getInstance().images.get(activityHistory.activity)).into((ImageView) convertView.findViewById(R.id.activity_icon));
         } catch (Exception ignored) {
             ignored.printStackTrace();
         }

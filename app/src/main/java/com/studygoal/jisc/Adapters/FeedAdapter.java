@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +23,8 @@ import android.widget.TextView;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.Log;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.daimajia.swipe.SwipeLayout;
@@ -33,6 +36,7 @@ import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -125,17 +129,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             feedViewHolder.open.setVisibility(View.GONE);
             if (!DataManager.getInstance().user.profile_pic.equals("")) {
                 Log.e("TEST", NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic);
-                Glide.with(feedViewHolder.itemView.getContext())
+                GlideApp.with(feedViewHolder.itemView.getContext())
                         .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
-                        .listener(new RequestListener<String, GlideDrawable>() {
+                        .listener(new RequestListener<Drawable>() {
                             @Override
-                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                                 e.printStackTrace();
                                 return false;
                             }
 
                             @Override
-                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                 return false;
                             }
                         })
@@ -143,7 +147,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         .transform(new CircleTransform(context))
                         .into(feedViewHolder.profile_pic);
             } else {
-                Glide.with(context).load(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
+                GlideApp.with(context).load(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
             }
 
             feedViewHolder.swipelayout.setSwipeEnabled(true);
@@ -227,9 +231,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 photo = "";
 
             if (photo.equals(""))
-                Glide.with(context).load(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
+                GlideApp.with(context).load(R.drawable.profilenotfound).into(feedViewHolder.profile_pic);
             else
-                Glide.with(context)
+                GlideApp.with(context)
                         .load(NetworkManager.getInstance().host + photo)
                         .transform(new CircleTransform(context))
                         .into(feedViewHolder.profile_pic);

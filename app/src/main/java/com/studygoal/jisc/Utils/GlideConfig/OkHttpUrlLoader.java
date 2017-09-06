@@ -1,31 +1,45 @@
 package com.studygoal.jisc.Utils.GlideConfig;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
-import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.GenericLoaderFactory;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 
 import java.io.InputStream;
 
 import okhttp3.OkHttpClient;
 
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+    private final OkHttpClient mClient;
 
-    /**
-     * The default factory for {@link OkHttpUrlLoader}s.
-     */
+    public OkHttpUrlLoader(OkHttpClient client) {
+        mClient = client;
+    }
+
+    @Nullable
+    @Override
+    public LoadData<InputStream> buildLoadData(GlideUrl glideUrl, int width, int height, Options options) {
+        return new LoadData<>(glideUrl, new OkHttpStreamFetcher(mClient, glideUrl));
+    }
+
+    @Override
+    public boolean handles(GlideUrl glideUrl) {
+        return true;
+    }
+
     public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
         private static volatile OkHttpClient internalClient;
         private OkHttpClient client;
 
-        private static OkHttpClient getInternalClient() {
+        private static OkHttpClient getInternalClient(final Context appContext) {
             if (internalClient == null) {
                 synchronized (Factory.class) {
                     if (internalClient == null) {
-                        internalClient = UnsafeOkHttpClient.getUnsafeOkHttpClient();
+                        internalClient = UnsafeOkHttpClient.getUnsafeOkHttpClient(appContext);
                     }
                 }
             }
@@ -35,8 +49,8 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         /**
          * Constructor for a new Factory that runs requests using a static singleton client.
          */
-        public Factory() {
-            this(getInternalClient());
+        public Factory(final Context appContext) {
+            this(getInternalClient(appContext));
         }
 
         /**
@@ -47,7 +61,7 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         }
 
         @Override
-        public ModelLoader<GlideUrl, InputStream> build(Context context, GenericLoaderFactory factories) {
+        public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
             return new OkHttpUrlLoader(client);
         }
 
@@ -55,16 +69,5 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         public void teardown() {
             // Do nothing, this instance doesn't own the client.
         }
-    }
-
-    private final OkHttpClient client;
-
-    public OkHttpUrlLoader(OkHttpClient client) {
-        this.client = client;
-    }
-
-    @Override
-    public DataFetcher<InputStream> getResourceFetcher(GlideUrl model, int width, int height) {
-        return new OkHttpStreamFetcher(client, model);
     }
 }

@@ -68,6 +68,7 @@ import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.RunningActivity;
 import com.studygoal.jisc.Utils.CircleTransform;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
@@ -107,7 +108,7 @@ public class MainActivity extends FragmentActivity {
         DataManager.getInstance().checkForbidden = true;
 
         try {
-            Glide.with(DataManager.getInstance().mainActivity)
+            GlideApp.with(DataManager.getInstance().mainActivity)
                     .load(NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic)
                     .transform(new CircleTransform(DataManager.getInstance().mainActivity))
                     .into(DataManager.getInstance().mainActivity.adapter.profile_pic);
