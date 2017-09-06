@@ -39,6 +39,7 @@ public class DataManager {
 
     public String home_screen;
     public String language;
+    public String first_time;
 
     public NotificationManager mNotificationManager;
     public MainActivity mainActivity;

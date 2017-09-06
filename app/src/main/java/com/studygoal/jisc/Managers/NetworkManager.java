@@ -3505,6 +3505,7 @@ public class NetworkManager {
                 DataManager.getInstance().user.modules = jsonObject.getString("modules");
                 DataManager.getInstance().user.created_date = jsonObject.getString("created_date");
                 DataManager.getInstance().user.modified_date = jsonObject.getString("modified_date");
+                DataManager.getInstance().first_time = jsonObject.getString("first_time");
 
                 Log.e(getClass().getCanonicalName(), DataManager.getInstance().user.toString());
 

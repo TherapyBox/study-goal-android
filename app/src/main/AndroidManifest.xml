@@ -52,6 +52,8 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden|adjustUnspecified" />
         <activity
+            android:name=".TermsActivity"/>
+        <activity
             android:name=".TrophyDetails"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".SettingsActivity" />
