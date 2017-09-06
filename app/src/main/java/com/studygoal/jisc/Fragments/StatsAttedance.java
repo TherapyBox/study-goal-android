@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
@@ -57,6 +58,12 @@ public class StatsAttedance extends Fragment {
 
         mWebView = (WebView) mainView.findViewById(R.id.webview_graph);
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
 
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());

@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -79,6 +80,12 @@ public class Stats3 extends Fragment {
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.setPadding(0, 0, 0, 0);
         mWebView.getSettings().setLoadWithOverviewMode(true);
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
         mWebView.getViewTreeObserver().addOnGlobalLayoutListener(() -> mWebViewHeight = Utils.pxToDp(mWebView.getHeight() - 40));
 
         mWebView.loadDataWithBaseURL("", "<html><head></head><body><div style=\"height:100%;width:100%;background:white;\"></div></body></html>", "text/html", "UTF-8", "");
