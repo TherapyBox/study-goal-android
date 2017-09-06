@@ -59,7 +59,7 @@ public class Stats3 extends Fragment {
     private List<ED> mList;
     private float mWebViewHeight;
     private boolean mIsBar;
-    private boolean mIsSevenDays = true;
+    private boolean mIsSevenDays = false;
     private boolean mIsOverall = false;
 
     @Override
@@ -192,7 +192,7 @@ public class Stats3 extends Fragment {
 
         mDescription = (TextView) mMainView.findViewById(R.id.description);
         mDescription.setTypeface(DataManager.getInstance().myriadpro_regular);
-        mDescription.setText(R.string.last_week);
+        mDescription.setText(R.string.last_month_engagement);
 
         ((TextView) mMainView.findViewById(R.id.module)).setTypeface(DataManager.getInstance().myriadpro_regular);
         ((TextView) mMainView.findViewById(R.id.period)).setTypeface(DataManager.getInstance().myriadpro_regular);
