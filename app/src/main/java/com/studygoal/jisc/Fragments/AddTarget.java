@@ -55,7 +55,7 @@ import java.util.Map;
 public class AddTarget extends BaseFragment {
     private static final String TAG = AddTarget.class.getSimpleName();
 
-    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public Boolean isInEditMode = false;
     public Boolean isSingleTarget = false;
@@ -790,7 +790,7 @@ public class AddTarget extends BaseFragment {
             }
 
             if (!params.containsKey("module")) {
-                params.put("module", "");
+                params.put("module", "no_module");
             }
 
             if (mBinding.addtargetEdittextMyGoalSingle.getText().toString().length() > 0) {
@@ -842,7 +842,7 @@ public class AddTarget extends BaseFragment {
             }
 
             if (!params.containsKey("module")) {
-                params.put("module", "");
+                params.put("module", "no_module");
             }
 
             if (mBinding.addtargetEdittextMyGoalSingle.getText().toString().length() > 0) {

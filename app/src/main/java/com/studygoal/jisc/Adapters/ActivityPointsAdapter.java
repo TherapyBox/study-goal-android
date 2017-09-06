@@ -65,7 +65,11 @@ public class ActivityPointsAdapter extends BaseAdapter {
         if(position > 0) {
             ActivityPoints activityPoints = DataManager.getInstance().user.points.get(position-1);
 
-            activity_title.setText(activityPoints.activity);
+            if(activityPoints.activity.equals("Loggedin")){
+                activity_title.setText("Logged in");
+            } else {
+                activity_title.setText(activityPoints.activity);
+            }
             count_title.setText(activityPoints.points);
             points_title.setText(activityPoints.points);
         }
