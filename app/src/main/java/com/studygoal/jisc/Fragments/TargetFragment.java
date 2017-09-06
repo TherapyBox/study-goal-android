@@ -290,9 +290,9 @@ public class TargetFragment extends BaseFragment {
 
                     if(currentTask.status.equals("1")) {
                         iterator.remove();
-                    } else if (currentTask.isAccepted.equals("2")) {
+                    } /*else if (currentTask.isAccepted.equals("2")) {
                         iterator.remove();
-                    }
+                    }*/
                 }
                 mAdapterToDo.updateList(currentTaskList);
                 mAdapterToDo.notifyDataSetChanged();
