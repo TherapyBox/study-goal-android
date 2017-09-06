@@ -2,16 +2,20 @@ package com.studygoal.jisc.Fragments;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -21,19 +25,27 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.R;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class StatsEventAttendance extends Fragment {
 
     private AppCompatTextView moduleTextView;
     private ListView actLisiview;
+    private ArrayAdapter<String> eventListAdapter;
+    private int previouseLast;
 
-    static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
+    //static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
+    private ArrayList<String> events = new ArrayList<String>();
 
     @Override
     public void onResume() {
@@ -57,9 +69,40 @@ public class StatsEventAttendance extends Fragment {
         LayoutInflater i = getActivity().getLayoutInflater();
         ViewGroup header = (ViewGroup) i.inflate(R.layout.stats_event_attendance_list_view_header, actLisiview, false);
         actLisiview.addHeaderView(header, null, false);
-        actLisiview.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, EVENTS));
-        // ((MainActivity) getActivity()).showProgressBar(null);
+        eventListAdapter = new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, events);
+        actLisiview.setAdapter(eventListAdapter);
+        actLisiview.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
 
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                //firstVisibleItem, visibleItemCount, totalItemCount
+                final int lastItem = i + i1;
+
+                if(lastItem == i2)
+                {
+                    if(previouseLast!=lastItem)
+                    {
+                        //to avoid multiple calls for last item
+                        previouseLast = lastItem;
+                        ((MainActivity) getActivity()).showProgressBar(null);
+                        hideProgressBar();
+                    }
+                }
+            }
+        });
+        actLisiview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
+        });
+
+        ((MainActivity) getActivity()).showProgressBar(null);
+        hideProgressBar();
 
         return mainView;
     }
@@ -128,19 +171,60 @@ public class StatsEventAttendance extends Fragment {
         });
     }
 
+    private void getData(int skip, int limit){
+        if(NetworkManager.getInstance().getEventsAttended(skip, limit)) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            try {
+                Log.e(getClass().getCanonicalName(), "events attended: " + preferences.getString(getString(R.string.events_attended), null));
+                JSONArray jsonArray = new JSONArray(preferences.getString(getString(R.string.events_attended), null));
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    JSONObject statement = jsonObject.getJSONObject("statement");
+                    JSONObject name = statement.getJSONObject("object").getJSONObject("definition").getJSONObject("name");
+                    String[] dataInfo = name.getString("en").split(" ");
+
+                    JSONObject courseArea = statement.getJSONObject("context").getJSONObject("extensions").getJSONObject("http://xapi.jisc.ac.uk/courseArea");
+                    String[] moduleInfo = courseArea.getString("http://xapi.jisc.ac.uk/uddModInstanceID").split("-");
+
+                    String data = "";
+                    if (dataInfo.length >= 3 && dataInfo[2] != null)
+                        data += dataInfo[2] + " ";
+                    if (dataInfo.length >= 2 && dataInfo[1] != null)
+                        data += dataInfo[1] + " ";
+                    if (dataInfo.length >= 1 && dataInfo[0] != null)
+                        data += dataInfo[0] + " ";
+                    if (moduleInfo.length >= 1 && moduleInfo[0] != null)
+                        data += moduleInfo[0];
+
+                    events.add(data);
+                    Log.d("getData", events.get(i));
+                }
+                eventListAdapter.notifyDataSetChanged();
+            } catch (Exception je) {
+                je.printStackTrace();
+            }
+        }
+        else{
+            events.add("error");
+        }
+    }
+
     private void hideProgressBar() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                getActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        getData();
-//                        ((MainActivity) getActivity()).hideProgressBar();
-//                    }
-//                });
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(events.size() == 0)
+                            getData(0,20);
+                        else
+                            getData(events.size(),10);
+                        ((MainActivity) getActivity()).hideProgressBar();
+                    }
+                });
+            }
+        }).start();
     }
 
 }
