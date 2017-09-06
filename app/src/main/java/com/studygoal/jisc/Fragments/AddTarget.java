@@ -763,7 +763,7 @@ public class AddTarget extends BaseFragment {
         }
 
         if (isInEditMode) {
-            if (DataManager.getInstance().user.isDemo) {
+            if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
                 alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_edittarget) + "</font>"));
                 alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
@@ -816,7 +816,7 @@ public class AddTarget extends BaseFragment {
             }).start();
 
         } else {
-            if (DataManager.getInstance().user.isDemo) {
+            if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AddTarget.this.getActivity());
                 alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_addtarget) + "</font>"));
                 alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> dialog.dismiss());
