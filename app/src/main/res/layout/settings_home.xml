@@ -303,6 +303,46 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/terms_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.15">
+
+                <ImageView
+                    android:id="@+id/image_terms"
+                    android:layout_width="50dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:src="@drawable/friends" />
+
+                <TextView
+                    android:id="@+id/term_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/image_terms"
+                    android:text="@string/terms_title"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/arrow_right" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="#edeeee" />
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/email_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

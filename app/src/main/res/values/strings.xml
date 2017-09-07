@@ -198,6 +198,7 @@
     <string name="success_delete_activity">Successfully deleted activity</string>
     <string name="fail_delete_activity">Failed to delete activity from history, please try again later</string>
     <string name="log_title">Log</string>
+    <string name="terms_title">Terms and Conditions</string>
     <string name="running_activity">Running Activity</string>
     <string name="new_activity">New Activity</string>
     <string name="edit_recent_activity">Edit Activity</string>
