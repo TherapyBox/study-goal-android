@@ -112,6 +112,7 @@
     <string name="activity_points">Activity Points</string>
     <string name="leader_board">Engagement Leaderboard</string>
     <string name="events_attended">Events Attended</string>
+    <string name="app_usage">App Usage</string>
     <string name="attendance">Attendance Summary</string>
     <string name="this_week">This Week</string>
     <string name="period">Period</string>
@@ -474,4 +475,10 @@
     <string name="to_do_task_decline_dialog_message">Give reason for declining the task</string>
     <string name="to_do_task_decline_reason">Reason</string>
 
+    <string name="to">to</string>
+    <string name="session_on_app">Sessions on App</string>
+    <string name="hours_of_activity_logged">Hours of Activity Logged</string>
+    <string name="targets_set">Targets Set</string>
+    <string name="targets_met">Targets Met</string>
+    <string name="targets_failed_to_meet">Targets Failed to Meet</string>
 </resources>

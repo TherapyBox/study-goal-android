@@ -13,6 +13,7 @@ public enum LogActivityEvent {
     NavigateLeaderboard,
     NavigateEventsAttended,
     NavigateAttendanceGraph,
+    NavigateAppUsage,
     NavigateLog,
     NavigateTargetsMain,
     NavigateTargetsGraphs,

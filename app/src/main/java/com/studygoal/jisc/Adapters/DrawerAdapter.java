@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +61,8 @@ public class DrawerAdapter extends BaseAdapter {
                 valuesList.add(con.getString(R.string.attendance));
                 statOpenedNum++;
             }
+            valuesList.add(con.getString(R.string.app_usage));
+            statOpenedNum++;
             if (prefs.getBoolean(con.getString(R.string.studyGoalAttendance), false)) {
                 valuesList.add(con.getString(R.string.check_in));
             }
@@ -127,7 +130,6 @@ public class DrawerAdapter extends BaseAdapter {
             textView.setTypeface(DataManager.getInstance().myriadpro_regular);
             imageView = (ImageView) convertView.findViewById(R.id.drawer_item_icon);
             imageView.setImageBitmap(null);
-
 
             ImageView arrow_button = (ImageView) convertView.findViewById(R.id.arrow_button);
             arrow_button.setVisibility(View.GONE);

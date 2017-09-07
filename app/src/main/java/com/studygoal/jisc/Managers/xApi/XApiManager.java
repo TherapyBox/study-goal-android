@@ -74,6 +74,10 @@ public class XApiManager {
                     sendLogActivity("viewed", "stats-attendance-summary", "attendanceGraph");
                     break;
                 }
+                case NavigateAppUsage: {
+                    sendLogActivity("viewed", "app-usage", "appUsage");
+                    break;
+                }
                 case NavigateLog: {
                     sendLogActivity("viewed", "logs-main", "MainLogsPage");
                     break;

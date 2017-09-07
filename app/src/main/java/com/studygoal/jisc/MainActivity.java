@@ -47,6 +47,7 @@ import com.bumptech.glide.Glide;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
 import com.studygoal.jisc.Fragments.AddTarget;
+import com.studygoal.jisc.Fragments.AppUsageFragment;
 import com.studygoal.jisc.Fragments.CheckInFragment;
 import com.studygoal.jisc.Fragments.FeedFragment;
 import com.studygoal.jisc.Fragments.Friends;
@@ -432,6 +433,8 @@ public class MainActivity extends FragmentActivity {
                     destination = new StatsEventAttendance();
                 } else if (selection.equals(getString(R.string.attendance))) {
                     destination = new StatsAttedance();
+                } else if (selection.equals(getString(R.string.app_usage))){
+                    destination = new AppUsageFragment();
                 }
 
                 if (destination != null) {
