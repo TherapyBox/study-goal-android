@@ -23,14 +23,14 @@
             android:layout_height="match_parent">
 
             <RelativeLayout
-                android:id="@+id/edit"
+                android:id="@+id/share"
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
-                android:background="@color/default_blue">
+                android:background="@color/default_purple">
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/edit_image"
+                    android:src="@drawable/share_feed_button"
                     android:layout_centerInParent="true"/>
             </RelativeLayout>
 
@@ -69,9 +69,50 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
             <RelativeLayout
+                android:id="@+id/feed_item_bottom_bar"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="#FFF">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:src="@drawable/clock"/>
+                <TextView
+                    android:id="@+id/feed_item_time_ago"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/dark_grey"
+                    android:layout_marginStart="35dp"/>
+                <!--<RelativeLayout
+                    android:id="@+id/feed_item_option"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="6dp"
+                        android:src="@drawable/repor"
+                        android:layout_centerInParent="true"/>
+                </RelativeLayout>-->
+                <!--<RelativeLayout
+                    android:id="@+id/feed_item_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentEnd="true">
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/share"
+                        android:layout_centerInParent="true"/>
+                </RelativeLayout>-->
+            </RelativeLayout>
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/feed_item_bottom_bar">
+                android:layout_below="@+id/feed_item_bottom_bar">
                 <ImageView
                     android:id="@+id/feed_item_profile"
                     android:layout_width="70dp"
@@ -154,48 +195,6 @@
                     android:layout_alignParentEnd="true"
                     android:scaleType="centerInside"
                     android:src="@drawable/x"/>
-            </RelativeLayout>
-            <RelativeLayout
-                android:id="@+id/feed_item_bottom_bar"
-                android:layout_width="match_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_height="40dp"
-                android:background="#FFF">
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:src="@drawable/clock"/>
-                <TextView
-                    android:id="@+id/feed_item_time_ago"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:textColor="@color/dark_grey"
-                    android:layout_marginStart="35dp"/>
-                <RelativeLayout
-                    android:id="@+id/feed_item_option"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true">
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="6dp"
-                        android:src="@drawable/repor"
-                        android:layout_centerInParent="true"/>
-                </RelativeLayout>
-                <RelativeLayout
-                    android:id="@+id/feed_item_share"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="10dp"
-                    android:layout_alignParentEnd="true">
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="18dp"
-                        android:src="@drawable/share"
-                        android:layout_centerInParent="true"/>
-                </RelativeLayout>
             </RelativeLayout>
         </RelativeLayout>
     </com.daimajia.swipe.SwipeLayout>

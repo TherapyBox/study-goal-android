@@ -446,6 +446,7 @@
     <string name="demo_mode_edittarget">Targets can\’t be edited in demo mode.</string>
     <string name="demo_mode_changeappsettings">Demo mode only. You can\’t change the settings.</string>
     <string name="demo_mode_deletefeedlog">You can\’t delete items from feed in demo mode.</string>
+    <string name="demo_mode_sharefeedlog">You can\’t share items from feed in demo mode.</string>
     <string name="demo_mode_updateprofileimage">You can\’t update your profile image in demo mode.</string>
     <string name="social_login_error">This email is already registered in our system. Please try again with a different social platform!</string>
     <string name="add_module">Add Module</string>

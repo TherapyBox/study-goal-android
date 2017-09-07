@@ -70,14 +70,19 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public void onBindViewHolder(final FeedViewHolder feedViewHolder, final int i) {
         final Feed item = feedList.get(i);
         Log.e(getClass().getCanonicalName(), item.toString());
-        feedViewHolder.share.setOnClickListener(new View.OnClickListener() {
+        feedViewHolder.shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
+                    Snackbar.make(layout, R.string.demo_mode_sharefeedlog, Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
                 SocialManager.getInstance().shareOnIntent(item.message);
             }
         });
 
-        feedViewHolder.open.setOnClickListener(new View.OnClickListener() {
+        /*feedViewHolder.open.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 feedViewHolder.bottom_bar.setVisibility(View.GONE);
@@ -85,7 +90,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 feedViewHolder.menu.setVisibility(View.VISIBLE);
                 feedViewHolder.feed.setVisibility(View.GONE);
             }
-        });
+        });*/
 
         feedViewHolder.close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,8 +130,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         });
 
         if (item.message_from.equals(DataManager.getInstance().user.id)) {
-            feedViewHolder.share.setVisibility(View.VISIBLE);
-            feedViewHolder.open.setVisibility(View.GONE);
+            //feedViewHolder.open.setVisibility(View.GONE);
             if (!DataManager.getInstance().user.profile_pic.equals("")) {
                 Log.e("TEST", NetworkManager.getInstance().host + DataManager.getInstance().user.profile_pic);
                 GlideApp.with(feedViewHolder.itemView.getContext())
@@ -221,8 +225,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
             feedViewHolder.swipelayout.setSwipeEnabled(false);
             feedViewHolder.deleteButton.setOnClickListener(null);
-            feedViewHolder.share.setVisibility(View.GONE);
-            feedViewHolder.open.setVisibility(View.VISIBLE);
+            //feedViewHolder.open.setVisibility(View.VISIBLE);
             Friend friend = new Select().from(Friend.class).where("friend_id = ?", item.message_from).executeSingle();
             String photo;
             if (friend != null) {
@@ -304,6 +307,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         SwipeLayout swipelayout;
         RelativeLayout deleteButton;
+        RelativeLayout shareButton;
 
         protected View share;
 
@@ -320,6 +324,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             try {
                 swipelayout = (SwipeLayout) v.findViewById(R.id.swipelayout);
                 deleteButton = (RelativeLayout) v.findViewById(R.id.delete);
+                shareButton = (RelativeLayout) v.findViewById(R.id.share);
                 profile_pic = (ImageView) v.findViewById(R.id.feed_item_profile);
                 feed = (TextView) v.findViewById(R.id.feed_item_feed);
                 time_ago = (TextView) v.findViewById(R.id.feed_item_time_ago);
@@ -328,9 +333,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 delete_friend = (TextView) v.findViewById(R.id.feed_item_delete_friend);
                 menu = v.findViewById(R.id.feed_item_menu);
                 close = v.findViewById(R.id.feed_item_close);
-                open = v.findViewById(R.id.feed_item_option);
+                //open = v.findViewById(R.id.feed_item_option);
                 bottom_bar = v.findViewById(R.id.feed_item_bottom_bar);
-                share = v.findViewById(R.id.feed_item_share);
+                //share = v.findViewById(R.id.feed_item_share);
                 facebook_btn = v.findViewById(R.id.facebook_btn);
                 twitter_btn = v.findViewById(R.id.twitter_btn);
                 mail_btn = v.findViewById(R.id.mail_btn);
