@@ -165,7 +165,7 @@ public class StatsEventAttendance extends Fragment {
                         moduleTextView.setText(titleText);
                     }
                 });
-                ((MainActivity) getActivity()).showProgressBar2("");
+                //((MainActivity) getActivity()).showProgressBar2("");
                 dialog.show();
             }
         });
