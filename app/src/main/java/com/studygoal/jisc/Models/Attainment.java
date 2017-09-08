@@ -8,6 +8,13 @@ import com.activeandroid.annotation.Table;
 public class Attainment extends Model {
     public Attainment() {super();}
 
+    public Attainment(String id, String date, String module, String percent){
+        this.id = id;
+        this.date = date;
+        this.module = module;
+        this.percent = percent;
+    }
+
     @Column(name = "student_id")
     public String id;
     @Column(name = "date")

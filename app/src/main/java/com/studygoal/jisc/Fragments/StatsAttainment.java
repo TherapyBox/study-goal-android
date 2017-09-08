@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,9 @@ import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Attainment;
 import com.studygoal.jisc.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StatsAttainment extends Fragment {
 
@@ -40,9 +44,21 @@ public class StatsAttainment extends Fragment {
         DataManager.getInstance().mainActivity.showCertainButtons(5);
 
         new Thread(() -> {
-            NetworkManager.getInstance().getAssignmentRanking();
-            mAdapter.list = new Select().from(Attainment.class).execute();
+            if (NetworkManager.getInstance().getAssignmentRanking()) {
+                mAdapter.list = new Select().from(Attainment.class).execute();
+            } else {
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String attainmentDataBackup = sharedPref.getString(getString(R.string.attainmentData), "no_data_stored");
+                mAdapter.list = new ArrayList<Attainment>();
+                String[] attainmentData = attainmentDataBackup.split("----");
+                for (String data : attainmentData) {
+                    String[] attainment = data.split(";");
+                    if(attainment.length == 4)
+                        mAdapter.list.add(new Attainment(attainment[0], attainment[1], attainment[2], attainment[3]));
+                }
+            }
 
+            String attainmentDataBackup = "";
             for (int i = 0; i < mAdapter.list.size(); i++) {
                 Attainment attainment = mAdapter.list.get(i);
 
@@ -50,7 +66,17 @@ public class StatsAttainment extends Fragment {
                         && Integer.parseInt(attainment.percent.substring(0, attainment.percent.length() - 1)) == 0) {
                     mAdapter.list.remove(i);
                 }
+
+                attainmentDataBackup += mAdapter.list.get(i).id + ";"
+                        + mAdapter.list.get(i).date + ";"
+                        + mAdapter.list.get(i).module + ";"
+                        + mAdapter.list.get(i).percent + "----";
             }
+
+            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.attainmentData), attainmentDataBackup);
+            editor.commit();
 
             DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                 if (mAdapter.list != null && mAdapter.list.size() > 0) {
@@ -63,9 +89,14 @@ public class StatsAttainment extends Fragment {
 
                 mAdapter.notifyDataSetChanged();
             });
-        }).start();
+        }).
 
-        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateAttainment);
+                start();
+
+        XApiManager.getInstance().
+
+                sendLogActivityEvent(LogActivityEvent.NavigateAttainment);
+
     }
 
     @Override
@@ -78,10 +109,21 @@ public class StatsAttainment extends Fragment {
         mNowData.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         mLayout.setOnRefreshListener(() -> new Thread(() -> {
-            NetworkManager.getInstance().getAssignmentRanking();
-            mAdapter.list = new Select().from(Attainment.class).execute();
+            if (NetworkManager.getInstance().getAssignmentRanking()) {
+                mAdapter.list = new Select().from(Attainment.class).execute();
+            } else {
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String attainmentDataBackup = sharedPref.getString(getString(R.string.attainmentData), "no_data_stored");
+                mAdapter.list = new ArrayList<Attainment>();
+                String[] attainmentData = attainmentDataBackup.split("----");
+                for (String data : attainmentData) {
+                    String[] attainment = data.split(";");
+                    mAdapter.list.add(new Attainment(attainment[0], attainment[1], attainment[2], attainment[3]));
+                }
+            }
 
             if (mAdapter.list.size() > 0) {
+                String attainmentDataBackup = "";
                 for (int i = 0; i < mAdapter.list.size(); i++) {
                     if (mAdapter.list.get(i).percent != null && !mAdapter.list.get(i).percent.isEmpty()) {
                         String stringIndex = mAdapter.list.get(i).percent.substring(0, mAdapter.list.get(i).percent.length() - 1);
@@ -97,8 +139,16 @@ public class StatsAttainment extends Fragment {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        attainmentDataBackup += mAdapter.list.get(i).id + ";"
+                                + mAdapter.list.get(i).date + ";"
+                                + mAdapter.list.get(i).module + ";"
+                                + mAdapter.list.get(i).percent + "----";
                     }
                 }
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(getString(R.string.attainmentData), attainmentDataBackup);
+                editor.commit();
             }
 
             DataManager.getInstance().mainActivity.runOnUiThread(() -> {
