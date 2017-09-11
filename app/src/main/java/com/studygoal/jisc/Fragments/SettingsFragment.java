@@ -284,7 +284,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mainView.findViewById(R.id.terms_layout).setOnClickListener(new View.OnClickListener() {
+        /*mainView.findViewById(R.id.terms_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
@@ -292,7 +292,7 @@ public class SettingsFragment extends Fragment {
                         .addToBackStack(null)
                         .commit();
             }
-        });
+        });*/
 
         mProfileImage = (ImageView) mainView.findViewById(R.id.profile_picture);
         mProfileSpinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
