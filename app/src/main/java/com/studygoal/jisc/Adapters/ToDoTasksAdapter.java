@@ -136,14 +136,13 @@ public class ToDoTasksAdapter extends BaseAdapter {
         Log.d(TAG, "getView: difference " + difference);
         if (difference == 0) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_due_today));
-            Log.d(TAG, "getView: difference due today");
         } else if (difference == -1 || difference == -2) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_2_left));
-        } else if (difference >= -7) {
+        } else if (difference <= -3 && difference > -7) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_7_left));
-        } else if (difference < -7) {
+        } else if (difference <= -7) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_idle));
-        } else {
+        } else if (difference > 0){
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.watch_time_overdue));
         }
 
