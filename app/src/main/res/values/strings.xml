@@ -120,8 +120,8 @@
     <string name="time_period">Time Period</string>
     <string name="last_day">Last Day</string>
     <string name="last_week">Last Week</string>
-    <string name="last_week_engagement">Last Week engagement</string>
-    <string name="last_month_engagement">Last Month engagement</string>
+    <string name="last_week_engagement">Last 7 days engagement</string>
+    <string name="last_month_engagement">Last 28 days engagement</string>
     <string name="Overall_engagement">Overall engagement</string>
     <string name="last_month">Last Month</string>
     <string name="Overall">Overall</string>
