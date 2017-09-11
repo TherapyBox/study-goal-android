@@ -284,15 +284,15 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mainView.findViewById(R.id.terms_layout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new TermsScreen())
-                        .addToBackStack(null)
-                        .commit();
-            }
-        });
+//        mainView.findViewById(R.id.terms_layout).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.main_fragment, new TermsScreen())
+//                        .addToBackStack(null)
+//                        .commit();
+//            }
+//        });
 
         mProfileImage = (ImageView) mainView.findViewById(R.id.profile_picture);
         mProfileSpinner = (ProgressBar) mainView.findViewById(R.id.profile_spinner);
