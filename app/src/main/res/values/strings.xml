@@ -21,6 +21,18 @@
     <string name="nov">Nov</string>
     <string name="dec">Dec</string>
 
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+
     <string name="_1st">1st</string>
     <string name="_2nd">2nd</string>
     <string name="_3rd">3rd</string>
