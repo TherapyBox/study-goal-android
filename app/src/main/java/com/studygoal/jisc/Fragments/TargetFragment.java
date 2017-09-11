@@ -31,7 +31,12 @@ import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.databinding.TargetFragmentBinding;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -290,10 +295,34 @@ public class TargetFragment extends BaseFragment {
 
                     if(currentTask.status.equals("1")) {
                         iterator.remove();
-                    } /*else if (currentTask.isAccepted.equals("2")) {
+                    } else if (currentTask.isAccepted.equals("2")) {
                         iterator.remove();
-                    }*/
+                    }
                 }
+
+                Collections.sort(currentTaskList, new Comparator<ToDoTasks>() {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    @Override
+                    public int compare(ToDoTasks taskA, ToDoTasks taskB)
+                    {
+                        Date date1 = new Date();
+                        try {
+                            date1 = dateFormat.parse(taskA.endDate);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        Date date2 = new Date();
+                        try {
+                            date2 = dateFormat.parse(taskB.endDate);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        return Long.valueOf(date1.getTime()).compareTo(Long.valueOf(date2.getTime()));
+                    }
+                });
+
                 mAdapterToDo.updateList(currentTaskList);
                 mAdapterToDo.notifyDataSetChanged();
 

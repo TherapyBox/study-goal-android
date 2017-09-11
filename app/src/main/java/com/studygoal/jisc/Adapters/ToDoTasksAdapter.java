@@ -2,6 +2,7 @@ package com.studygoal.jisc.Adapters;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.support.annotation.IntegerRes;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -63,7 +64,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
             notifyDataSetChanged();
         }
 
-        Collections.sort(mList, (o1, o2) -> {
+        /*Collections.sort(mList, (o1, o2) -> {
             int result = 0;
 
             if (o1 != null && o2 != null) {
@@ -85,7 +86,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
             }
 
             return result;
-        });
+        });*/
     }
 
     public void deleteItem(int position) {
@@ -130,29 +131,35 @@ public class ToDoTasksAdapter extends BaseAdapter {
         }
         int difference = (int)((currentDate.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24)) ;
 
-        Log.d(TAG, "getView: difference " + item.description);
+        /*Log.d(TAG, "getView: difference " + item.description);
         Log.d(TAG, "getView: difference " + item.endDate);
         Log.d(TAG, "getView: difference " + new SimpleDateFormat("yyyy-MM-dd").format(currentDate));
-        Log.d(TAG, "getView: difference " + difference);
+        Log.d(TAG, "getView: difference " + difference);*/
+        String overdueText = "";
         if (difference == 0) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_due_today));
-            Log.d(TAG, "getView: difference due today");
         } else if (difference == -1 || difference == -2) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_2_left));
-        } else if (difference >= -7) {
+        } else if (difference <= -3 && difference > -7) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_7_left));
-        } else if (difference < -7) {
+        } else if (difference <= -7) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_idle));
-        } else {
+        } else if (difference > 0){
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.watch_time_overdue));
+            if(difference == 1)
+                overdueText = "1 day overdue: ";
+            else
+                overdueText = difference + " days overdue: ";
         }
 
         TextView textView = (TextView) convertView.findViewById(R.id.target_item_text);
         textView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         String text = "";
-        text += item.description + " " + mContext.getString(R.string._for) + " ";
-        text += item.module + " " + mContext.getString(R.string.by).toLowerCase() + " ";
+        text += overdueText + item.description;
+        if(!item.module.equals("no_module"))
+            text += " " + mContext.getString(R.string._for) + " " + item.module;
+        text  += " " + mContext.getString(R.string.by).toLowerCase() + " ";
 
         boolean isToday = false;
 
@@ -170,7 +177,7 @@ public class ToDoTasksAdapter extends BaseAdapter {
         if (isToday) {
             text += mContext.getString(R.string.today);
         } else {
-            text += item.endDate;
+            text += getDateFromEndDateTag(item.endDate);
         }
 
         if (item.reason != null && !item.reason.isEmpty()) {
@@ -247,5 +254,72 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         convertView.setTag(item.taskId);
         return convertView;
+    }
+
+    private String getDateFromEndDateTag(String dateTag){
+        String[] date = dateTag.split("-");
+        int day = Integer.valueOf(date[2]);
+        int month = Integer.valueOf(date[1]);
+
+        String returnDate = "";
+        switch(day){
+            case 1:
+            case 21:
+            case 31:
+                returnDate += day + "st";
+                break;
+            case 2:
+            case 22:
+                returnDate += day + "nd";
+                break;
+            case 3:
+            case 23:
+                returnDate += day + "rd";
+                break;
+            default:
+                returnDate += day + mContext.getString(R.string._th);
+        }
+
+        switch(month){
+            case 1:
+                returnDate += " " + mContext.getString(R.string.january);
+                break;
+            case 2:
+                returnDate += " " + mContext.getString(R.string.february);
+                break;
+            case 3:
+                returnDate += " " + mContext.getString(R.string.march);
+                break;
+            case 4:
+                returnDate += " " + mContext.getString(R.string.april);
+                break;
+            case 5:
+                returnDate += " " + mContext.getString(R.string.may);
+                break;
+            case 6:
+                returnDate += " " + mContext.getString(R.string.june);
+                break;
+            case 7:
+                returnDate += " " + mContext.getString(R.string.july);
+                break;
+            case 8:
+                returnDate += " " + mContext.getString(R.string.august);
+                break;
+            case 9:
+                returnDate += " " + mContext.getString(R.string.september);
+                break;
+            case 10:
+                returnDate += " " + mContext.getString(R.string.october);
+                break;
+            case 11:
+                returnDate += " " + mContext.getString(R.string.november);
+                break;
+            default:
+                returnDate += " " + mContext.getString(R.string.december);
+        }
+
+        returnDate += " " + date[0];
+
+        return returnDate;
     }
 }
