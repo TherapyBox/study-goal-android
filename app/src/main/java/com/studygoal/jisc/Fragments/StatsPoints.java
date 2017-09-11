@@ -100,6 +100,7 @@ public class StatsPoints extends Fragment {
             piChartWebView.post(new Runnable() {
                 @Override
                 public void run() {
+                    String pointsDataBackup = "";
                     double d = getActivity().getResources().getDisplayMetrics().density;
                     int h = (int) (piChartWebView.getHeight() / d) - 20;
                     int w = (int) (piChartWebView.getWidth() / d) - 20;
@@ -121,6 +122,10 @@ public class StatsPoints extends Fragment {
                             data += "name:" + "\'" + p.activity + "\',";
                         data += "y:" + p.points;
                         data += "},";
+                        pointsDataBackup += p.activity + ";"
+                                + p.points + ";"
+                                + p.id + ";"
+                                + p.key + "----";
                     }
 
                     String rawhtml = new String(buffer);
@@ -128,6 +133,11 @@ public class StatsPoints extends Fragment {
                     rawhtml = rawhtml.replace("220px", h + "px");
                     rawhtml = rawhtml.replace("REPLACE_DATA", data);
                     piChartWebView.loadDataWithBaseURL("", rawhtml, "text/html", "UTF-8", "");
+
+                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.pointsData), pointsDataBackup);
+                    editor.commit();
                 }
             });
         } catch (IOException e) {
@@ -141,7 +151,17 @@ public class StatsPoints extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                NetworkManager.getInstance().getStudentActivityPoint(isThisWeek ? "7d" : "overall");
+                if(!NetworkManager.getInstance().getStudentActivityPoint(isThisWeek ? "7d" : "overall")){
+                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    String pointsDataBackup = sharedPref.getString(getString(R.string.pointsData), "no_data_stored");
+                    String[] pointsData = pointsDataBackup.split("----");
+                    DataManager.getInstance().user.points.clear();
+                    for (String data : pointsData) {
+                        String[] point = data.split(";");
+                        DataManager.getInstance().user.points.add(new ActivityPoints(point[0], point[1], point[2], point[3]));
+                    }
+                }
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

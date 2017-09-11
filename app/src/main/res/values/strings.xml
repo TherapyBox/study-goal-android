@@ -343,6 +343,7 @@
     <string name="attendanceData">attendanceData</string>
     <string name="studyGoalAttendance">studyGoalAttendance</string>
     <string name="attainmentData">attainmentData</string>
+    <string name="pointsData">pointsData</string>
 
     <string name="week">Week</string>
     <string name="me">Me</string>
