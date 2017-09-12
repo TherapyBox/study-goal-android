@@ -2,8 +2,10 @@ package com.studygoal.jisc.Adapters;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.provider.CalendarContract;
 import android.support.annotation.IntegerRes;
 import android.support.v4.content.ContextCompat;
+import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -131,10 +133,6 @@ public class ToDoTasksAdapter extends BaseAdapter {
         }
         int difference = (int)((currentDate.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24)) ;
 
-        /*Log.d(TAG, "getView: difference " + item.description);
-        Log.d(TAG, "getView: difference " + item.endDate);
-        Log.d(TAG, "getView: difference " + new SimpleDateFormat("yyyy-MM-dd").format(currentDate));
-        Log.d(TAG, "getView: difference " + difference);*/
         String overdueText = "";
         if (difference == 0) {
             activity_icon.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.watch_time_due_today));
@@ -164,12 +162,10 @@ public class ToDoTasksAdapter extends BaseAdapter {
         boolean isToday = false;
 
         try {
-            Date today = new Date();
-            today.setTime(Calendar.getInstance().getTimeInMillis());
-            Date data = sDateFormat.parse(item.endDate);
-            isToday = data.getYear() == today.getYear()
-                    && data.getMonth() == today.getMonth()
-                    && data.getDay() == today.getDay();
+            Date date = sDateFormat.parse(item.endDate);
+            if(DateUtils.isToday(date.getTime())){
+                isToday = true;
+            }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }

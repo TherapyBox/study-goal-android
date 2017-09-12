@@ -300,7 +300,7 @@ public class TargetFragment extends BaseFragment {
                     }
                 }
 
-                Collections.sort(currentTaskList, new Comparator<ToDoTasks>() {
+                /*Collections.sort(currentTaskList, new Comparator<ToDoTasks>() {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     @Override
                     public int compare(ToDoTasks taskA, ToDoTasks taskB)
@@ -321,7 +321,7 @@ public class TargetFragment extends BaseFragment {
 
                         return Long.valueOf(date1.getTime()).compareTo(Long.valueOf(date2.getTime()));
                     }
-                });
+                });*/
 
                 mAdapterToDo.updateList(currentTaskList);
                 mAdapterToDo.notifyDataSetChanged();
