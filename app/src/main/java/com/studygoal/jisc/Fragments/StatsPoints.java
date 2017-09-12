@@ -62,12 +62,14 @@ public class StatsPoints extends Fragment {
         mainView = inflater.inflate(R.layout.stats_points, container, false);
         activity_points_value = (TextView) mainView.findViewById(R.id.activity_points_value);
         piChartWebView = (WebView) mainView.findViewById(R.id.pi_chart_web_view);
+        piChartWebView.setVisibility(View.INVISIBLE);
         upperContainer = (LinearLayout) mainView.findViewById(R.id.activity_points_container);
+        upperContainer.setVisibility(View.VISIBLE);
         pieChartSwitch = (Switch) mainView.findViewById(R.id.pie_chart_switch);
         pieChartSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                upperContainer.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
-                piChartWebView.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
+                upperContainer.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
+                piChartWebView.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
             }
         });
 
