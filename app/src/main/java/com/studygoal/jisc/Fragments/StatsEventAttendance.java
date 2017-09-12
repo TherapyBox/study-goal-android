@@ -188,6 +188,8 @@ public class StatsEventAttendance extends Fragment {
                     JSONObject name = statement.getJSONObject("object").getJSONObject("definition").getJSONObject("name");
                     String[] dataInfo = name.getString("en").split(" ");
 
+                    String activityInfo = statement.getJSONObject("context").getJSONObject("extensions").getString("http://xapi.jisc.ac.uk/activity_type_id");
+
                     JSONObject courseArea = statement.getJSONObject("context").getJSONObject("extensions").getJSONObject("http://xapi.jisc.ac.uk/courseArea");
                     String[] moduleInfo = courseArea.getString("http://xapi.jisc.ac.uk/uddModInstanceID").split("-");
 
@@ -201,7 +203,7 @@ public class StatsEventAttendance extends Fragment {
                     if (moduleInfo.length >= 1 && moduleInfo[0] != null)
                         data += moduleInfo[0];*/
 
-                    Event event = new Event(dataInfo[2], dataInfo[0], moduleInfo[0]);
+                    Event event = new Event(dataInfo[2] + " " + dataInfo[1], activityInfo, moduleInfo[0]);
 
                     events.add(event);
                 }

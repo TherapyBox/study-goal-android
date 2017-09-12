@@ -61,7 +61,7 @@ public class EventsAttendedAdapter extends BaseAdapter {
     }
 
     public void updateList(ArrayList<Event> events) {
-        list.addAll(events);
+        list = events;
         notifyDataSetChanged();
     }
 }
