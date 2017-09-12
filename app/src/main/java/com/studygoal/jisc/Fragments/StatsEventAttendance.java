@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
+import com.studygoal.jisc.Adapters.EventsAttendedAdapter;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
@@ -29,6 +30,7 @@ import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
+import com.studygoal.jisc.Models.Event;
 import com.studygoal.jisc.R;
 
 import org.json.JSONArray;
@@ -40,12 +42,14 @@ import java.util.List;
 public class StatsEventAttendance extends Fragment {
 
     private AppCompatTextView moduleTextView;
-    private ListView actLisiview;
+    private ListView listView;
     private ArrayAdapter<String> eventListAdapter;
     private int previouseLast;
+    private EventsAttendedAdapter adapter;
 
     //static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
-    private ArrayList<String> events = new ArrayList<String>();
+    //private ArrayList<String> events = new ArrayList<String>();
+    private ArrayList<Event> events = new ArrayList<>();
 
     @Override
     public void onResume() {
@@ -60,18 +64,19 @@ public class StatsEventAttendance extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View mainView = inflater.inflate(R.layout.stats_event_attendance, container, false);
-        moduleTextView = (AppCompatTextView) mainView.findViewById(R.id.module_list);
-        ((TextView) mainView.findViewById(R.id.module)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        //moduleTextView = (AppCompatTextView) mainView.findViewById(R.id.module_list);
+        //((TextView) mainView.findViewById(R.id.module)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        adapter = new EventsAttendedAdapter(getContext());
 
-        setUpModule();
+        //setUpModule();
 
-        actLisiview = (ListView) mainView.findViewById(R.id.event_attendance_listView);
+        listView = (ListView) mainView.findViewById(R.id.event_attendance_listView);
         LayoutInflater i = getActivity().getLayoutInflater();
-        ViewGroup header = (ViewGroup) i.inflate(R.layout.stats_event_attendance_list_view_header, actLisiview, false);
-        actLisiview.addHeaderView(header, null, false);
-        eventListAdapter = new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, events);
-        actLisiview.setAdapter(eventListAdapter);
-        actLisiview.setOnScrollListener(new AbsListView.OnScrollListener() {
+        ViewGroup header = (ViewGroup) i.inflate(R.layout.stats_event_attendance_list_view_header, listView, false);
+        //listView.addHeaderView(header, null, false);
+        //eventListAdapter = new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, events);
+        listView.setAdapter(adapter);
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
 
@@ -94,10 +99,10 @@ public class StatsEventAttendance extends Fragment {
                 }
             }
         });
-        actLisiview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                return;
             }
         });
 
@@ -186,7 +191,7 @@ public class StatsEventAttendance extends Fragment {
                     JSONObject courseArea = statement.getJSONObject("context").getJSONObject("extensions").getJSONObject("http://xapi.jisc.ac.uk/courseArea");
                     String[] moduleInfo = courseArea.getString("http://xapi.jisc.ac.uk/uddModInstanceID").split("-");
 
-                    String data = "";
+                    /*String data = "";
                     if (dataInfo.length >= 3 && dataInfo[2] != null)
                         data += dataInfo[2] + " ";
                     if (dataInfo.length >= 2 && dataInfo[1] != null)
@@ -194,18 +199,18 @@ public class StatsEventAttendance extends Fragment {
                     if (dataInfo.length >= 1 && dataInfo[0] != null)
                         data += dataInfo[0] + " ";
                     if (moduleInfo.length >= 1 && moduleInfo[0] != null)
-                        data += moduleInfo[0];
+                        data += moduleInfo[0];*/
 
-                    events.add(data);
-                    Log.d("getData", events.get(i));
+                    Event event = new Event(dataInfo[2], dataInfo[0], moduleInfo[0]);
+
+                    events.add(event);
                 }
-                eventListAdapter.notifyDataSetChanged();
+                adapter.updateList(events);
+                Log.d("", "getData: count: " + adapter.list.size());
+                adapter.notifyDataSetChanged();
             } catch (Exception je) {
                 je.printStackTrace();
             }
-        }
-        else{
-            events.add("error");
         }
     }
 
