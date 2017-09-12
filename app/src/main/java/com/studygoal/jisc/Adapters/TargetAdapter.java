@@ -22,8 +22,11 @@ import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class TargetAdapter extends BaseAdapter {
@@ -72,7 +75,7 @@ public class TargetAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_target, parent, false);
         }
 
-        Calendar c = Calendar.getInstance();
+        Calendar date = Calendar.getInstance();
         List<ActivityHistory> activityHistoryList;
 
         if (module != null) {
@@ -81,12 +84,21 @@ public class TargetAdapter extends BaseAdapter {
             activityHistoryList = new Select().from(ActivityHistory.class).where("activity = ?", item.activity).execute();
         }
 
-        String current_date = c.get(Calendar.YEAR) + "-";
-        current_date += (c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) + "-" : (c.get(Calendar.MONTH) + 1) + "-";
-        current_date += c.get(Calendar.DAY_OF_MONTH) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) + " " : c.get(Calendar.DAY_OF_MONTH) + " ";
-        current_date += c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + c.get(Calendar.HOUR_OF_DAY) + ":" : c.get(Calendar.HOUR_OF_DAY) + ":";
-        current_date += c.get(Calendar.MINUTE) < 10 ? "0" + c.get(Calendar.MINUTE) + ":" : c.get(Calendar.MINUTE) + ":";
-        current_date += c.get(Calendar.SECOND) < 10 ? "0" + c.get(Calendar.SECOND) : c.get(Calendar.SECOND);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String current_date = dateFormat.format(date.getTime());
+
+        boolean dueToday = false;
+
+        Calendar nextDueDate = Calendar.getInstance();
+        Date creationDate = new Date();
+        try {
+            creationDate = dateFormat.parse(item.created_date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        long weekTime = (1000*60*60*24*7);
+        long monthTime = (1000*60*60*24*30);
 
         switch (item.time_span.toLowerCase()) {
             case "daily": {
@@ -98,6 +110,7 @@ public class TargetAdapter extends BaseAdapter {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                dueToday = true;
                 break;
             }
             case "weekly": {
@@ -108,6 +121,9 @@ public class TargetAdapter extends BaseAdapter {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                if((creationDate.getTime() % weekTime -1) == (date.getTimeInMillis() % weekTime)){
+                    dueToday = true;
+                }
                 break;
             }
             case "monthly": {
@@ -119,22 +135,25 @@ public class TargetAdapter extends BaseAdapter {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                if((creationDate.getTime() % monthTime -1) == (date.getTimeInMillis() % monthTime)){
+                    dueToday = true;
+                }
                 break;
             }
         }
 
-        int neccesary_time = Integer.parseInt(item.total_time);
-
+        int necessary_time = Integer.parseInt(item.total_time);
         int spent_time = 0;
+
         for (int i = 0; i < activityHistoryList.size(); i++) {
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
         }
-        if (spent_time == 0)
+        if (dueToday && (spent_time < necessary_time))
             convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
-        else if (spent_time >= neccesary_time)
-            convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
-        else
+        else if (spent_time < necessary_time)
             convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFff7400);
+        else
+            convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
 
         try {
             Glide.with(DataManager.getInstance().mainActivity).load(LinguisticManager.getInstance().images.get(item.activity)).into((ImageView) convertView.findViewById(R.id.activity_icon));
