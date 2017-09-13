@@ -305,6 +305,8 @@ public class AddTarget extends BaseFragment {
         mBinding.addtargetSaveBtn.setOnClickListener(v -> onAddTargetSave());
         mBinding.addtargetSaveBtnSingle.setOnClickListener(v -> onAddTargetSingleSave());
 
+        mIn.setOnClickListener(v -> onAddTargetIn());
+
         final View contentView = container;
         container.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             private int mPreviousHeight;
@@ -530,7 +532,7 @@ public class AddTarget extends BaseFragment {
 
         final ArrayList<String> items = new ArrayList<>();
         items.add(DataManager.getInstance().mainActivity.getString(R.string.any_module));
-        List<Module> modules = new Select().from(Module.class).execute();
+        List<Module> modules = new Select().from(Module.class).orderBy("module_name").execute();
 
         for (int i = 0; i < modules.size(); i++) {
             items.add(modules.get(i).name);
