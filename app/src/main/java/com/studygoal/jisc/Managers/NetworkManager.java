@@ -2193,6 +2193,7 @@ public class NetworkManager {
 
 //                Log.e("Jisc", "List: " + sb.toString());
 //                JSONArray jsonArray = new JSONArray(sb.toString());
+                //returning String not JSON Array
                 JSONArray jsonArray = new JSONArray(response);
                 ActiveAndroid.beginTransaction();
                 try {
@@ -4049,7 +4050,7 @@ public class NetworkManager {
         @Override
         public Boolean call() {
             try {
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=" + parameter;
+                String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + parameter;
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -4120,12 +4121,14 @@ public class NetworkManager {
         @Override
         public String call(){
             try {
+                //String apiURL = "https://api.datax.jisc.ac.uk/sg/attendance?skip=" + skip + "&limit=" + limit;
                 String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/attendance?skip=" + skip + "&limit=" + limit;
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                Log.d("Bearer", "call: " + "Bearer " + DataManager.getInstance().get_jwt());
                 urlConnection.setSSLSocketFactory(context.getSocketFactory());
 
                 int responseCode = urlConnection.getResponseCode();
@@ -4191,7 +4194,7 @@ public class NetworkManager {
                 Date daysBeforeDate = cal.getTime();
                 String current = sdf.format(new Date());
                 String past = sdf.format(daysBeforeDate);
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/weeklyattendance?startdate=" + past + "&enddate=" + current;
+                String apiURL = "https://api.datax.jisc.ac.uk/sg/weeklyattendance?startdate=" + past + "&enddate=" + current;
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -4634,7 +4637,7 @@ public class NetworkManager {
 
     /**
      * GET Get Setting
-     * https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=attendanceData
+     * https://api.datax.jisc.ac.uk/sg/setting?setting=attendanceData
      * Use
      * To a site setting
      * Paramaters
@@ -4668,7 +4671,7 @@ public class NetworkManager {
 
             try {
 
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=" + this.settingOption;
+                String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + this.settingOption;
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection;

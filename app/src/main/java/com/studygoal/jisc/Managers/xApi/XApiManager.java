@@ -18,7 +18,7 @@ import rx.schedulers.Schedulers;
 public class XApiManager {
     private static final String TAG = XApiManager.class.getSimpleName();
 
-    private static final String SERVER_BASE = "https://api.x-dev.data.alpha.jisc.ac.uk";
+    private static final String SERVER_BASE = "https://api.datax.jisc.ac.uk";
     private static final String TOKEN_PREFIX = "Bearer ";
 
     private static XApiManager sInstance = null;
