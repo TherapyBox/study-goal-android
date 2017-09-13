@@ -26,8 +26,8 @@ public class ModuleAdapter2 extends BaseAdapter {
         this.selected = selected;
         this.moduleList = new ArrayList<>();
         this.coursesList = new ArrayList<>();
-        List<Module> moduleList = new Select().from(Module.class).execute();
-        List<Courses> coursesList = new Select().from(Courses.class).execute();
+        List<Module> moduleList = new Select().from(Module.class).orderBy("module_name").execute();
+        List<Courses> coursesList = new Select().from(Courses.class).orderBy("course_name").execute();
 
         for (int j = 0; j < coursesList.size(); j++) {
             this.coursesList.add(coursesList.get(j).name);
