@@ -15,11 +15,25 @@
             android:layout_height="match_parent"
             android:background="@color/default_blue">
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_centerInParent="true"
                 android:src="@drawable/edit_image" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/edit"
+                android:textColor="#ffffff"
+                android:textSize="14sp" />
+            </LinearLayout>
         </RelativeLayout>
 
         <RelativeLayout

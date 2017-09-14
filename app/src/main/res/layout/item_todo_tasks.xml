@@ -13,13 +13,28 @@
             android:id="@+id/done"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:background="@color/default_purple">
+            android:background="@color/default_green">
 
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="@drawable/done_image" />
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/done_image" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/done"
+                    android:textColor="#ffffff"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </RelativeLayout>
 
         <RelativeLayout
@@ -28,11 +43,26 @@
             android:layout_height="match_parent"
             android:background="@color/default_blue">
 
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="@drawable/edit_image" />
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/edit_image" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/edit"
+                    android:textColor="#ffffff"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </RelativeLayout>
 
         <RelativeLayout

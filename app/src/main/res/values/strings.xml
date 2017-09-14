@@ -67,6 +67,8 @@
     <string name="set">Set</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="done">Done</string>
+    <string name="share">Share</string>
     <string name="module">Module</string>
     <string name="post">Post</string>
     <string name="send">Send</string>
