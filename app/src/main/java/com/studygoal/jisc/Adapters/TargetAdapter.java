@@ -3,6 +3,7 @@ package com.studygoal.jisc.Adapters;
 import android.app.Dialog;
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +76,6 @@ public class TargetAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_target, parent, false);
         }
 
-        Calendar date = Calendar.getInstance();
         List<ActivityHistory> activityHistoryList;
 
         if (module != null) {
@@ -84,21 +84,22 @@ public class TargetAdapter extends BaseAdapter {
             activityHistoryList = new Select().from(ActivityHistory.class).where("activity = ?", item.activity).execute();
         }
 
+        Calendar date = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         String current_date = dateFormat.format(date.getTime());
 
         boolean dueToday = false;
 
-        Calendar nextDueDate = Calendar.getInstance();
-        Date creationDate = new Date();
+        SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date convertedDate = null;
         try {
-            creationDate = dateFormat.parse(item.created_date);
+            convertedDate = shortDateFormat.parse(current_date);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        long weekTime = (1000*60*60*24*7);
-        long monthTime = (1000*60*60*24*30);
+        Calendar dueDate = Calendar.getInstance();
+        dueDate.setTime(convertedDate);
+        String shortCurrentDate = shortDateFormat.format(Calendar.getInstance().getTime());
 
         switch (item.time_span.toLowerCase()) {
             case "daily": {
@@ -121,7 +122,7 @@ public class TargetAdapter extends BaseAdapter {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
-                if((creationDate.getTime() % weekTime -1) == (date.getTimeInMillis() % weekTime)){
+                if(dueDate.DAY_OF_WEEK == 7){
                     dueToday = true;
                 }
                 break;
@@ -135,7 +136,9 @@ public class TargetAdapter extends BaseAdapter {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
-                if((creationDate.getTime() % monthTime -1) == (date.getTimeInMillis() % monthTime)){
+                dueDate.set(Calendar.DAY_OF_MONTH, dueDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+                String nextDueDate = shortDateFormat.format(dueDate.getTime());
+                if(shortCurrentDate.equals(nextDueDate)){
                     dueToday = true;
                 }
                 break;
@@ -148,6 +151,8 @@ public class TargetAdapter extends BaseAdapter {
         for (int i = 0; i < activityHistoryList.size(); i++) {
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
         }
+
+        Log.d("Spend", "getView: " + spent_time + " " + necessary_time);
         if (dueToday && (spent_time < necessary_time))
             convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
         else if (spent_time < necessary_time)

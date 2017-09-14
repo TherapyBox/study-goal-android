@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,8 +40,11 @@ import com.studygoal.jisc.Utils.Utils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,7 +54,7 @@ public class TargetItem extends Fragment {
     public Targets target;
     public TargetDetails reference;
     public int position;
-    int neccesary_time;
+    int necessary_time;
     int spent_time;
     boolean piChart;
     TextView incomplete_textView;
@@ -155,7 +159,6 @@ public class TargetItem extends Fragment {
         textView.setTypeface(DataManager.getInstance().myriadpro_regular);
 
         piChart = true;
-        Calendar c = Calendar.getInstance();
 
         stretch_target = new Select().from(StretchTarget.class).where("target_id = ?", target.target_id).executeSingle();
 
@@ -168,7 +171,9 @@ public class TargetItem extends Fragment {
         } else {
             activityHistoryList = new Select().from(ActivityHistory.class).where("activity = ?", target.activity).execute();
         }
-
+        for(int i=0; i<activityHistoryList.size();i++) {
+            Log.d("History", "onCreateView: history" + activityHistoryList.get(i).toString());
+        }
         set_stretch_target = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -267,13 +272,22 @@ public class TargetItem extends Fragment {
             }
         };
 
-        String current_date = c.get(Calendar.YEAR) + "-";
-        current_date += (c.get(Calendar.MONTH) + 1) < 10 ? "0" + (c.get(Calendar.MONTH) + 1) + "-" : (c.get(Calendar.MONTH) + 1) + "-";
-        current_date += c.get(Calendar.DAY_OF_MONTH) < 10 ? "0" + c.get(Calendar.DAY_OF_MONTH) + " " : c.get(Calendar.DAY_OF_MONTH) + " ";
-        current_date += c.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + c.get(Calendar.HOUR_OF_DAY) + ":" : c.get(Calendar.HOUR_OF_DAY) + ":";
-        current_date += c.get(Calendar.MINUTE) < 10 ? "0" + c.get(Calendar.MINUTE) + ":" : c.get(Calendar.MINUTE) + ":";
-        current_date += c.get(Calendar.SECOND) < 10 ? "0" + c.get(Calendar.SECOND) : c.get(Calendar.SECOND);
+        Calendar date = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String current_date = dateFormat.format(date.getTime());
 
+        boolean dueToday = false;
+
+        SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date convertedDate = null;
+        try {
+            convertedDate = shortDateFormat.parse(current_date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar dueDate = Calendar.getInstance();
+        dueDate.setTime(convertedDate);
+        String shortCurrentDate = shortDateFormat.format(Calendar.getInstance().getTime());
 
         switch (target.time_span.toLowerCase()) {
             case "daily": {
@@ -285,6 +299,7 @@ public class TargetItem extends Fragment {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                dueToday = true;
                 break;
             }
             case "weekly": {
@@ -295,6 +310,9 @@ public class TargetItem extends Fragment {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                if(dueDate.DAY_OF_WEEK == 7){
+                    dueToday = true;
+                }
                 break;
             }
             case "monthly": {
@@ -306,29 +324,33 @@ public class TargetItem extends Fragment {
                 }
                 activityHistoryList.clear();
                 activityHistoryList.addAll(tmp);
+                dueDate.set(Calendar.DAY_OF_MONTH, dueDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+                String nextDueDate = shortDateFormat.format(dueDate.getTime());
+                if(shortCurrentDate.equals(nextDueDate)){
+                    dueToday = true;
+                }
                 break;
             }
         }
 
+        necessary_time = Integer.parseInt(target.total_time);
+        int spent_time = 0;
 
-        neccesary_time = Integer.parseInt(target.total_time);
-
-        spent_time = 0;
         for (int i = 0; i < activityHistoryList.size(); i++) {
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
         }
-        if (spent_time == 0)
+        if (dueToday && (spent_time < necessary_time))
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
-        else if (spent_time >= neccesary_time)
-            mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
-        else
+        else if (spent_time < necessary_time)
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFff7400);
+        else
+            mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
 
-        if (spent_time == 0 || spent_time < neccesary_time) {
+        if (spent_time == 0 || spent_time < this.necessary_time) {
             incomplete_textView = (TextView) mainView.findViewById(R.id.target_item_incomplete_textview);
             incomplete_textView.setVisibility(View.VISIBLE);
             incomplete_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
-            incomplete_textView.setText(Utils.convertToHour(spent_time) + "/" + Utils.convertToHour(neccesary_time));
+            incomplete_textView.setText(Utils.convertToHour(spent_time) + "/" + Utils.convertToHour(this.necessary_time));
 
             if (spent_time == 0) {
                 View set_stretch = mainView.findViewById(R.id.target_set_stretch_btn);
@@ -354,7 +376,7 @@ public class TargetItem extends Fragment {
             TextView complete_textView = (TextView) mainView.findViewById(R.id.target_item_complete_textview);
             complete_textView.setVisibility(View.VISIBLE);
             complete_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
-            complete_textView.setText(Utils.convertToHour(neccesary_time) + "/" + Utils.convertToHour(neccesary_time));
+            complete_textView.setText(Utils.convertToHour(spent_time) + "/" + Utils.convertToHour(this.necessary_time));
 
             if (stretch_target != null) {
 
@@ -367,8 +389,8 @@ public class TargetItem extends Fragment {
                 }, 100);
 
 
-                if (spent_time < neccesary_time + Integer.parseInt(stretch_target.stretch_time)) {
-                    int time = neccesary_time + Integer.parseInt(stretch_target.stretch_time) - spent_time;
+                if (spent_time < this.necessary_time + Integer.parseInt(stretch_target.stretch_time)) {
+                    int time = this.necessary_time + Integer.parseInt(stretch_target.stretch_time) - spent_time;
                     TextView textView1 = (TextView) mainView.findViewById(R.id.target_reached_stretch_present);
                     String text = LinguisticManager.getInstance().present.get(target.activity);
                     if (text.contains(DataManager.getInstance().mainActivity.getString(R.string._for))) {
@@ -504,7 +526,7 @@ public class TargetItem extends Fragment {
 
     protected void loadData() {
         String html = getHighChartsHTML(false);
-        html = html.replace("Y_MAX_VALUE", "" + neccesary_time);
+        html = html.replace("Y_MAX_VALUE", "" + necessary_time);
         html = html.replace("Y_VALUE", "" + spent_time);
         html = html.replace("height:1000px", "height:" + webviewHeight + "px !important");
         html = html.replace("width:1000px", "width:" + webviewWidth + "px !important");
@@ -514,7 +536,7 @@ public class TargetItem extends Fragment {
 
     protected void loadDataStretch() {
         String html = getHighChartsHTML(true);
-        html = html.replace("Y_VALUE", "" + (spent_time - neccesary_time));
+        html = html.replace("Y_VALUE", "" + (spent_time - necessary_time));
         html = html.replace("Y_MAX_VALUE", "" + stretch_target.stretch_time);
         html = html.replace("height:1000px", "height:" + webviewHeight + "px !important");
         html = html.replace("width:1000px", "width:" + webviewWidth + "px !important");

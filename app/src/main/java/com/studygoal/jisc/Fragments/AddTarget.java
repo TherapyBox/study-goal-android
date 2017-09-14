@@ -582,7 +582,7 @@ public class AddTarget extends BaseFragment {
 
         final ArrayList<String> items = new ArrayList<>();
         items.add(DataManager.getInstance().mainActivity.getString(R.string.any_module));
-        List<Module> modules = new Select().from(Module.class).execute();
+        List<Module> modules = new Select().from(Module.class).orderBy("module_name").execute();
 
         for (int i = 0; i < modules.size(); i++) {
             items.add(modules.get(i).name);
@@ -723,7 +723,12 @@ public class AddTarget extends BaseFragment {
                 params.put("activity_type", DataManager.getInstance().api_values.get(mActivityType.getText().toString()));
                 params.put("activity", DataManager.getInstance().api_values.get(mChooseActivity.getText().toString()));
                 params.put("total_time", total_time + "");
-                params.put("time_span", DataManager.getInstance().api_values.get(mEvery.getText().toString().toLowerCase()));
+
+                if(mEvery.getText().toString().toLowerCase().equals("day")){
+                    params.put("time_span","daily");
+                } else {
+                    params.put("time_span",mEvery.getText().toString().toLowerCase() + "ly");
+                }
 
                 if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
                     params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
@@ -733,7 +738,7 @@ public class AddTarget extends BaseFragment {
                     params.put("because", mBecause.getText().toString());
                 }
 
-                System.out.println("ADD_TARGET: " + params.toString());
+                Log.d(TAG, "ADD_TARGET: " + params.toString());
                 DataManager.getInstance().mainActivity.showProgressBar(null);
 
                 new Thread(() -> {
@@ -742,7 +747,7 @@ public class AddTarget extends BaseFragment {
                         DataManager.getInstance().mainActivity.runOnUiThread(() -> {
                             DataManager.getInstance().mainActivity.hideProgressBar();
                             DataManager.getInstance().mainActivity.onBackPressed();
-//                                            Snackbar.make(mRoot, R.string.target_saved, Snackbar.LENGTH_LONG).show();
+//                          Snackbar.make(mRoot, R.string.target_saved, Snackbar.LENGTH_LONG).show();
                         });
                     } else {
                         DataManager.getInstance().mainActivity.runOnUiThread(() -> {
@@ -855,7 +860,7 @@ public class AddTarget extends BaseFragment {
                 params.put("reason", mBinding.addtargetEdittextBecauseSingle.getText().toString());
             }
 
-            System.out.println("ADD_SINGLE_TARGET: " + params.toString());
+            Log.d(TAG, "ADD_SINGLE_TARGET: " + params.toString());
             DataManager.getInstance().mainActivity.showProgressBar(null);
 
             new Thread(() -> {
