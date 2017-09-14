@@ -697,7 +697,7 @@ public class MainActivity extends FragmentActivity {
             case 1: {
                 menu.setVisibility(View.VISIBLE);
                 friend.setVisibility(View.VISIBLE);
-                settings.setVisibility(View.VISIBLE);
+                //settings.setVisibility(View.VISIBLE);
                 int count = new Select().from(ReceivedRequest.class).count();
                 if (count > 0) {
                     findViewById(R.id.incoming_fr).setVisibility(View.VISIBLE);
@@ -707,7 +707,7 @@ public class MainActivity extends FragmentActivity {
                 break;
             }
             case 3: {
-                settings.setVisibility(View.VISIBLE);
+                //settings.setVisibility(View.VISIBLE);
                 addTarget.setVisibility(View.VISIBLE);
                 menu.setVisibility(View.VISIBLE);
 
@@ -742,7 +742,7 @@ public class MainActivity extends FragmentActivity {
             case 4: {
                 menu.setVisibility(View.VISIBLE);
                 addTarget.setVisibility(View.VISIBLE);
-                settings.setVisibility(View.VISIBLE);
+                //settings.setVisibility(View.VISIBLE);
 
                 addTarget.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -770,7 +770,7 @@ public class MainActivity extends FragmentActivity {
             }
             case 8: {
                 back.setVisibility(View.VISIBLE);
-                settings.setVisibility(View.VISIBLE);
+                //settings.setVisibility(View.VISIBLE);
                 break;
             }
         }
