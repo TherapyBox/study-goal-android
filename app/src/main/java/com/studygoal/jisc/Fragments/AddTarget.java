@@ -55,11 +55,15 @@ import java.util.Map;
 
 public class AddTarget extends BaseFragment {
     private static final String TAG = AddTarget.class.getSimpleName();
-
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public Boolean isInEditMode = false;
     public Boolean isSingleTarget = false;
+    private Boolean mIsRecurringTarget;
+    private TargetAddTargetBinding mBinding = null;
+
+    private Calendar mToDoDate = null;
+
     public Targets item;
     public ToDoTasks itemToDo;
 
@@ -71,9 +75,13 @@ public class AddTarget extends BaseFragment {
     private EditText mHours;
     private EditText mMinutes;
     private EditText mBecause;
-    private View mRoot;
 
+    private View mRoot;
     private RelativeLayout mAddModuleLayout;
+
+    public AddTarget() {
+
+    }
 
     private TextWatcher mHoursWatcher = new TextWatcher() {
         @Override
@@ -131,15 +139,6 @@ public class AddTarget extends BaseFragment {
             }
         }
     };
-
-    public AddTarget() {
-    }
-
-    private TargetAddTargetBinding mBinding = null;
-
-    private boolean mIsRecurringTarget = true;
-
-    private Calendar mToDoDate = null;
 
     @Override
     public void onResume() {
@@ -289,6 +288,8 @@ public class AddTarget extends BaseFragment {
 
                 mIn.setText(moduleName);
                 mBecause.setText(item.because);
+                mActivityType.setOnClickListener(v -> onAddTargetActivityType());
+                mChooseActivity.setOnClickListener(v -> onAddTargetChooseActivity());
             }
         } else {
             mActivityType.setText(DataManager.getInstance().activity_type.get(0));
