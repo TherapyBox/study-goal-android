@@ -44,6 +44,7 @@ import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.studygoal.jisc.databinding.TargetAddTargetBinding;
 
+import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -640,26 +641,44 @@ public class AddTarget extends BaseFragment {
                 Snackbar.make(mRoot, R.string.fail_to_edit_target_insuficient_time, Snackbar.LENGTH_LONG).show();
                 return;
             } else {
+                Module module = ((new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle()));
+                String id;
+
+                if (module == null) {
+                    id = "";
+                } else if (module.id == null) {
+                    id = "";
+                } else {
+                    id = module.id;
+                }
+
+                String selectedEvery = "";
+                if(mEvery.getText().toString().toLowerCase().equals("day")){
+                    selectedEvery = "Daily";
+                } else {
+                    selectedEvery = mEvery.getText().toString() + "ly";
+                }
+
+                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?",selectedEvery).and("module_id = ?", id).exists()) {
+                    Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
                 final HashMap<String, String> params = new HashMap<>();
                 params.put("student_id", DataManager.getInstance().user.id);
                 params.put("target_id", item.target_id);
                 params.put("total_time", total_time + "");
-                params.put("time_span", DataManager.getInstance().api_values.get(mEvery.getText().toString().toLowerCase()));
+                params.put("time_span",selectedEvery);
+
                 if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase()))
                     params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
                 if (mBecause.getText().toString().length() > 0)
                     params.put("because", mBecause.getText().toString());
-                System.out.println("EDIT_TARGET: " + params.toString());
+                Log.d(TAG, "EDIT_TARGET: " + params.toString());
                 DataManager.getInstance().mainActivity.showProgressBar(null);
-                Calendar calendar = Calendar.getInstance();
-                String modified_date = "";
-                modified_date += calendar.get(Calendar.YEAR) + "-";
-                modified_date += (calendar.get(Calendar.MONTH) + 1) < 10 ? "0" + (calendar.get(Calendar.MONTH) + 1) + "-" : (calendar.get(Calendar.MONTH) + 1) + "-";
-                modified_date += calendar.get(Calendar.DAY_OF_MONTH) < 10 ? "0" + calendar.get(Calendar.DAY_OF_MONTH) + " " : calendar.get(Calendar.DAY_OF_MONTH) + " ";
-                modified_date += calendar.get(Calendar.HOUR_OF_DAY) < 10 ? "0" + calendar.get(Calendar.HOUR_OF_DAY) + ":" : calendar.get(Calendar.HOUR_OF_DAY) + ":";
-                modified_date += calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE) + ":" : calendar.get(Calendar.MINUTE) + ":";
-                modified_date += calendar.get(Calendar.SECOND) < 10 ? "0" + calendar.get(Calendar.SECOND) : calendar.get(Calendar.SECOND);
 
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                String modified_date = dateFormat.format(Calendar.getInstance().getTime());
                 final String finalModified_date = modified_date;
 
                 new Thread(() -> {
@@ -676,7 +695,7 @@ public class AddTarget extends BaseFragment {
 
                             DataManager.getInstance().mainActivity.hideProgressBar();
                             DataManager.getInstance().mainActivity.onBackPressed();
-//                                            Snackbar.make(mRoot, R.string.target_saved, Snackbar.LENGTH_LONG).show();
+//                          Snackbar.make(mRoot, R.string.target_saved, Snackbar.LENGTH_LONG).show();
                         });
                     } else {
                         DataManager.getInstance().mainActivity.runOnUiThread(() -> {
@@ -713,7 +732,14 @@ public class AddTarget extends BaseFragment {
                     id = module.id;
                 }
 
-                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?", mEvery.getText().toString()).and("module_id = ?", id).exists()) {
+                String selectedEvery = "";
+                if(mEvery.getText().toString().toLowerCase().equals("day")){
+                    selectedEvery = "Daily";
+                } else {
+                    selectedEvery = mEvery.getText().toString() + "ly";
+                }
+
+                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?",selectedEvery).and("module_id = ?", id).exists()) {
                     Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -723,12 +749,7 @@ public class AddTarget extends BaseFragment {
                 params.put("activity_type", DataManager.getInstance().api_values.get(mActivityType.getText().toString()));
                 params.put("activity", DataManager.getInstance().api_values.get(mChooseActivity.getText().toString()));
                 params.put("total_time", total_time + "");
-
-                if(mEvery.getText().toString().toLowerCase().equals("day")){
-                    params.put("time_span","daily");
-                } else {
-                    params.put("time_span",mEvery.getText().toString().toLowerCase() + "ly");
-                }
+                params.put("time_span",selectedEvery);
 
                 if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
                     params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);

@@ -78,10 +78,13 @@ public class TargetAdapter extends BaseAdapter {
 
         List<ActivityHistory> activityHistoryList;
 
+
         if (module != null) {
             activityHistoryList = new Select().from(ActivityHistory.class).where("module_id = ?", item.module_id).and("activity = ?", item.activity).execute();
+            Log.d("TargetAdapter", "getView: searching for logs for: " + item.activity);
         } else {
             activityHistoryList = new Select().from(ActivityHistory.class).where("activity = ?", item.activity).execute();
+            Log.d("TargetAdapter", "getView: searching for logs for: " + module + "    " + item.activity);
         }
 
         Calendar date = Calendar.getInstance();
@@ -106,6 +109,7 @@ public class TargetAdapter extends BaseAdapter {
                 String time = current_date.split(" ")[0];
                 List<ActivityHistory> tmp = new ArrayList<>();
                 for (int i = 0; i < activityHistoryList.size(); i++) {
+                    Log.d("", "getView: activity History all " + activityHistoryList.get(i).toString());
                     if (time.equals(activityHistoryList.get(i).created_date.split(" ")[0]))
                         tmp.add(activityHistoryList.get(i));
                 }
@@ -117,6 +121,7 @@ public class TargetAdapter extends BaseAdapter {
             case "weekly": {
                 List<ActivityHistory> tmp = new ArrayList<>();
                 for (int i = 0; i < activityHistoryList.size(); i++) {
+                    Log.d("", "getView: activity History all " + activityHistoryList.get(i).toString());
                     if (Utils.isInSameWeek(activityHistoryList.get(i).created_date.split(" ")[0]))
                         tmp.add(activityHistoryList.get(i));
                 }
@@ -131,6 +136,7 @@ public class TargetAdapter extends BaseAdapter {
                 String time = current_date.split(" ")[0].split("-")[0] + "-" + current_date.split(" ")[0].split("-")[1];
                 List<ActivityHistory> tmp = new ArrayList<>();
                 for (int i = 0; i < activityHistoryList.size(); i++) {
+                    Log.d("TargetAdapter", "getView: activity History all " + activityHistoryList.get(i).toString());
                     if (time.equals(activityHistoryList.get(i).created_date.split(" ")[0].split("-")[0] + "-" + activityHistoryList.get(i).created_date.split(" ")[0].split("-")[1]))
                         tmp.add(activityHistoryList.get(i));
                 }
@@ -149,6 +155,8 @@ public class TargetAdapter extends BaseAdapter {
         int spent_time = 0;
 
         for (int i = 0; i < activityHistoryList.size(); i++) {
+            Log.d("TargetAdapter", "getView: activity History filtered " + activityHistoryList.get(i).toString());
+            Log.d("TargetAdapter", "getView: time of that log" + Integer.parseInt(activityHistoryList.get(i).time_spent));
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
         }
 
@@ -156,7 +164,7 @@ public class TargetAdapter extends BaseAdapter {
         if (dueToday && (spent_time < necessary_time))
             convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
         else if (spent_time < necessary_time)
-            convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFff7400);
+            convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFFCC00);
         else
             convertView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
 

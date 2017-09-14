@@ -334,7 +334,7 @@ public class TargetItem extends Fragment {
         }
 
         necessary_time = Integer.parseInt(target.total_time);
-        int spent_time = 0;
+        spent_time = 0;
 
         for (int i = 0; i < activityHistoryList.size(); i++) {
             spent_time += Integer.parseInt(activityHistoryList.get(i).time_spent);
@@ -342,7 +342,7 @@ public class TargetItem extends Fragment {
         if (dueToday && (spent_time < necessary_time))
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFF0000);
         else if (spent_time < necessary_time)
-            mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFff7400);
+            mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFFFFCC00);
         else
             mainView.findViewById(R.id.colorbar).setBackgroundColor(0xFF00FF00);
 
@@ -352,7 +352,7 @@ public class TargetItem extends Fragment {
             incomplete_textView.setTypeface(DataManager.getInstance().myriadpro_regular);
             incomplete_textView.setText(Utils.convertToHour(spent_time) + "/" + Utils.convertToHour(this.necessary_time));
 
-            if (spent_time == 0) {
+            if (spent_time < necessary_time) {
                 View set_stretch = mainView.findViewById(R.id.target_set_stretch_btn);
                 set_stretch.setVisibility(View.VISIBLE);
                 ((TextView) mainView.findViewById(R.id.target_stretch_btn_text)).setText(DataManager.getInstance().mainActivity.getString(R.string.start_your_new_activity));
