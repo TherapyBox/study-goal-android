@@ -7,14 +7,12 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -32,8 +30,7 @@ import com.studygoal.jisc.R;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class StatsPoints extends Fragment {
-
+public class StatsPoints extends BaseFragment {
     private View mainView;
     private WebView piChartWebView;
     private LinearLayout upperContainer;
@@ -66,11 +63,9 @@ public class StatsPoints extends Fragment {
         upperContainer = (LinearLayout) mainView.findViewById(R.id.activity_points_container);
         upperContainer.setVisibility(View.VISIBLE);
         pieChartSwitch = (Switch) mainView.findViewById(R.id.pie_chart_switch);
-        pieChartSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                upperContainer.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
-                piChartWebView.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
-            }
+        pieChartSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            upperContainer.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);
+            piChartWebView.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
         });
 
         ListView activity_points_list_view = (ListView) mainView.findViewById(R.id.activity_points_list_view);
@@ -99,48 +94,45 @@ public class StatsPoints extends Fragment {
             is.read(buffer);
             is.close();
 
-            piChartWebView.post(new Runnable() {
-                @Override
-                public void run() {
-                    String pointsDataBackup = "";
-                    double d = getActivity().getResources().getDisplayMetrics().density;
-                    int h = (int) (piChartWebView.getHeight() / d) - 20;
-                    int w = (int) (piChartWebView.getWidth() / d) - 20;
+            piChartWebView.post(() -> {
+                String pointsDataBackup = "";
+                double d = getActivity().getResources().getDisplayMetrics().density;
+                int h = (int) (piChartWebView.getHeight() / d) - 20;
+                int w = (int) (piChartWebView.getWidth() / d) - 20;
 
-                    /* data: [{
-                        name: 'Computer',
-                                y: 56.33
-                    }, {
-                        name: 'English',
-                                y: 24.03
-                    }] */
+                /* data: [{
+                    name: 'Computer',
+                            y: 56.33
+                }, {
+                    name: 'English',
+                            y: 24.03
+                }] */
 
-                    String data = "";
-                    for (ActivityPoints p : DataManager.getInstance().user.points) {
-                        data += "{";
-                        if(p.activity.equals("Loggedin"))
-                            data += "name:" + "\'Logged in\',";
-                        else
-                            data += "name:" + "\'" + p.activity + "\',";
-                        data += "y:" + p.points;
-                        data += "},";
-                        pointsDataBackup += p.activity + ";"
-                                + p.points + ";"
-                                + p.id + ";"
-                                + p.key + "----";
-                    }
-
-                    String rawhtml = new String(buffer);
-                    rawhtml = rawhtml.replace("280px", w + "px");
-                    rawhtml = rawhtml.replace("220px", h + "px");
-                    rawhtml = rawhtml.replace("REPLACE_DATA", data);
-                    piChartWebView.loadDataWithBaseURL("", rawhtml, "text/html", "UTF-8", "");
-
-                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(getString(R.string.pointsData), pointsDataBackup);
-                    editor.commit();
+                String data = "";
+                for (ActivityPoints p : DataManager.getInstance().user.points) {
+                    data += "{";
+                    if (p.activity.equals("Loggedin"))
+                        data += "name:" + "\'Logged in\',";
+                    else
+                        data += "name:" + "\'" + p.activity + "\',";
+                    data += "y:" + p.points;
+                    data += "},";
+                    pointsDataBackup += p.activity + ";"
+                            + p.points + ";"
+                            + p.id + ";"
+                            + p.key + "----";
                 }
+
+                String rawhtml = new String(buffer);
+                rawhtml = rawhtml.replace("280px", w + "px");
+                rawhtml = rawhtml.replace("220px", h + "px");
+                rawhtml = rawhtml.replace("REPLACE_DATA", data);
+                piChartWebView.loadDataWithBaseURL("", rawhtml, "text/html", "UTF-8", "");
+
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(getString(R.string.pointsData), pointsDataBackup);
+                editor.commit();
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -150,34 +142,27 @@ public class StatsPoints extends Fragment {
     private void refreshView() {
         DataManager.getInstance().mainActivity.showProgressBar(null);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(!NetworkManager.getInstance().getStudentActivityPoint(isThisWeek ? "7d" : "overall")){
-                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    String pointsDataBackup = sharedPref.getString(getString(R.string.pointsData), "no_data_stored");
-                    String[] pointsData = pointsDataBackup.split("----");
-                    DataManager.getInstance().user.points.clear();
-                    for (String data : pointsData) {
-                        String[] point = data.split(";");
-                        DataManager.getInstance().user.points.add(new ActivityPoints(point[0], point[1], point[2], point[3]));
-                    }
+        new Thread(() -> {
+            if (!NetworkManager.getInstance().getStudentActivityPoint(isThisWeek ? "7d" : "overall")) {
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                String pointsDataBackup = sharedPref.getString(getString(R.string.pointsData), "no_data_stored");
+                String[] pointsData = pointsDataBackup.split("----");
+                DataManager.getInstance().user.points.clear();
+                for (String data : pointsData) {
+                    String[] point = data.split(";");
+                    DataManager.getInstance().user.points.add(new ActivityPoints(point[0], point[1], point[2], point[3]));
                 }
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        call_refresh();
-                        loadWebView();
-                    }
-                });
             }
+
+            runOnUiThread(() -> {
+                call_refresh();
+                loadWebView();
+            });
         }).start();
     }
 
     private void call_refresh() {
         DataManager.getInstance().mainActivity.hideProgressBar();
-
         adapter.notifyDataSetChanged();
 
         int sum = 0;
@@ -203,12 +188,7 @@ public class StatsPoints extends Fragment {
                     editor.apply();
                 }
             });
-            alertDialogBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            alertDialogBuilder.setNegativeButton("OK", (dialog, which) -> dialog.dismiss());
             android.app.AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
         }

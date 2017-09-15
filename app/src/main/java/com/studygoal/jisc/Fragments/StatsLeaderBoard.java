@@ -31,12 +31,10 @@ import com.studygoal.jisc.R;
 
 import java.util.List;
 
-public class StatsLeaderBoard extends Fragment {
-
+public class StatsLeaderBoard extends BaseFragment {
     private AppCompatTextView module;
     private String selectedPeriod;
     private ListView rankListView;
-
 
     static final String[] EVENTS = new String[]{"Calculate 101", "Calculate 102", "Calculate 103", "Calculate 101"};
 
@@ -57,7 +55,7 @@ public class StatsLeaderBoard extends Fragment {
         rankListView = (ListView) mainView.findViewById(R.id.stats_leaderBoard_listView);
         ViewGroup header = (ViewGroup) inflater.inflate(R.layout.stats_event_attendance_list_view_header, rankListView, false);
         rankListView.addHeaderView(header);
-        rankListView.setAdapter(new ArrayAdapter<String>(getContext(), R.layout.list_event_attendance, EVENTS));
+        rankListView.setAdapter(new ArrayAdapter<>(getContext(), R.layout.list_event_attendance, EVENTS));
 
 
         setUpModule(mainView);
@@ -85,63 +83,47 @@ public class StatsLeaderBoard extends Fragment {
         module.setTypeface(DataManager.getInstance().myriadpro_regular);
         module.setText(R.string.anymodule);
         ((TextView) mainView.findViewById(R.id.module)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        module.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.custom_spinner_layout);
-                dialog.setCancelable(true);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        dialog.dismiss();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).hideProgressBar();
-                            }
-                        });
+        module.setOnClickListener(v -> {
+            final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.custom_spinner_layout);
+            dialog.setCancelable(true);
+            dialog.setOnCancelListener(dialog1 -> {
+                dialog1.dismiss();
+                runOnUiThread(() -> ((MainActivity) getActivity()).hideProgressBar());
+            });
+
+            if (DataManager.getInstance().mainActivity.isLandscape) {
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int width = (int) (displaymetrics.widthPixels * 0.3);
+
+                WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                params.width = width;
+                dialog.getWindow().setAttributes(params);
+            }
+
+            ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+            ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
+
+            final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
+            listView.setAdapter(new ModuleAdapter2(DataManager.getInstance().mainActivity, module.getText().toString()));
+            listView.setOnItemClickListener((parent, view, position, id) -> {
+                String titleText = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString();
+                List<Courses> coursesList = new Select().from(Courses.class).execute();
+
+                for (int j = 0; j < coursesList.size(); j++) {
+                    String courseName = coursesList.get(j).name;
+                    if (courseName.equals(titleText)) {
+                        return;
                     }
-                });
-
-                if (DataManager.getInstance().mainActivity.isLandscape) {
-                    DisplayMetrics displaymetrics = new DisplayMetrics();
-                    DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                    int width = (int) (displaymetrics.widthPixels * 0.3);
-
-                    WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                    params.width = width;
-                    dialog.getWindow().setAttributes(params);
                 }
 
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.choose_module);
-
-                final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                listView.setAdapter(new ModuleAdapter2(DataManager.getInstance().mainActivity, module.getText().toString()));
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                        String titleText = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString();
-
-                        List<Courses> coursesList = new Select().from(Courses.class).execute();
-
-                        for (int j = 0; j < coursesList.size(); j++) {
-                            String courseName = coursesList.get(j).name;
-                            if (courseName.equals(titleText)) {
-                                return;
-                            }
-                        }
-
-                        dialog.dismiss();
-                        module.setText(titleText);
-                    }
-                });
-                ((MainActivity) getActivity()).showProgressBar2("");
-                dialog.show();
-            }
+                dialog.dismiss();
+                module.setText(titleText);
+            });
+            ((MainActivity) getActivity()).showProgressBar2("");
+            dialog.show();
         });
 
         final TextView last_7d_text_view = (TextView) mainView.findViewById(R.id.last_7d_text_view);
@@ -151,25 +133,22 @@ public class StatsLeaderBoard extends Fragment {
         selectedPeriod = getString(R.string.last_7_days);
 
         LinearLayout period_segmented = (LinearLayout) mainView.findViewById(R.id.period_segmented);
-        period_segmented.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (selectedPeriod.equals(getString(R.string.last_7_days))) {
-                    selectedPeriod = getString(R.string.last_30_days);
-                    last_30d_text_view.setTextColor(Color.parseColor("#ffffff"));
-                    last_30d_text_view.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.circle_background_blue_right));
+        period_segmented.setOnClickListener(v -> {
+            if (selectedPeriod.equals(getString(R.string.last_7_days))) {
+                selectedPeriod = getString(R.string.last_30_days);
+                last_30d_text_view.setTextColor(Color.parseColor("#ffffff"));
+                last_30d_text_view.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.circle_background_blue_right));
 
-                    last_7d_text_view.setTextColor(Color.parseColor("#3691ee"));
-                    last_7d_text_view.setBackground(null);
+                last_7d_text_view.setTextColor(Color.parseColor("#3691ee"));
+                last_7d_text_view.setBackground(null);
 
-                } else {
-                    selectedPeriod = getString(R.string.last_7_days);
-                    last_30d_text_view.setTextColor(Color.parseColor("#3691ee"));
-                    last_30d_text_view.setBackground(null);
+            } else {
+                selectedPeriod = getString(R.string.last_7_days);
+                last_30d_text_view.setTextColor(Color.parseColor("#3691ee"));
+                last_30d_text_view.setBackground(null);
 
-                    last_7d_text_view.setTextColor(Color.parseColor("#ffffff"));
-                    last_7d_text_view.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.circle_background_blue_left));
-                }
+                last_7d_text_view.setTextColor(Color.parseColor("#ffffff"));
+                last_7d_text_view.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.circle_background_blue_left));
             }
         });
     }

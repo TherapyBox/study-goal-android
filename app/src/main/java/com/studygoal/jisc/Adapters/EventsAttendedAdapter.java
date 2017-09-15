@@ -8,31 +8,31 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.studygoal.jisc.Models.Event;
-import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Marjana-Tbox on 12/09/17.
  */
-
 public class EventsAttendedAdapter extends BaseAdapter {
-
-    private Context context;
-    public List<Event> list;
+    private Context mContext;
+    private List<Event> mList;
 
     public EventsAttendedAdapter(Context context) {
-        this.context = context;
-        list = new ArrayList<>();
+        mContext = context;
+        mList = new ArrayList<>();
+    }
+
+    public List<Event> getList() {
+        return mList;
     }
 
     @Override
     public int getCount() {
-        return list.size();
+        return mList.size();
     }
 
     @Override
@@ -47,21 +47,33 @@ public class EventsAttendedAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        convertView = LayoutInflater.from(context).inflate(R.layout.item_events_attended, parent, false);
+        convertView = LayoutInflater.from(mContext).inflate(R.layout.item_events_attended, parent, false);
 
         TextView date = (TextView) convertView.findViewById(R.id.event_item_time_ago);
-        date.setText(list.get(position).date);
+        date.setText(mList.get(position).getDate());
         TextView activity = (TextView) convertView.findViewById(R.id.event_item_activity);
-        activity.setText(list.get(position).activity);
+        activity.setText(mList.get(position).getActivity());
         TextView module = (TextView) convertView.findViewById(R.id.event_item_module);
-        module.setText(list.get(position).module);
+        module.setText(mList.get(position).getModule());
 
         return convertView;
     }
 
     public void updateList(ArrayList<Event> events) {
-        list = events;
-        notifyDataSetChanged();
+        if (events != null && events.size() > 0) {
+            mList.clear();
+            mList.addAll(events);
+            Collections.sort(mList, (o1, o2) -> {
+                if (o1 != null && o2 != null) {
+                    Long t1 = o1.getTime();
+                    Long t2 = o2.getTime();
+
+                    return t2.compareTo(t1);
+                }
+
+                return 0;
+            });
+            notifyDataSetChanged();
+        }
     }
 }

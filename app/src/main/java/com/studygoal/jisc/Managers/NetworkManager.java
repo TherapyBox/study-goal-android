@@ -4100,6 +4100,7 @@ public class NetworkManager {
 
     public boolean getEventsAttended(int skip, int limit){
         Future<String> futureResult = executorService.submit(new getEventsAttended(skip, limit));
+
         try {
             String result = futureResult.get();
             return result.equals("Success");
