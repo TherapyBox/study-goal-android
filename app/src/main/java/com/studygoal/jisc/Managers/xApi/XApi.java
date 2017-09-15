@@ -1,5 +1,7 @@
 package com.studygoal.jisc.Managers.xApi;
 
+import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -26,4 +28,9 @@ interface XApi {
                                       @Query("contentID") String contentId,
                                       @Query("contentName") String contentName,
                                       @Query("modid") String modId);
+
+    @GET("/sg/attendance")
+    Call<ResponseAttendance> getAttendance(@Header("authorization") String token,
+                                           @Query("skip") int skip,
+                                           @Query("limit") int limit);
 }

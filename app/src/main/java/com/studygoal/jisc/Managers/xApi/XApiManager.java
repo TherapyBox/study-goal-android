@@ -2,7 +2,16 @@ package com.studygoal.jisc.Managers.xApi;
 
 import android.util.Log;
 
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.query.Delete;
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.Managers.xApi.response.AttendanceStatement;
+import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
+import com.studygoal.jisc.Models.Event;
+import com.studygoal.jisc.Models.ToDoTasks;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -20,6 +29,7 @@ public class XApiManager {
 
     private static final String SERVER_BASE = "https://api.datax.jisc.ac.uk";
     private static final String TOKEN_PREFIX = "Bearer ";
+    private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     private static XApiManager sInstance = null;
 
@@ -29,6 +39,82 @@ public class XApiManager {
         }
 
         return sInstance;
+    }
+
+    public boolean getAttendance(int skip, int limit) {
+        boolean result = true;
+
+        try {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(SERVER_BASE)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            XApi api = retrofit.create(XApi.class);
+            String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+            Call<ResponseAttendance> call = api.getAttendance(token, skip, limit);
+            Response<ResponseAttendance> response = call.execute();
+
+            if (response != null && response.code() == 200) {
+                ArrayList<AttendanceStatement> list = response.body().getStatement();
+
+                if (list != null && list.size() > 0) {
+                    ActiveAndroid.beginTransaction();
+
+                    try {
+                        new Delete().from(ToDoTasks.class).execute();
+
+                        for (AttendanceStatement item : list) {
+                            String dateString = "";
+                            String activityInfo = "";
+                            String moduleName = "";
+                            long time = 0;
+                            String[] dataInfo = null;
+
+                            // TODO: need parse all data correct
+
+                            if (item.getObject() != null && item.getObject().getDefinition() != null
+                                    && item.getObject().getDefinition().getName() != null && item.getObject().getDefinition().getName().getEn() != null) {
+                                dataInfo = item.getObject().getDefinition().getName().getEn().split(" ");
+                            }
+
+                            if (item.getContext() != null && item.getContext().getExtensions() != null
+                                    && item.getContext().getExtensions().getCourseArea() != null) {
+                                activityInfo = item.getContext().getExtensions().getActivityTypeId();
+                            }
+
+                            if (item.getContext() != null && item.getContext().getExtensions() != null
+                                    && item.getContext().getExtensions().getCourseArea() != null
+                                    && item.getContext().getExtensions().getCourseArea().getUddModInstanceID() != null) {
+                                moduleName = item.getContext().getExtensions().getCourseArea().getUddModInstanceID().split("-")[0];
+                            }
+
+                            if (dataInfo != null) {
+                                dateString = dataInfo[2] + " " + dataInfo[1];
+                            }
+
+                            try {
+                                time = sDateFormat.parse(dateString).getTime();
+                            } catch (Exception e) {
+                                Log.d(TAG, e.getMessage());
+                            }
+
+                            Event event = new Event(dateString, activityInfo, moduleName, time);
+                            event.save();
+                        }
+
+                        ActiveAndroid.setTransactionSuccessful();
+                        result = true;
+                    } finally {
+                        ActiveAndroid.endTransaction();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
     }
 
     public void sendLogActivityEvent(LogActivityEvent event) {

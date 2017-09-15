@@ -4122,6 +4122,7 @@ public class NetworkManager {
         @Override
         public String call(){
             try {
+                // TODO:
                 //String apiURL = "https://api.datax.jisc.ac.uk/sg/attendance?skip=" + skip + "&limit=" + limit;
                 String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/attendance?skip=" + skip + "&limit=" + limit;
                 URL url = new URL(apiURL);
@@ -4144,8 +4145,7 @@ public class NetworkManager {
                 }
 
                 InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        is, "iso-8859-1"), 8);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
