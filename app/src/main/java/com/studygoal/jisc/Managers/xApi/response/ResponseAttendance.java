@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public class ResponseAttendance {
     @SerializedName("statement")
-    ArrayList<AttendanceStatement> statement;
+    AttendanceStatement statement;
 
-    public ArrayList<AttendanceStatement> getStatement() {
+    public AttendanceStatement getStatement() {
         return statement;
     }
 }

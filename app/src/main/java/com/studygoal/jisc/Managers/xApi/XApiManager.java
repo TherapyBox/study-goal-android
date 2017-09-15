@@ -11,7 +11,7 @@ import com.studygoal.jisc.Models.Event;
 import com.studygoal.jisc.Models.ToDoTasks;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -52,11 +52,11 @@ public class XApiManager {
 
             XApi api = retrofit.create(XApi.class);
             String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
-            Call<ResponseAttendance> call = api.getAttendance(token, skip, limit);
-            Response<ResponseAttendance> response = call.execute();
+            Call<List<ResponseAttendance>> call = api.getAttendance(token, skip, limit);
+            Response<List<ResponseAttendance>> response = call.execute();
 
             if (response != null && response.code() == 200) {
-                ArrayList<AttendanceStatement> list = response.body().getStatement();
+                List<ResponseAttendance> list = response.body();
 
                 if (list != null && list.size() > 0) {
                     ActiveAndroid.beginTransaction();
@@ -64,14 +64,13 @@ public class XApiManager {
                     try {
                         new Delete().from(ToDoTasks.class).execute();
 
-                        for (AttendanceStatement item : list) {
+                        for (ResponseAttendance aitem : list) {
+                            AttendanceStatement item = aitem.getStatement();
                             String dateString = "";
                             String activityInfo = "";
                             String moduleName = "";
                             long time = 0;
                             String[] dataInfo = null;
-
-                            // TODO: need parse all data correct
 
                             if (item.getObject() != null && item.getObject().getDefinition() != null
                                     && item.getObject().getDefinition().getName() != null && item.getObject().getDefinition().getName().getEn() != null) {

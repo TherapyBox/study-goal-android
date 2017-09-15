@@ -2,6 +2,8 @@ package com.studygoal.jisc.Managers.xApi;
 
 import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
 
+import java.util.List;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -30,7 +32,7 @@ interface XApi {
                                       @Query("modid") String modId);
 
     @GET("/sg/attendance")
-    Call<ResponseAttendance> getAttendance(@Header("authorization") String token,
-                                           @Query("skip") int skip,
-                                           @Query("limit") int limit);
+    Call<List<ResponseAttendance>> getAttendance(@Header("authorization") String token,
+                                                 @Query("skip") int skip,
+                                                 @Query("limit") int limit);
 }
