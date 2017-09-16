@@ -88,8 +88,8 @@ public class XApiManager {
                                 moduleName = item.getContext().getExtensions().getCourseArea().getUddModInstanceID().split("-")[0];
                             }
 
-                            if (dataInfo != null) {
-                                dateString = dataInfo[2] + " " + dataInfo[1];
+                            if (dataInfo != null && dataInfo.length > 1) {
+                                dateString = dataInfo[dataInfo.length - 1] + " " + dataInfo[dataInfo.length - 2];
                             }
 
                             try {
@@ -98,7 +98,11 @@ public class XApiManager {
                                 Log.d(TAG, e.getMessage());
                             }
 
-                            Event event = new Event(dateString, activityInfo, moduleName, time);
+                            Event event = new Event();
+                            event.setDate(dateString);
+                            event.setActivity(activityInfo);
+                            event.setModule(moduleName);
+                            event.setTime(time);
                             event.save();
                         }
 

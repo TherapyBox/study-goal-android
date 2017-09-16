@@ -18,11 +18,8 @@ public class Event extends Model {
     @Column(name = "time")
     private long time = 0;
 
-    public Event(String activity, String module, String date, long time) {
-        this.activity = activity;
-        this.module = module;
-        this.date = date;
-        this.time = time;
+    public Event() {
+        super();
     }
 
     public String getActivity() {
@@ -39,6 +36,22 @@ public class Event extends Model {
 
     public long getTime() {
         return time;
+    }
+
+    public void setActivity(String activity) {
+        this.activity = activity;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }
 
