@@ -41,7 +41,7 @@ public class XApiManager {
         return sInstance;
     }
 
-    public boolean getAttendance(int skip, int limit) {
+    public boolean getAttendance(int skip, int limit, boolean reset) {
         boolean result = true;
 
         try {
@@ -62,7 +62,9 @@ public class XApiManager {
                     ActiveAndroid.beginTransaction();
 
                     try {
-                        new Delete().from(ToDoTasks.class).execute();
+                        if (reset) {
+                            new Delete().from(Event.class).execute();
+                        }
 
                         for (ResponseAttendance aitem : list) {
                             AttendanceStatement item = aitem.getStatement();

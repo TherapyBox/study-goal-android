@@ -28,6 +28,7 @@ public class StatsEventAttendance extends BaseFragment {
     private int mPreviousLast;
     private EventsAttendedAdapter mAdapter;
     private ArrayList<Event> mEvents = new ArrayList<>();
+    private boolean mIsLoading = false;
 
     @Override
     public void onResume() {
@@ -56,13 +57,26 @@ public class StatsEventAttendance extends BaseFragment {
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 final int lastItem = firstVisibleItem + visibleItemCount;
 
-                // TODO: implement paging
-//                if (lastItem == totalItemCount) {
-//                    if (mPreviousLast != lastItem) {
-//                        //to avoid multiple calls for last item
-//                        mPreviousLast = lastItem;
-//                    }
-//                }
+                if (lastItem == totalItemCount) {
+                    if (mPreviousLast != lastItem) {
+                        //to avoid multiple calls for last item
+                        if (!mIsLoading) {
+                            new Thread(() -> {
+                                if (!mIsLoading) {
+                                    mPreviousLast = lastItem;
+                                    mIsLoading = true;
+                                    loadData(lastItem, PAGE_SIZE, false);
+                                    runOnUiThread(() -> {
+                                        mAdapter.updateList(mEvents);
+                                        mAdapter.notifyDataSetChanged();
+                                        ((MainActivity) getActivity()).hideProgressBar();
+                                        mIsLoading = false;
+                                    });
+                                }
+                            }).start();
+                        }
+                    }
+                }
             }
         });
 
@@ -73,19 +87,23 @@ public class StatsEventAttendance extends BaseFragment {
         ((MainActivity) getActivity()).showProgressBar(null);
 
         new Thread(() -> {
-            loadData(0, PAGE_SIZE * 2);
-            runOnUiThread(() -> {
-                mAdapter.updateList(mEvents);
-                mAdapter.notifyDataSetChanged();
-                ((MainActivity) getActivity()).hideProgressBar();
-            });
+            if (!mIsLoading) {
+                mIsLoading = true;
+                loadData(0, PAGE_SIZE * 2, true);
+                runOnUiThread(() -> {
+                    mAdapter.updateList(mEvents);
+                    mAdapter.notifyDataSetChanged();
+                    ((MainActivity) getActivity()).hideProgressBar();
+                    mIsLoading = false;
+                });
+            }
         }).start();
 
         return mainView;
     }
 
-    private void loadData(int skip, int limit) {
-        if (XApiManager.getInstance().getAttendance(skip, limit)) {
+    private void loadData(int skip, int limit, boolean reset) {
+        if (XApiManager.getInstance().getAttendance(skip, limit, reset)) {
             mEvents.clear();
             List<Event> events = new Select().from(Event.class).execute();
             mEvents.addAll(events);

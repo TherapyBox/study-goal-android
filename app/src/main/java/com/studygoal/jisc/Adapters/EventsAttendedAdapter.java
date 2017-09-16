@@ -47,14 +47,18 @@ public class EventsAttendedAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = LayoutInflater.from(mContext).inflate(R.layout.item_events_attended, parent, false);
+        final Event item = mList.get(position);
+
+        if (convertView == null) {
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_events_attended, parent, false);
+        }
 
         TextView date = (TextView) convertView.findViewById(R.id.event_item_time_ago);
-        date.setText(mList.get(position).getDate());
+        date.setText(item.getDate());
         TextView activity = (TextView) convertView.findViewById(R.id.event_item_activity);
-        activity.setText(mList.get(position).getActivity());
+        activity.setText(item.getActivity());
         TextView module = (TextView) convertView.findViewById(R.id.event_item_module);
-        module.setText(mList.get(position).getModule());
+        module.setText(item.getModule());
 
         return convertView;
     }
@@ -62,6 +66,23 @@ public class EventsAttendedAdapter extends BaseAdapter {
     public void updateList(ArrayList<Event> events) {
         if (events != null && events.size() > 0) {
             mList.clear();
+            mList.addAll(events);
+            Collections.sort(mList, (o1, o2) -> {
+                if (o1 != null && o2 != null) {
+                    Long t1 = o1.getTime();
+                    Long t2 = o2.getTime();
+
+                    return t2.compareTo(t1);
+                }
+
+                return 0;
+            });
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addToList(ArrayList<Event> events) {
+        if (events != null && events.size() > 0) {
             mList.addAll(events);
             Collections.sort(mList, (o1, o2) -> {
                 if (o1 != null && o2 != null) {
