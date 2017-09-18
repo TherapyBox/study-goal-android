@@ -693,17 +693,25 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-
-            mEmail = acct.getEmail();
-            mSocialID = acct.getId();
-
-            runOnUiThread(() -> loginSocial());
-
+        if(result.getStatus().getResolution() == null){
+            android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
+            alertDialogBuilder.setMessage(R.string.google_play_services_update_required);
+            alertDialogBuilder.setNegativeButton(Html.fromHtml("<font color='#000000'>OK</font>"), (dialog, which) -> dialog.dismiss());
+            android.support.v7.app.AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
         } else {
-            Log.e("JISC", "handleSignInResult:" + result.getStatus().getResolution());
+            if (result.isSuccess()) {
+                // Signed in successfully, show authenticated UI.
+                GoogleSignInAccount acct = result.getSignInAccount();
+
+                mEmail = acct.getEmail();
+                mSocialID = acct.getId();
+
+                runOnUiThread(() -> loginSocial());
+
+            } else {
+                Log.e("JISC", "handleSignInResult: " + result.getStatus().getResolution());
+            }
         }
     }
 
@@ -773,7 +781,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             if (!isFinishing()) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
                 alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
-                alertDialogBuilder.setNegativeButton("Ok", (dialog, which) -> {
+                alertDialogBuilder.setNegativeButton(Html.fromHtml("<font color='#000000'>OK</font>"), (dialog, which) -> {
                     mRefreshCounter = 0;
                     refreshData();
                     dialog.dismiss();
