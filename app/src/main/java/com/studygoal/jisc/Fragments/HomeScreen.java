@@ -47,8 +47,16 @@ public class HomeScreen extends Fragment {
                 selected_value = getString(R.string.feed);
                 break;
             }
+            case "friends": {
+                selected_value = getString(R.string.friends);
+                break;
+            }
             case "stats": {
                 selected_value = getString(R.string.stats);
+                break;
+            }
+            case "checkin": {
+                selected_value = getString(R.string.check_in);
                 break;
             }
             case "log": {
@@ -62,7 +70,9 @@ public class HomeScreen extends Fragment {
         }
         final ArrayList<String> en_menu = new ArrayList<String>();
         en_menu.add("feed");
+        en_menu.add("friends");
         en_menu.add("stats");
+        en_menu.add("checkin");
         en_menu.add("log");
         en_menu.add("target");
 
@@ -70,7 +80,9 @@ public class HomeScreen extends Fragment {
 
         final ArrayList<String> list = new ArrayList<>();
         list.add(getString(R.string.feed).toUpperCase());
+        list.add(getString(R.string.friends).toUpperCase());
         list.add(getString(R.string.stats).toUpperCase());
+        list.add(getString(R.string.check_in).toUpperCase());
         list.add(getString(R.string.log).toUpperCase());
         list.add(getString(R.string.target).toUpperCase());
 
