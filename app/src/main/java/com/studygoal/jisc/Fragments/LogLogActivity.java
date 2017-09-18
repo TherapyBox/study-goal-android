@@ -123,9 +123,10 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
 
                 if (s.toString().length() != 0) {
                     int value = Integer.parseInt(s.toString());
-                    if (value < 0 || value > 9) {
+                    if (value < 0)
                         hours_spent.setText("0");
-                    }
+                    if (value > 9)
+                        hours_spent.setText("9");
                 }
             }
         };
@@ -144,9 +145,10 @@ public class LogLogActivity extends Fragment implements View.OnClickListener {
 
                 if (s.toString().length() != 0) {
                     int value = Integer.parseInt(s.toString());
-                    if (value < 0 || value > 59) {
-                        minutes_spent.setText("0");
-                    }
+                    if (value < 0)
+                        minutes_spent.setText("00");
+                    if (value > 59)
+                        minutes_spent.setText("59");
                 }
             }
         };

@@ -107,12 +107,10 @@ public class AddTarget extends BaseFragment {
 
             if (s.toString().length() != 0) {
                 int value = Integer.parseInt(s.toString());
-                if (value < 0) {
+                if (value < 0)
                     mHours.setText("0");
-                }
-                if (value > maxValue) {
+                if (value > maxValue)
                     mHours.setText("" + maxValue);
-                }
                 mHours.setSelection(mHours.getText().length());
             }
         }
@@ -132,10 +130,11 @@ public class AddTarget extends BaseFragment {
 
             if (s.toString().length() != 0) {
                 int value = Integer.parseInt(s.toString());
-                if (value < 0 || value > 60) {
-                    mMinutes.setText("");
-                    mMinutes.setSelection(mMinutes.getText().length());
-                }
+                if (value < 0)
+                    mMinutes.setText("00");
+                if (value > 59)
+                    mMinutes.setText("59");
+                mMinutes.setSelection(mMinutes.getText().length());
             }
         }
     };

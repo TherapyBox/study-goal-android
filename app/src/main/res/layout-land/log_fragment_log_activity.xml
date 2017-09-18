@@ -259,7 +259,7 @@
                                     android:textSize="30sp"
                                     android:background="@android:color/transparent"
                                     android:maxLength="1"
-                                    android:text="0"
+                                    android:hint="0"
                                     android:textColor="@color/colorPrimary"/>
                                 <TextView
                                     android:id="@+id/log_activity_text_hours"
@@ -278,7 +278,7 @@
                                     android:background="@android:color/transparent"
                                     android:imeOptions="actionDone"
                                     android:maxLength="2"
-                                    android:text="00"
+                                    android:hint="00"
                                     android:textColor="@color/colorPrimary"/>
                                 <TextView
                                     android:id="@+id/log_activity_text_minutes"
