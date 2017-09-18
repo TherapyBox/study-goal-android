@@ -567,7 +567,11 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-        updateDeviceInfo();
+        if(!DataManager.getInstance().user.isSocial){
+            updateDeviceInfo();
+        } else {
+            updateDeviceInfoSocial();
+        }
     }
 
 
@@ -595,8 +599,19 @@ public class MainActivity extends FragmentActivity {
                 }
             }).start();
         }
+    }
 
-
+    private void updateDeviceInfoSocial() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.contains("push_token")
+                && sharedPreferences.getString("push_token", "").length() > 0) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    NetworkManager.getInstance().updateDeviceDetailsSocial();
+                }
+            }).start();
+        }
     }
 
     public void setTitle(String title) {

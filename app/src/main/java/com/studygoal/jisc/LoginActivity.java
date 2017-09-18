@@ -287,9 +287,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                     if (NetworkManager.getInstance().loginStaff()) {
                                         DataManager.getInstance().institution = mSelectedInstitution.name;
                                         getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
-
-                                        // terms and conditions
-                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        String firstlogin = DataManager.getInstance().first_time;
+                                        Intent intent = null;
+                                        if(firstlogin.equals("yes")){
+                                            intent = new Intent(LoginActivity.this, TermsActivity.class);
+                                        } else {
+                                            intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        }
                                         startActivity(intent);
                                         LoginActivity.this.finish();
                                     } else {
@@ -306,7 +310,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                         DataManager.getInstance().institution = mSelectedInstitution.name;
                                         getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
                                         String firstlogin = DataManager.getInstance().first_time;
-                                        Log.d("", "onPageFinished: " + firstlogin);
                                         Intent intent = null;
                                         if(firstlogin.equals("yes")){
                                             intent = new Intent(LoginActivity.this, TermsActivity.class);
@@ -725,7 +728,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         if (response == 200) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            // terms and conditions ?
             startActivity(intent);
             LoginActivity.this.finish();
             return;

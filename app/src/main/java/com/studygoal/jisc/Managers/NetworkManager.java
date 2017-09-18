@@ -4811,4 +4811,34 @@ public class NetworkManager {
             e.printStackTrace();
         }
     }
+
+    public void updateDeviceDetailsSocial() {
+        RequestBody formBody = new FormBody.Builder()
+                .add("student_id", DataManager.getInstance().user.id)
+                .add("version", BuildConfig.VERSION_NAME)
+                .add("build", "" + BuildConfig.VERSION_CODE)
+                .add("bundle_identifier", BuildConfig.APPLICATION_ID)
+                .add("is_active", "1")
+                .add("is_social", "no")
+                .add("device_token", Build.SERIAL)
+                .add("platform", "android")
+                .add("push_token", PreferenceManager.getDefaultSharedPreferences(appContext).getString("push_token", ""))
+                .build();
+        Request request = new Request.Builder()
+                .url(host + "fn_register_device")
+                .post(formBody)
+                .build();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            if (response.isSuccessful()) {
+                String message = response.body().string();
+                Log.e(getClass().getCanonicalName(), "Updated device info: " + message);
+            } else {
+                Log.e(getClass().getCanonicalName(), "Error code: " + response.code());
+            }
+            // Do something with the response.
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
