@@ -578,7 +578,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if (mProgressDialog == null) {
                     mProgressDialog = new ProgressDialog(LoginActivity.this);
                     mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    mProgressDialog.setMessage("Logging in...");
+                    mProgressDialog.setMessage(Html.fromHtml("<font color='#000000'>Logging in..."));
                     mProgressDialog.setCancelable(false);
                 }
 
