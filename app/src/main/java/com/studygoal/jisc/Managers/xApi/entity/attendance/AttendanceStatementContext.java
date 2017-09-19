@@ -1,4 +1,4 @@
-package com.studygoal.jisc.Managers.xApi.response;
+package com.studygoal.jisc.Managers.xApi.response.attendance;
 
 import com.google.gson.annotations.SerializedName;
 

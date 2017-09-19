@@ -10,14 +10,12 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
-import com.studygoal.jisc.Models.Activity;
 import com.studygoal.jisc.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by Marjana-Tbox on 07/09/17.
