@@ -1,6 +1,7 @@
 package com.studygoal.jisc.Managers.xApi;
 
 import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
+import com.studygoal.jisc.Managers.xApi.response.ResponseSetting;
 
 import java.util.List;
 
@@ -35,4 +36,8 @@ interface XApi {
     Call<List<ResponseAttendance>> getAttendance(@Header("authorization") String token,
                                                  @Query("skip") int skip,
                                                  @Query("limit") int limit);
+
+    @GET("/sg/setting")
+    Call<ResponseSetting> getSetting(@Header("authorization") String token,
+                                     @Query("setting") String settingName);
 }

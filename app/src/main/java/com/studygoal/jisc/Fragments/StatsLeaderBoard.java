@@ -1,11 +1,9 @@
 package com.studygoal.jisc.Fragments;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.DisplayMetrics;
@@ -14,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -24,7 +21,7 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
 import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Courses;
 import com.studygoal.jisc.R;

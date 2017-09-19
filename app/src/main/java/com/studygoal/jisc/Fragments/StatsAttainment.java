@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +15,12 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.AttainmentAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Attainment;
 import com.studygoal.jisc.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class StatsAttainment extends Fragment {
 

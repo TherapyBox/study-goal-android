@@ -5,10 +5,11 @@ import android.util.Log;
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.xApi.response.AttendanceStatement;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.attendance.AttendanceStatement;
 import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
+import com.studygoal.jisc.Managers.xApi.response.ResponseSetting;
 import com.studygoal.jisc.Models.Event;
-import com.studygoal.jisc.Models.ToDoTasks;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -31,6 +32,9 @@ public class XApiManager {
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
+    private static final String SETTING_ATTENDANCE_DATA = "attendanceData";
+    private static final String SETTING_STUDY_GOAL_ATTENDANCE = "studyGoalAttendance";
+
     private static XApiManager sInstance = null;
 
     public static XApiManager getInstance() {
@@ -39,6 +43,64 @@ public class XApiManager {
         }
 
         return sInstance;
+    }
+
+    private boolean getSettingAttendanceData() {
+        boolean result = false;
+
+        try {
+            String value = getSetting(SETTING_ATTENDANCE_DATA);
+
+            if (value != null) {
+                result = Boolean.parseBoolean(value);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
+    }
+
+    private boolean getSettingStudyGoalAttendance() {
+        boolean result = false;
+
+        try {
+            String value = getSetting(SETTING_STUDY_GOAL_ATTENDANCE);
+
+            if (value != null) {
+                result = Boolean.parseBoolean(value);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
+    }
+
+    private String getSetting(String settingName) {
+        String result = null;
+
+        try {
+            if (settingName != null) {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(SERVER_BASE)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                XApi api = retrofit.create(XApi.class);
+                String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                Call<ResponseSetting> call = api.getSetting(token, settingName);
+                Response<ResponseSetting> response = call.execute();
+
+                if (response != null && response.code() == 200) {
+                    result = response.body().getValue();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
     }
 
     public boolean getAttendance(int skip, int limit, boolean reset) {

@@ -18,7 +18,7 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.TargetPagerAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;

@@ -1,4 +1,4 @@
-package com.studygoal.jisc.Managers.xApi;
+package com.studygoal.jisc.Managers.xApi.entity;
 
 /**
  * Created by Eugene Krasnopolskiy (eugene.krasnopolskiy@gmail.com) on 14.08.2017.

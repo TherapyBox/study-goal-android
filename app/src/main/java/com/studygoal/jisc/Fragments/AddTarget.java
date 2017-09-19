@@ -35,7 +35,7 @@ import com.studygoal.jisc.Adapters.ChooseActivityAdapter;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.Targets;
@@ -44,7 +44,6 @@ import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.studygoal.jisc.databinding.TargetAddTargetBinding;
 
-import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

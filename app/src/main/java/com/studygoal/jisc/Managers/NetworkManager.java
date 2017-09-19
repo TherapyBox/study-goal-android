@@ -4050,7 +4050,9 @@ public class NetworkManager {
         @Override
         public Boolean call() {
             try {
-                String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + parameter;
+                // TODO:
+                //String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + parameter;
+                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=" + parameter;
                 URL url = new URL(apiURL);
 
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
@@ -4603,6 +4605,7 @@ public class NetworkManager {
 
             try {
 
+                // TODO:
                 String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + this.settingOption;
                 URL url = new URL(apiURL);
 
