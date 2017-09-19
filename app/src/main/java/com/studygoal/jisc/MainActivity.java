@@ -43,7 +43,6 @@ import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.Log;
-import com.bumptech.glide.Glide;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
 import com.studygoal.jisc.Fragments.AddTarget;
@@ -63,6 +62,7 @@ import com.studygoal.jisc.Fragments.StatsPoints;
 import com.studygoal.jisc.Fragments.TargetFragment;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.ReceivedRequest;
@@ -307,18 +307,20 @@ public class MainActivity extends FragmentActivity {
                 NetworkManager.getInstance().getStretchTargets(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriends(DataManager.getInstance().user.id);
                 NetworkManager.getInstance().getFriendRequests(DataManager.getInstance().user.id);
-                NetworkManager.getInstance().getSettings(getString(R.string.attendanceData));
-                NetworkManager.getInstance().getSettings(getString(R.string.studyGoalAttendance));
-                NetworkManager.getInstance().getSettings(getString(R.string.attainmentData));
+
+                Preferences pref = AppCore.getInstance().getPreferences();
+                pref.setAttendanceData(XApiManager.getInstance().getSettingAttendanceData());
+                pref.setAttainmentData(XApiManager.getInstance().getSettingAttainmentData());
+                pref.setStudyGoalAttendance(XApiManager.getInstance().getSettingStudyGoalAttendance());
+//                NetworkManager.getInstance().getSettings(getString(R.string.attendanceData));
+//                NetworkManager.getInstance().getSettings(getString(R.string.studyGoalAttendance));
+//                NetworkManager.getInstance().getSettings(getString(R.string.attainmentData));
                 NetworkManager.getInstance().getWeeklyAttendance();
 
                 // change left menu after login
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter = new DrawerAdapter(MainActivity.this);
-                        navigationView.setAdapter(adapter);
-                    }
+                runOnUiThread(() -> {
+                    adapter = new DrawerAdapter(MainActivity.this);
+                    navigationView.setAdapter(adapter);
                 });
             }
         }).start();
@@ -433,7 +435,7 @@ public class MainActivity extends FragmentActivity {
                     destination = new StatsEventAttendance();
                 } else if (selection.equals(getString(R.string.attendance))) {
                     destination = new StatsAttedance();
-                } else if (selection.equals(getString(R.string.app_usage))){
+                } else if (selection.equals(getString(R.string.app_usage))) {
                     destination = new AppUsageFragment();
                 }
 
@@ -478,15 +480,15 @@ public class MainActivity extends FragmentActivity {
                     adapter.selected_image.setColorFilter(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
                     adapter.selected_text.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.default_blue));
 
-                     int staticMenuItems = 8;
-                        for(String menuItem: adapter.values){
-                            if (menuItem.equals(getString(R.string.check_in))){
-                                staticMenuItems++;
-                            }
+                    int staticMenuItems = 8;
+                    for (String menuItem : adapter.values) {
+                        if (menuItem.equals(getString(R.string.check_in))) {
+                            staticMenuItems++;
                         }
-                        int statOpenedNum = adapter.values.length - staticMenuItems;
+                    }
+                    int statOpenedNum = adapter.values.length - staticMenuItems;
 
-                    
+
                     if (adapter.values[position].equals(getString(R.string.stats))) {
                         return;
                     }
@@ -567,7 +569,7 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-        if(!DataManager.getInstance().user.isSocial){
+        if (!DataManager.getInstance().user.isSocial) {
             updateDeviceInfo();
         } else {
             updateDeviceInfoSocial();

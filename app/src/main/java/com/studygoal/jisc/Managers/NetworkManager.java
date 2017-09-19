@@ -4028,78 +4028,6 @@ public class NetworkManager {
         }
     }
 
-    public boolean getSettings(String parameter) {
-        language = LinguisticManager.getInstance().getLanguageCode();
-        Future<Boolean> future = executorService.submit(new getSettings(parameter));
-        try {
-            return future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getSettings implements Callable<Boolean> {
-
-        String parameter;
-
-        getSettings(String parameter) {
-            this.parameter = parameter;
-        }
-
-        @Override
-        public Boolean call() {
-            try {
-                // TODO:
-                //String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + parameter;
-                String apiURL = "https://api.x-dev.data.alpha.jisc.ac.uk/sg/setting?setting=" + parameter;
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-                int responseCode = urlConnection.getResponseCode();
-                forbidden(responseCode);
-                if (responseCode != 200) {
-                    if (responseCode == 204) {
-                        Log.i("getSettings", "No records found");
-                    } else
-                        Log.e("getSettings", "Code: " + responseCode);
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                JSONObject jsonObject = new JSONObject(sb.toString());
-
-                ActiveAndroid.beginTransaction();
-                try {
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(appContext);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean(parameter, jsonObject.getBoolean("value"));
-                    editor.apply();
-                    Log.e(parameter, prefs.getBoolean(parameter, false) ? "true" : "false");
-                    ActiveAndroid.setTransactionSuccessful();
-                } finally {
-                    ActiveAndroid.endTransaction();
-                }
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
     public boolean getWeeklyAttendance() {
         language = LinguisticManager.getInstance().getLanguageCode();
         Future<String> futureResult = executorService.submit(new getWeeklyAttendance());
@@ -4111,7 +4039,6 @@ public class NetworkManager {
             return false;
         }
     }
-
 
     private class getWeeklyAttendance implements Callable<String> {
 
@@ -4562,85 +4489,6 @@ public class NetworkManager {
                 is.close();
 
                 return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    /**
-     * GET Get Setting
-     * https://api.datax.jisc.ac.uk/sg/setting?setting=attendanceData
-     * Use
-     * To a site setting
-     * Paramaters
-     * setting: the setting you want to get
-     * valid values:
-     * studyGoalAttendance: whether to show checkin feature
-     * attendanceData: whether to show attendance data
-     * Results:
-     * Success: 200
-     * { "value": false } ```
-     */
-    public boolean getSetting(String settingOption) {
-        Future<Boolean> futureResult = executorService.submit(new getSetting(settingOption));
-        try {
-            return futureResult.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getSetting implements Callable<Boolean> {
-        String settingOption;
-
-        getSetting(String settingOption) {
-            this.settingOption = settingOption;
-        }
-
-        @Override
-        public Boolean call() {
-
-            try {
-
-                // TODO:
-                String apiURL = "https://api.datax.jisc.ac.uk/sg/setting?setting=" + this.settingOption;
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection;
-                urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setRequestMethod("GET");
-
-                int responseCode = urlConnection.getResponseCode();
-                if (responseCode != 200) {
-                    return false;
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                try {
-                    JSONObject jsonObject = new JSONObject(sb.toString());
-                    Boolean resultValue = jsonObject.getBoolean("value");
-                    if (resultValue) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    return false;
-                }
-
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;

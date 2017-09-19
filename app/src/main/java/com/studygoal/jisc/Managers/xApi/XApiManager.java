@@ -33,6 +33,7 @@ public class XApiManager {
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     private static final String SETTING_ATTENDANCE_DATA = "attendanceData";
+    private static final String SETTING_ATTAINMENT_DATA = "attainmentData";
     private static final String SETTING_STUDY_GOAL_ATTENDANCE = "studyGoalAttendance";
 
     private static XApiManager sInstance = null;
@@ -45,8 +46,8 @@ public class XApiManager {
         return sInstance;
     }
 
-    private boolean getSettingAttendanceData() {
-        boolean result = false;
+    public boolean getSettingAttendanceData() {
+        boolean result = true;
 
         try {
             String value = getSetting(SETTING_ATTENDANCE_DATA);
@@ -61,8 +62,8 @@ public class XApiManager {
         return result;
     }
 
-    private boolean getSettingStudyGoalAttendance() {
-        boolean result = false;
+    public boolean getSettingStudyGoalAttendance() {
+        boolean result = true;
 
         try {
             String value = getSetting(SETTING_STUDY_GOAL_ATTENDANCE);
@@ -77,24 +78,14 @@ public class XApiManager {
         return result;
     }
 
-    private String getSetting(String settingName) {
-        String result = null;
+    public boolean getSettingAttainmentData() {
+        boolean result = true;
 
         try {
-            if (settingName != null) {
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(SERVER_BASE)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
+            String value = getSetting(SETTING_ATTAINMENT_DATA);
 
-                XApi api = retrofit.create(XApi.class);
-                String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
-                Call<ResponseSetting> call = api.getSetting(token, settingName);
-                Response<ResponseSetting> response = call.execute();
-
-                if (response != null && response.code() == 200) {
-                    result = response.body().getValue();
-                }
+            if (value != null) {
+                result = Boolean.parseBoolean(value);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -371,5 +362,31 @@ public class XApiManager {
         });
 
         observable.subscribeOn(Schedulers.io()).retry(1).subscribe();
+    }
+
+    private String getSetting(String settingName) {
+        String result = null;
+
+        try {
+            if (settingName != null) {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(SERVER_BASE)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                XApi api = retrofit.create(XApi.class);
+                String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                Call<ResponseSetting> call = api.getSetting(token, settingName);
+                Response<ResponseSetting> response = call.execute();
+
+                if (response != null && response.code() == 200) {
+                    result = response.body().getValue();
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
     }
 }

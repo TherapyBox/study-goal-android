@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.studygoal.jisc.AppCore;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
@@ -50,22 +49,28 @@ public class DrawerAdapter extends BaseAdapter {
             valuesList.add(con.getString(R.string.graphs));
             valuesList.add(con.getString(R.string.attainment));
             statOpenedNum++;
+
 //            if (prefs.getBoolean(con.getString(R.string.attainmentData), false)) {
 //                valuesList.add(con.getString(R.string.attainment));
 //                statOpenedNum++;
 //            }
+
             valuesList.add(con.getString(R.string.points));
-            if (prefs.getBoolean(con.getString(R.string.attendanceData), false)) {
+
+            if (AppCore.getInstance().getPreferences().getAttendanceData()) {
                 valuesList.add(con.getString(R.string.events_attended));
                 statOpenedNum++;
                 valuesList.add(con.getString(R.string.attendance));
                 statOpenedNum++;
             }
+
             //valuesList.add(con.getString(R.string.app_usage));
             //statOpenedNum++;
-            if (prefs.getBoolean(con.getString(R.string.studyGoalAttendance), false)) {
+
+            if (AppCore.getInstance().getPreferences().getStudyGoalAttendance()) {
                 valuesList.add(con.getString(R.string.check_in));
             }
+
             valuesList.add(con.getString(R.string.log));
             valuesList.add(con.getString(R.string.target));
             valuesList.add(con.getString(R.string.settings));

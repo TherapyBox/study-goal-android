@@ -166,9 +166,10 @@ public class CheckInFragment extends Fragment {
 
                         final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
 
+                        // commented, not used
                         //debug for testing getsettings - by tmobiledevcore
-                        final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
-                        final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
+                        //final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
+                        //final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
 
 
                         CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
