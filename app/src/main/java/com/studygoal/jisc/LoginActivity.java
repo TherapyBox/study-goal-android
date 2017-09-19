@@ -573,7 +573,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
 
         if (!isConnected()) {
-            if(restoreLastKnownUser()) {
+            if(!DataManager.getInstance().fromLogout & restoreLastKnownUser()) {
                 Log.d("", "refreshData: logging on last known user as by pass");
                 String jwtLastKnownUser = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("jwt", "");
                 DataManager.getInstance().set_jwt(jwtLastKnownUser);

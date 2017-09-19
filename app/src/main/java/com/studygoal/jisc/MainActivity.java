@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -549,6 +550,7 @@ public class MainActivity extends FragmentActivity {
                                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
                                         .edit().remove("trophies").apply();
 
+                                DataManager.getInstance().fromLogout = true;
                                 new Delete().from(CurrentUser.class).execute();
                                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                 startActivity(intent);
