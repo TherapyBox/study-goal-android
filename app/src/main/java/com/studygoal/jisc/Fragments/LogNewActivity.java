@@ -43,7 +43,7 @@ import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Activity;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.RunningActivity;
-import com.studygoal.jisc.NotificationAlarm;
+import com.studygoal.jisc.Receivers.NotificationAlarm;
 import com.studygoal.jisc.R;
 
 import java.util.Calendar;

@@ -71,7 +71,7 @@ import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.RunningActivity;
 import com.studygoal.jisc.Preferences;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.Syncronize;
+import com.studygoal.jisc.Services.Syncronize;
 import com.studygoal.jisc.Utils.CircleTransform;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;

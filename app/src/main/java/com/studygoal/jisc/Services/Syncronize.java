@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Services;
 
 import android.app.IntentService;
 import android.content.Context;

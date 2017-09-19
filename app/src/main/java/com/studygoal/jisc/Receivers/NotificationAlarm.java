@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Receivers;
 
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.R;
 
 public class NotificationAlarm extends BroadcastReceiver {
 

@@ -21,10 +21,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <receiver android:name=".NotificationAlarm" />
+        <receiver android:name=".Receivers.NotificationAlarm" />
 
         <service
-            android:name=".Syncronize"
+            android:name=".Services.Syncronize"
             android:stopWithTask="true" />
 
         <meta-data
