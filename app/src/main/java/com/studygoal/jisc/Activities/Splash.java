@@ -1,22 +1,17 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Display;
 import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
-import com.google.firebase.FirebaseApp;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.twitter.sdk.android.Twitter;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-import io.fabric.sdk.android.Fabric;
+import com.studygoal.jisc.R;
 
 public class Splash extends AppCompatActivity {
 

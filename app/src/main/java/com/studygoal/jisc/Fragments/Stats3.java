@@ -27,7 +27,7 @@ import android.widget.TextView;
 import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Adapters.ModuleAdapter2;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Courses;

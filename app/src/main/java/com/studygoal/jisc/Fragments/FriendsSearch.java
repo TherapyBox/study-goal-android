@@ -11,13 +11,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.SwitchCompat;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -25,12 +23,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.studygoal.jisc.Adapters.FriendsSearchAdapter;
-import com.studygoal.jisc.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 import com.studygoal.jisc.Utils.Utils;
 
 import java.util.HashMap;

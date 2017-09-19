@@ -10,13 +10,13 @@ import android.widget.GridView;
 
 import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.TrophiesMyAdapter;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
-import com.studygoal.jisc.TrophyDetails;
+import com.studygoal.jisc.Activities.SettingsActivity;
+import com.studygoal.jisc.Activities.TrophyDetails;
 
 /**
  * Created by MarcelC on 1/14/16.

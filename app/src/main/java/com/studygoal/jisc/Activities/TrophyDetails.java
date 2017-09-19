@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 

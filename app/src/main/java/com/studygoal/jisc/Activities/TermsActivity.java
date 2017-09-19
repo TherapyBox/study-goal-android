@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 
 import com.studygoal.jisc.Managers.DataManager;
+import com.studygoal.jisc.R;
 
 /**
  * Created by Marjana Karzek on 06/09/17.

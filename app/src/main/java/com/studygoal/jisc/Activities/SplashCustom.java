@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -11,6 +11,7 @@ import android.widget.VideoView;
 
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.R;
 
 public class SplashCustom extends AppCompatActivity {
 

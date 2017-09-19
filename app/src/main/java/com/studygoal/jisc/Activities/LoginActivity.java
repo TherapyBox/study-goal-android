@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -44,9 +44,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.studygoal.jisc.Adapters.InstitutionsAdapter;
+import com.studygoal.jisc.Constants;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Institution;
+import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;

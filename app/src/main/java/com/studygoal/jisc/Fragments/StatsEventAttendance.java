@@ -9,7 +9,7 @@ import android.widget.ListView;
 
 import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.EventsAttendedAdapter;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;

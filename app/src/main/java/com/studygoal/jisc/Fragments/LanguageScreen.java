@@ -19,7 +19,7 @@ import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -15,11 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Fragments.LogActivityHistory;
 import com.studygoal.jisc.Fragments.LogLogActivity;
 import com.studygoal.jisc.Fragments.LogNewActivity;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Models.ActivityHistory;

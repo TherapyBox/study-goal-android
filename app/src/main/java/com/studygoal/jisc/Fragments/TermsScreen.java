@@ -10,7 +10,7 @@ import android.webkit.WebView;
 
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 /**
  * Created by Marjana-Tbox on 07/09/17.

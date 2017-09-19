@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +22,7 @@ import com.studygoal.jisc.Fragments.LanguageScreen;
 import com.studygoal.jisc.Fragments.Trophies;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.R;
 import com.studygoal.jisc.SettingsLandscape.ListMenuAdapter;
 import com.studygoal.jisc.SettingsLandscape.ProfileFragment;
 

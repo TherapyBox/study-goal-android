@@ -10,11 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

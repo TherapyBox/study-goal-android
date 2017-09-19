@@ -19,7 +19,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.studygoal.jisc.Adapters.ActivityPointsAdapter;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;

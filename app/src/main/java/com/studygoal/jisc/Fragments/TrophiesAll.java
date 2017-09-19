@@ -8,12 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import com.studygoal.jisc.Adapters.TrophiesAdapter;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
-import com.studygoal.jisc.TrophyDetails;
+import com.studygoal.jisc.Activities.SettingsActivity;
+import com.studygoal.jisc.Activities.TrophyDetails;
 
 /**
  * Created by MarcelC on 1/14/16.

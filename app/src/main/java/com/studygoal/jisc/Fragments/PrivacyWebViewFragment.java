@@ -1,30 +1,15 @@
 package com.studygoal.jisc.Fragments;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
-import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 public class PrivacyWebViewFragment extends Fragment {
 

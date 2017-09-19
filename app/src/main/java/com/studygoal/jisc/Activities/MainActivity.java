@@ -1,4 +1,4 @@
-package com.studygoal.jisc;
+package com.studygoal.jisc.Activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -45,6 +45,8 @@ import com.activeandroid.query.Select;
 import com.activeandroid.util.Log;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
+import com.studygoal.jisc.AppCore;
+import com.studygoal.jisc.Constants;
 import com.studygoal.jisc.Fragments.AddTarget;
 import com.studygoal.jisc.Fragments.AppUsageFragment;
 import com.studygoal.jisc.Fragments.CheckInFragment;
@@ -67,6 +69,9 @@ import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.Models.RunningActivity;
+import com.studygoal.jisc.Preferences;
+import com.studygoal.jisc.R;
+import com.studygoal.jisc.Syncronize;
 import com.studygoal.jisc.Utils.CircleTransform;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
