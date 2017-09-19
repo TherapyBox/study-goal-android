@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -46,6 +47,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.studygoal.jisc.Adapters.InstitutionsAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.Institution;
 import com.studygoal.jisc.Utils.Utils;
 import com.twitter.sdk.android.Twitter;
@@ -87,7 +89,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private String mEmail;
     private String mSocialID;
     private boolean mIsRefreshing = false;
-    private boolean mFistTimeConnectionProblem = true;
+    private boolean mFirstTimeConnectionProblem = true;
 
     private Institution mSelectedInstitution;
 
@@ -215,10 +217,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         findViewById(R.id.login_check_rememberme).setOnClickListener(v -> {
             LoginActivity.this.mRememberMe = true;
-
-//                mLoginContent.setVisibility(View.GONE);
-//                mLoginStep1.setVisibility(View.GONE);
-//                mLoginStep3.setVisibility(View.VISIBLE);
         });
 
         ((TextView) findViewById(R.id.login_searchinstitution_title)).setTypeface(DataManager.getInstance().myriadpro_bold);
@@ -286,10 +284,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 if (NetworkManager.getInstance().checkIfStaffRegistered()) {
                                     if (NetworkManager.getInstance().loginStaff()) {
                                         DataManager.getInstance().institution = mSelectedInstitution.name;
+                                        updateLastKnownUser();
                                         getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
                                         String firstlogin = DataManager.getInstance().first_time;
                                         Intent intent = null;
-                                        if(firstlogin.equals("yes")){
+                                        if (firstlogin.equals("yes")) {
                                             intent = new Intent(LoginActivity.this, TermsActivity.class);
                                         } else {
                                             intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -308,10 +307,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 if (NetworkManager.getInstance().checkIfUserRegistered()) {
                                     if (NetworkManager.getInstance().login()) {
                                         DataManager.getInstance().institution = mSelectedInstitution.name;
+                                        updateLastKnownUser();
                                         getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_institution", DataManager.getInstance().institution).apply();
                                         String firstlogin = DataManager.getInstance().first_time;
                                         Intent intent = null;
-                                        if(firstlogin.equals("yes")){
+                                        if (firstlogin.equals("yes")) {
                                             intent = new Intent(LoginActivity.this, TermsActivity.class);
                                         } else {
                                             intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -428,6 +428,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             if (NetworkManager.getInstance().checkIfStaffRegistered()) {
                                 if (NetworkManager.getInstance().loginStaff()) {
                                     DataManager.getInstance().institution = is_institution;
+                                    updateLastKnownUser();
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     LoginActivity.this.finish();
@@ -441,6 +442,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             if (NetworkManager.getInstance().checkIfUserRegistered()) {
                                 if (NetworkManager.getInstance().login()) {
                                     DataManager.getInstance().institution = is_institution;
+                                    updateLastKnownUser();
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     LoginActivity.this.finish();
@@ -516,7 +518,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             });
         });
 
-
         TextView backToFirstPage = (TextView) findViewById(R.id.back_to_firstpage);
         backToFirstPage.setOnClickListener(view -> onBackPressed());
 
@@ -571,8 +572,25 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-        Log.d("calling refresh", "onCreate: calling refresh ");
-        refreshData();
+        if (!isConnected()) {
+            if(restoreLastKnownUser()) {
+                Log.d("", "refreshData: logging on last known user as by pass");
+                String jwtLastKnownUser = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("jwt", "");
+                DataManager.getInstance().set_jwt(jwtLastKnownUser);
+                showProgressBar();
+
+                new Thread(() -> {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    LoginActivity.this.finish();
+                }).start();
+                return;
+            } else {
+                refreshData();
+            }
+        } else{
+            refreshData();
+        }
     }
 
     private void showProgressDialog(final boolean show) {
@@ -619,11 +637,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     //refreshCounter is increased to 99 to improve the chance of a connection being made.
                     while (mRefreshCounter < Constants.LOGIN_COUNT_CONNECTION_TRY) {
                         if (!isConnected()) {
-                            if (mFistTimeConnectionProblem) {
+                            if (mFirstTimeConnectionProblem) {
                                 showBadConnectDialog(getString(R.string.no_internet));
                             }
 
-                            mFistTimeConnectionProblem = false;
+                            mFirstTimeConnectionProblem = false;
                             isConnectionIssue = true;
                             mRefreshCounter++;
                         } else {
@@ -696,7 +714,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        if(result.getStatus().getResolution() == null){
+        if (result.getStatus().getResolution() == null) {
             android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(LoginActivity.this);
             alertDialogBuilder.setMessage(R.string.google_play_services_update_required);
             alertDialogBuilder.setNegativeButton(Html.fromHtml("<font color='#000000'>OK</font>"), (dialog, which) -> dialog.dismiss());
@@ -725,6 +743,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     void loginSocial() {
         Integer response = NetworkManager.getInstance().loginSocial(mEmail, mSocialID);
+        updateLastKnownUser();
 
         if (response == 200) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -794,5 +813,50 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 DataManager.getInstance().toast = false;
             }
         });
+    }
+
+    private void updateLastKnownUser() {
+        SharedPreferences sharedPref = this.getSharedPreferences("jisc",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("last_user_id", DataManager.getInstance().user.id);
+        editor.putString("last_user_staff_id", DataManager.getInstance().user.staff_id);
+        editor.putString("last_user_jisc_student_id", DataManager.getInstance().user.jisc_student_id);
+        editor.putString("last_user_pid", DataManager.getInstance().user.pid);
+        editor.putString("last_user_name", DataManager.getInstance().user.name);
+        editor.putString("last_user_email", DataManager.getInstance().user.email);
+        editor.putString("last_user_eppn", DataManager.getInstance().user.eppn);
+        editor.putString("last_user_affiliation", DataManager.getInstance().user.affiliation);
+        editor.putString("last_user_profile_pic", DataManager.getInstance().user.profile_pic);
+        editor.putString("last_user_modules", DataManager.getInstance().user.modules);
+        editor.putString("last_user_created_date", DataManager.getInstance().user.created_date);
+        editor.putString("last_user_modified_date", DataManager.getInstance().user.modified_date);
+        editor.putBoolean("last_user_isStaff", DataManager.getInstance().user.isStaff);
+        editor.putBoolean("last_user_isSocial", DataManager.getInstance().user.isSocial);
+        editor.putString("last_user_institution", DataManager.getInstance().institution);
+        editor.commit();
+    }
+
+    private boolean restoreLastKnownUser() {
+        SharedPreferences prefs = this.getSharedPreferences("jisc", this.MODE_PRIVATE);
+        if (!prefs.getString("last_user_id", "0").equals("0")) {
+            DataManager.getInstance().user = new CurrentUser();
+            DataManager.getInstance().user.id = prefs.getString("last_user_id", "0");
+            DataManager.getInstance().user.staff_id = prefs.getString("last_user_staff_id", "0");
+            DataManager.getInstance().user.jisc_student_id = prefs.getString("last_user_jisc_student_id", "0");
+            DataManager.getInstance().user.pid = prefs.getString("last_user_pid", "0");
+            DataManager.getInstance().user.name = prefs.getString("last_user_name", "0");
+            DataManager.getInstance().user.email = prefs.getString("last_user_email", "0");
+            DataManager.getInstance().user.eppn = prefs.getString("last_user_eppn", "0");
+            DataManager.getInstance().user.affiliation = prefs.getString("last_user_affiliation", "0");
+            DataManager.getInstance().user.profile_pic = prefs.getString("last_user_profile_pic", "0");
+            DataManager.getInstance().user.modules = prefs.getString("last_user_modules", "0");
+            DataManager.getInstance().user.created_date = prefs.getString("last_user_created_date", "0");
+            DataManager.getInstance().user.modified_date = prefs.getString("last_user_modified_date", "0");
+            DataManager.getInstance().user.isStaff = prefs.getBoolean("last_user_isStaff", false);
+            DataManager.getInstance().user.isSocial = prefs.getBoolean("last_user_isSocial", false);
+            DataManager.getInstance().institution = prefs.getString("last_user_institution", "0");
+            return true;
+        }
+        return false;
     }
 }
