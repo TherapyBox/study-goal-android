@@ -269,9 +269,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         // Token can be replaced here for testing individuals.
                         String token = jsonObject.getString("jwt");
                         DataManager.getInstance().set_jwt(token);
+                        getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", DataManager.getInstance().get_jwt()).apply();
 
                         if (LoginActivity.this.mRememberMe) {
-                            getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("jwt", DataManager.getInstance().get_jwt()).apply();
                             getSharedPreferences("jisc", Context.MODE_PRIVATE).edit().putString("is_checked", "yes").apply();
 
                             if (LoginActivity.this.mIsStaff) {
@@ -574,7 +574,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         if (!isConnected()) {
             if(!DataManager.getInstance().fromLogout & restoreLastKnownUser()) {
-                Log.d("", "refreshData: logging on last known user as by pass");
+                DataManager.getInstance().reauthNecessary = true;
                 String jwtLastKnownUser = getSharedPreferences("jisc", Context.MODE_PRIVATE).getString("jwt", "");
                 DataManager.getInstance().set_jwt(jwtLastKnownUser);
                 showProgressBar();

@@ -57,6 +57,7 @@ public class DataManager {
     public boolean checkForbidden = false;
 
     public boolean fromLogout = false;
+    public boolean reauthNecessary = false;
 
     public String selfie_url;
 
