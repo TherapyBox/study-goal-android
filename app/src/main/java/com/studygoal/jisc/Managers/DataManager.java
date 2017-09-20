@@ -55,6 +55,9 @@ public class DataManager {
     public boolean toast = false;
     public boolean checkForbidden = false;
 
+    public boolean fromLogout = false;
+    public boolean reauthNecessary = false;
+
     public String selfie_url;
 
     public static DataManager getInstance() {

@@ -4632,6 +4632,112 @@ public class NetworkManager {
         }
     }
 
+    public boolean updateAppUsage(String entry, String value){
+        Future<Boolean> future_result = executorService.submit(new UpdateAppUsage(entry, value));
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class UpdateAppUsage implements Callable<Boolean>{
+        private String entry;
+        private String value;
+
+        UpdateAppUsage(String entry, String value) {
+            this.entry = entry;
+            this.value = value;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                String apiURL = host + "fn_save_appusage" + entry + "=" + value;
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                if (responseCode != 200) {
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
+    public boolean getAppUsage(String startDate, String endDate){
+        Future<Boolean> future_result = executorService.submit(new GetAppUsage(startDate, endDate));
+        try {
+            return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private class GetAppUsage implements Callable<Boolean>{
+
+        private String startDate;
+        private String endDate;
+
+        GetAppUsage(String startDate, String endDate) {
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        @Override
+        public Boolean call() {
+            try {
+                //TODO add start and end date to call
+                String apiURL = host + "fn_get_appusage?student_id="
+                        + DataManager.getInstance().user.id;
+                URL url = new URL(apiURL);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
+                urlConnection.setSSLSocketFactory(context.getSocketFactory());
+
+                int responseCode = urlConnection.getResponseCode();
+                forbidden(responseCode);
+                Log.d("", "call: get AppUsage " + responseCode);
+                if (responseCode != 200) {
+                    InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    is.close();
+
+                    Log.d("", "call: get AppUsage Response Data" + sb.toString());
+
+                    JSONArray jsonArray = new JSONArray(sb.toString());
+                    //JSONObject jsonObject = jsonArray.getJSONObject();
+                    //item.id = jsonObject.getString("id");
+                    //store in shared preferences
+
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+
     public void updateDeviceDetails() {
         RequestBody formBody = new FormBody.Builder()
                 .add("student_id", DataManager.getInstance().user.id)

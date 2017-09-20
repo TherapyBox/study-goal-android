@@ -32,9 +32,6 @@ public class FeedFragment extends Fragment {
     FeedAdapter adapter;
     SwipeRefreshLayout layout;
 
-    public FeedFragment() {
-    }
-
     @Override
     public void onResume() {
         super.onResume();

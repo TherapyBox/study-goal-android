@@ -61,6 +61,7 @@
                 android:textColor="@color/dark_grey"
                 android:gravity="center" />
             <TextView
+                android:id="@+id/app_usage_sessions"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:text="200"
@@ -88,6 +89,7 @@
                 android:textColor="@color/dark_grey"
                 android:gravity="center"/>
             <TextView
+                android:id="@+id/app_usage_activities"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:text="1000"
@@ -115,6 +117,7 @@
                 android:textColor="@color/dark_grey"
                 android:gravity="center" />
             <TextView
+                android:id="@+id/app_usage_set_targets"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:text="50"
@@ -142,6 +145,7 @@
                 android:textColor="@color/dark_grey"
                 android:gravity="center" />
             <TextView
+                android:id="@+id/app_usage_met_targets"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:text="25"
@@ -169,6 +173,7 @@
                 android:textColor="@color/dark_grey"
                 android:gravity="center" />
             <TextView
+                android:id="@+id/app_usage_failed_targets"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:text="1"

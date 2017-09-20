@@ -107,6 +107,8 @@ public class MainActivity extends FragmentActivity {
     //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
 
     public String mCurrentPhotoPath;
+    private int backpressed = 0;
+    private int lastSelected = 1;
 
     @Override
     protected void onResume() {
@@ -277,13 +279,6 @@ public class MainActivity extends FragmentActivity {
         addTarget = (RelativeLayout) findViewById(R.id.main_screen_addtarget);
 
         DataManager.getInstance().mainActivity = this;
-
-//        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
-//        NetworkManager.getInstance().getMyTrophies();
-//
-//        if (new Select().from(ActivityHistory.class).count() == 0) {
-//            NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
-//        }
 
         new Thread(new Runnable() {
             @Override
@@ -556,6 +551,7 @@ public class MainActivity extends FragmentActivity {
                                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
                                         .edit().remove("trophies").apply();
 
+                                DataManager.getInstance().fromLogout = true;
                                 new Delete().from(CurrentUser.class).execute();
                                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                                 startActivity(intent);
@@ -580,9 +576,6 @@ public class MainActivity extends FragmentActivity {
             updateDeviceInfoSocial();
         }
     }
-
-
-    private int lastSelected = 1;
 
     private boolean isInsideStats(String selection) {
         if (selection.equals(getString(R.string.attainment))
@@ -626,8 +619,6 @@ public class MainActivity extends FragmentActivity {
         ((AutoResizeTextView) findViewById(R.id.main_screen_title)).setLines(1);
         ((AutoResizeTextView) findViewById(R.id.main_screen_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
     }
-
-    int backpressed = 0;
 
     @Override
     public void onBackPressed() {
@@ -674,7 +665,6 @@ public class MainActivity extends FragmentActivity {
                 super.onBackPressed();
         }
     }
-
 
     public void showProgressBar(@Nullable String text) {
         if (blackout != null) {
