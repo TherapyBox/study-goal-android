@@ -36,6 +36,7 @@ import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.ArrayList;
@@ -78,19 +79,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     return;
                 }
 
-                SocialManager.getInstance().shareOnIntent(item.message);
+                if(ConnectionHandler.isConnected(context)) {
+                    SocialManager.getInstance().shareOnIntent(item.message);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
-
-        /*feedViewHolder.open.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                feedViewHolder.bottom_bar.setVisibility(View.GONE);
-                feedViewHolder.close.setVisibility(View.VISIBLE);
-                feedViewHolder.menu.setVisibility(View.VISIBLE);
-                feedViewHolder.feed.setVisibility(View.GONE);
-            }
-        });*/
 
         feedViewHolder.close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,15 +111,19 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                     return;
                 }
 
-                HashMap<String, String> map = new HashMap<>();
-                map.put("feed_id", item.id);
-                map.put("student_id", DataManager.getInstance().user.id);
-                if (NetworkManager.getInstance().hidePost(map)) {
-                    feedViewHolder.close.callOnClick();
-                    removeItem(feedViewHolder.getAdapterPosition());
-                    Snackbar.make(layout, R.string.post_hidden_message, Snackbar.LENGTH_LONG).show();
+                if(ConnectionHandler.isConnected(context)) {
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("feed_id", item.id);
+                    map.put("student_id", DataManager.getInstance().user.id);
+                    if (NetworkManager.getInstance().hidePost(map)) {
+                        feedViewHolder.close.callOnClick();
+                        removeItem(feedViewHolder.getAdapterPosition());
+                        Snackbar.make(layout, R.string.post_hidden_message, Snackbar.LENGTH_LONG).show();
+                    } else {
+                        Snackbar.make(layout, R.string.failed_to_hide_message, Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
-                    Snackbar.make(layout, R.string.failed_to_hide_message, Snackbar.LENGTH_LONG).show();
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
             }
         });
@@ -173,59 +172,60 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         return;
                     }
 
-                    final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialog.setContentView(R.layout.dialog_confirmation);
-                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                    if (DataManager.getInstance().mainActivity.isLandscape) {
-                        DisplayMetrics displaymetrics = new DisplayMetrics();
-                        DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                        int width = (int) (displaymetrics.widthPixels * 0.45);
+                    if(ConnectionHandler.isConnected(context)) {
+                        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setContentView(R.layout.dialog_confirmation);
+                        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                        if (DataManager.getInstance().mainActivity.isLandscape) {
+                            DisplayMetrics displaymetrics = new DisplayMetrics();
+                            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                            int width = (int) (displaymetrics.widthPixels * 0.45);
 
-                        WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                        params.width = width;
-                        dialog.getWindow().setAttributes(params);
-                    }
+                            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                            params.width = width;
+                            dialog.getWindow().setAttributes(params);
+                        }
 
-                    ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                    ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirm);
+                        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirm);
 
-                    ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                    ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.confirm_delete_feed);
+                        ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                        ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.confirm_delete_feed);
 
-                    ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                    ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+                        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
 
-                    ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                    ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+                        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
 
-                    dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            dialog.dismiss();
-                            feedViewHolder.swipelayout.close(true);
+                        dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                                feedViewHolder.swipelayout.close(true);
 
-                            if (NetworkManager.getInstance().deleteFeed(item.id)) {
-                                removeItem(feedViewHolder.getAdapterPosition());
+                                if (NetworkManager.getInstance().deleteFeed(item.id)) {
+                                    removeItem(feedViewHolder.getAdapterPosition());
+                                }
                             }
-                        }
-                    });
-                    dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            dialog.dismiss();
-                            feedViewHolder.swipelayout.close(true);
-                        }
-                    });
-                    dialog.show();
+                        });
+                        dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                                feedViewHolder.swipelayout.close(true);
+                            }
+                        });
+                        dialog.show();
+                    } else {
+                        ConnectionHandler.showNoInternetConnectionSnackbar();
+                    }
                 }
             });
-
         } else {
-
             feedViewHolder.swipelayout.setSwipeEnabled(false);
             feedViewHolder.deleteButton.setOnClickListener(null);
-            //feedViewHolder.open.setVisibility(View.VISIBLE);
             Friend friend = new Select().from(Friend.class).where("friend_id = ?", item.message_from).executeSingle();
             String photo;
             if (friend != null) {
@@ -285,8 +285,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public FeedViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View itemView;
         itemView = LayoutInflater.
-                from(viewGroup.getContext()).
-                inflate(R.layout.feed_item, viewGroup, false);
+                from(viewGroup.getContext()).inflate(R.layout.feed_item, viewGroup, false);
         return new FeedViewHolder(itemView);
     }
 
@@ -300,7 +299,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         TextView delete_friend;
         View menu;
         protected View close;
-        View open;
         View bottom_bar;
         View facebook_btn, twitter_btn, mail_btn;
         View selfPost;
@@ -333,9 +331,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 delete_friend = (TextView) v.findViewById(R.id.feed_item_delete_friend);
                 menu = v.findViewById(R.id.feed_item_menu);
                 close = v.findViewById(R.id.feed_item_close);
-                //open = v.findViewById(R.id.feed_item_option);
                 bottom_bar = v.findViewById(R.id.feed_item_bottom_bar);
-                //share = v.findViewById(R.id.feed_item_share);
                 facebook_btn = v.findViewById(R.id.facebook_btn);
                 twitter_btn = v.findViewById(R.id.twitter_btn);
                 mail_btn = v.findViewById(R.id.mail_btn);

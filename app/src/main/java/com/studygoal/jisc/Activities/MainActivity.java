@@ -73,6 +73,7 @@ import com.studygoal.jisc.Preferences;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Services.Syncronize;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
@@ -755,14 +756,19 @@ public class MainActivity extends FragmentActivity {
                 menu.setVisibility(View.VISIBLE);
                 addTarget.setVisibility(View.VISIBLE);
                 //settings.setVisibility(View.VISIBLE);
+                Context context = this;
 
                 addTarget.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.main_fragment, new AddTarget())
-                                .addToBackStack(null)
-                                .commit();
+                        if(ConnectionHandler.isConnected(context)) {
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.main_fragment, new AddTarget())
+                                    .addToBackStack(null)
+                                    .commit();
+                        } else {
+                            ConnectionHandler.showNoInternetConnectionSnackbar();
+                        }
                     }
                 });
                 break;

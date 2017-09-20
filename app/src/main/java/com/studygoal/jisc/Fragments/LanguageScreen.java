@@ -20,6 +20,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Activities.SettingsActivity;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,62 +61,66 @@ public class LanguageScreen extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (!((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().equals(selected_value)) {
+                if(ConnectionHandler.isConnected(getContext())) {
+                    if (!((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().equals(selected_value)) {
 
-                    if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LanguageScreen.this.getActivity());
-                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_changeappsettings) + "</font>"));
-                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
-                        return;
-                    }
-
-                    String lang = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().toLowerCase().equals(getActivity().getString(R.string.english).toLowerCase()) ? "english" : "welsh";
-                    HashMap<String, String> map = new HashMap<>();
-                    map.put("student_id", DataManager.getInstance().user.id);
-                    map.put("setting_type", "language");
-                    map.put("setting_value", lang);
-                    if (NetworkManager.getInstance().changeAppSettings(map)) {
-//                        lang = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().toLowerCase();
-                        DataManager.getInstance().language = lang;
-                        SharedPreferences preferences = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
-                        preferences.edit().putString("language", DataManager.getInstance().language).apply();
-
-                        if (DataManager.getInstance().language.equals("english")) {
-                            Locale locale = new Locale("en");
-                            Locale.setDefault(locale);
-                            Configuration config = new Configuration();
-                            config.locale = locale;
-                            getActivity().getBaseContext().getResources().updateConfiguration(config,
-                                    getActivity().getBaseContext().getResources().getDisplayMetrics());
-                        } else if (DataManager.getInstance().language.equals("welsh")) {
-                            Locale locale = new Locale("cy");
-                            Locale.setDefault(locale);
-                            Configuration config = new Configuration();
-                            config.locale = locale;
-                            getActivity().getBaseContext().getResources().updateConfiguration(config,
-                                    getActivity().getBaseContext().getResources().getDisplayMetrics());
+                        if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LanguageScreen.this.getActivity());
+                            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_changeappsettings) + "</font>"));
+                            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+                            return;
                         }
-                        DataManager.getInstance().reload();
-                        if (DataManager.getInstance().mainActivity != null)
-                            DataManager.getInstance().mainActivity.refreshDrawer();
+
+                        String lang = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().toLowerCase().equals(getActivity().getString(R.string.english).toLowerCase()) ? "english" : "welsh";
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("student_id", DataManager.getInstance().user.id);
+                        map.put("setting_type", "language");
+                        map.put("setting_value", lang);
+                        if (NetworkManager.getInstance().changeAppSettings(map)) {
+//                        lang = ((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().toLowerCase();
+                            DataManager.getInstance().language = lang;
+                            SharedPreferences preferences = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
+                            preferences.edit().putString("language", DataManager.getInstance().language).apply();
+
+                            if (DataManager.getInstance().language.equals("english")) {
+                                Locale locale = new Locale("en");
+                                Locale.setDefault(locale);
+                                Configuration config = new Configuration();
+                                config.locale = locale;
+                                getActivity().getBaseContext().getResources().updateConfiguration(config,
+                                        getActivity().getBaseContext().getResources().getDisplayMetrics());
+                            } else if (DataManager.getInstance().language.equals("welsh")) {
+                                Locale locale = new Locale("cy");
+                                Locale.setDefault(locale);
+                                Configuration config = new Configuration();
+                                config.locale = locale;
+                                getActivity().getBaseContext().getResources().updateConfiguration(config,
+                                        getActivity().getBaseContext().getResources().getDisplayMetrics());
+                            }
+                            DataManager.getInstance().reload();
+                            if (DataManager.getInstance().mainActivity != null)
+                                DataManager.getInstance().mainActivity.refreshDrawer();
+                        }
                     }
-                }
-                if (!DataManager.getInstance().mainActivity.isLandscape)
-                    DataManager.getInstance().mainActivity.onBackPressed();
-                else {
-                    String selected = DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english) : getString(R.string.welsh);
-                    list.clear();
-                    list.add(getActivity().getString(R.string.english));
-                    list.add(getActivity().getString(R.string.welsh));
-                    listView.setAdapter(new GenericAdapter(getActivity(), selected.toUpperCase(), list));
-                    ((SettingsActivity) getActivity()).recreate();
+                    if (!DataManager.getInstance().mainActivity.isLandscape)
+                        DataManager.getInstance().mainActivity.onBackPressed();
+                    else {
+                        String selected = DataManager.getInstance().language.toLowerCase().equals("english") ? getString(R.string.english) : getString(R.string.welsh);
+                        list.clear();
+                        list.add(getActivity().getString(R.string.english));
+                        list.add(getActivity().getString(R.string.welsh));
+                        listView.setAdapter(new GenericAdapter(getActivity(), selected.toUpperCase(), list));
+                        ((SettingsActivity) getActivity()).recreate();
+                    }
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
             }
         });

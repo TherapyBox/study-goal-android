@@ -89,7 +89,7 @@
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="15dp"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="11dp"
                 android:layout_below="@id/event_item_module"
                 android:layout_toEndOf="@id/event_item_activity_description"
                 android:text="activity"

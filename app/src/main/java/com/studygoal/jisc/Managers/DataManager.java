@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Activities.MainActivity;
+import com.studygoal.jisc.Models.AppUsageData;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
@@ -24,6 +25,7 @@ public class DataManager {
 
     public Context context;
     public CurrentUser user;
+    public AppUsageData appUsageData = new AppUsageData();
 
     private static DataManager ourInstance = new DataManager();
     public Typeface myriadpro_regular;

@@ -42,6 +42,7 @@ import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.Event.EventReloadImage;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
@@ -150,13 +151,17 @@ public class SettingsFragment extends Fragment {
         mainView.findViewById(R.id.email_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                        "mailto", "support@jisclearninganalytics.freshdesk.com", null));
-                emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Bug/Feature idea " + DataManager.getInstance().institution);
-                emailIntent.putExtra(Intent.EXTRA_TEXT, "+" + getString(R.string.is_this_a_but_or_a_feature) + "\n" +
-                        "+" + getString(R.string.which_part) + "\n" +
-                        "+" + getString(R.string.further_detail));
-                startActivity(Intent.createChooser(emailIntent, "Send email..."));
+                if(ConnectionHandler.isConnected(getContext())) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                            "mailto", "support@jisclearninganalytics.freshdesk.com", null));
+                    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Bug/Feature idea " + DataManager.getInstance().institution);
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "+" + getString(R.string.is_this_a_but_or_a_feature) + "\n" +
+                            "+" + getString(R.string.which_part) + "\n" +
+                            "+" + getString(R.string.further_detail));
+                    startActivity(Intent.createChooser(emailIntent, "Send email..."));
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
@@ -197,60 +202,64 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.e("Test", "Click Mamera");
-                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsFragment.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_updateprofileimage) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                if(ConnectionHandler.isConnected(getContext())) {
+                    if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsFragment.this.getActivity());
+                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_updateprofileimage) + "</font>"));
+                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                        return;
+                    }
+
+                    final Dialog dialog = new Dialog(getActivity());
+                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    dialog.setContentView(R.layout.custom_spinner_layout);
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                    ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                    ((TextView) dialog.findViewById(R.id.dialog_title)).setText(DataManager.getInstance().mainActivity.getString(R.string.select_source));
+
+                    final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
+                    ArrayList<String> list = new ArrayList<>();
+                    list.add(DataManager.getInstance().mainActivity.getString(R.string.camera));
+                    list.add(DataManager.getInstance().mainActivity.getString(R.string.library));
+
+                    listView.setAdapter(new GenericAdapter(getActivity(), mHomeValue.getText().toString().toUpperCase(), list));
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            if (position == 0) {
+                                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                                        || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
+                                            102);
+                                } else {
+                                    Intent intent = getIntentGetPhotoFromCamera();
+                                    DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
+                                }
+                            } else {
+                                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                                        ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 103);
+                                } else {
+                                    Intent intent = new Intent(Intent.ACTION_PICK);
+                                    intent.setType("image/*");
+                                    DataManager.getInstance().mainActivity.startActivityForResult(intent, 101);
+                                }
+                            }
                             dialog.dismiss();
                         }
                     });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                    return;
+                    dialog.show();
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
-
-                final Dialog dialog = new Dialog(getActivity());
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.custom_spinner_layout);
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(DataManager.getInstance().mainActivity.getString(R.string.select_source));
-
-                final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
-                ArrayList<String> list = new ArrayList<>();
-                list.add(DataManager.getInstance().mainActivity.getString(R.string.camera));
-                list.add(DataManager.getInstance().mainActivity.getString(R.string.library));
-
-                listView.setAdapter(new GenericAdapter(getActivity(), mHomeValue.getText().toString().toUpperCase(), list));
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (position == 0) {
-                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                                    || ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE},
-                                        102);
-                            } else {
-                                Intent intent = getIntentGetPhotoFromCamera();
-                                DataManager.getInstance().mainActivity.startActivityForResult(intent, 100);
-                            }
-                        } else {
-                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                                    ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 103);
-                            } else {
-                                Intent intent = new Intent(Intent.ACTION_PICK);
-                                intent.setType("image/*");
-                                DataManager.getInstance().mainActivity.startActivityForResult(intent, 101);
-                            }
-                        }
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
             }
         });
 
@@ -277,20 +286,28 @@ public class SettingsFragment extends Fragment {
         mainView.findViewById(R.id.privacy_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new PrivacyWebViewFragment())
-                        .addToBackStack(null)
-                        .commit();
+                if(ConnectionHandler.isConnected(getContext())) {
+                    DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, new PrivacyWebViewFragment())
+                            .addToBackStack(null)
+                            .commit();
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
         /*mainView.findViewById(R.id.terms_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, new TermsScreen())
-                        .addToBackStack(null)
-                        .commit();
+                if(ConnectionHandler.isConnected(getContext()){
+                    DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, new TermsScreen())
+                            .addToBackStack(null)
+                            .commit();
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });*/
 

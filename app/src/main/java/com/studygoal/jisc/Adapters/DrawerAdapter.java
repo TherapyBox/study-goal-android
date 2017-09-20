@@ -46,7 +46,10 @@ public class DrawerAdapter extends BaseAdapter {
             valuesList.add(con.getString(R.string.feed));
             valuesList.add(con.getString(R.string.friends));
             valuesList.add(con.getString(R.string.stats));
-            valuesList.add(con.getString(R.string.graphs));
+            valuesList.add(con.getString(R.string.points));
+            //valuesList.add(con.getString(R.string.app_usage));
+            //statOpenedNum++;
+
             valuesList.add(con.getString(R.string.attainment));
             statOpenedNum++;
 
@@ -55,17 +58,16 @@ public class DrawerAdapter extends BaseAdapter {
 //                statOpenedNum++;
 //            }
 
-            valuesList.add(con.getString(R.string.points));
-
             if (AppCore.getInstance().getPreferences().getAttendanceData()) {
-                valuesList.add(con.getString(R.string.events_attended));
-                statOpenedNum++;
                 valuesList.add(con.getString(R.string.attendance));
                 statOpenedNum++;
+                valuesList.add(con.getString(R.string.events_attended));
+                statOpenedNum++;
             }
-   //         valuesList.add(con.getString(R.string.app_usage));
-    //        statOpenedNum++;
-            if (prefs.getBoolean(con.getString(R.string.studyGoalAttendance), true)) {
+
+            valuesList.add(con.getString(R.string.graphs));
+
+            if (prefs.getBoolean(con.getString(R.string.studyGoalAttendance), false)) {
                 valuesList.add(con.getString(R.string.check_in));
             }
 
