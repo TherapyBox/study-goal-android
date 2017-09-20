@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -44,7 +43,6 @@ import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.Log;
-import com.bumptech.glide.Glide;
 import com.lb.auto_fit_textview.AutoResizeTextView;
 import com.studygoal.jisc.Adapters.DrawerAdapter;
 import com.studygoal.jisc.Fragments.AddTarget;
@@ -103,6 +101,8 @@ public class MainActivity extends FragmentActivity {
     //statOpenedNum should be variable depending on whether or not attendance is being shown. This is a temp fix only.
 
     public String mCurrentPhotoPath;
+    private int backpressed = 0;
+    private int lastSelected = 1;
 
     @Override
     protected void onResume() {
@@ -273,13 +273,6 @@ public class MainActivity extends FragmentActivity {
         addTarget = (RelativeLayout) findViewById(R.id.main_screen_addtarget);
 
         DataManager.getInstance().mainActivity = this;
-
-//        NetworkManager.getInstance().getAppSettings(DataManager.getInstance().user.id);
-//        NetworkManager.getInstance().getMyTrophies();
-//
-//        if (new Select().from(ActivityHistory.class).count() == 0) {
-//            NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id);
-//        }
 
         new Thread(new Runnable() {
             @Override
@@ -576,9 +569,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-
-    private int lastSelected = 1;
-
     private boolean isInsideStats(String selection) {
         if (selection.equals(getString(R.string.attainment))
                 || (selection.equals(getString(R.string.graphs)))
@@ -621,8 +611,6 @@ public class MainActivity extends FragmentActivity {
         ((AutoResizeTextView) findViewById(R.id.main_screen_title)).setLines(1);
         ((AutoResizeTextView) findViewById(R.id.main_screen_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
     }
-
-    int backpressed = 0;
 
     @Override
     public void onBackPressed() {
@@ -669,7 +657,6 @@ public class MainActivity extends FragmentActivity {
                 super.onBackPressed();
         }
     }
-
 
     public void showProgressBar(@Nullable String text) {
         if (blackout != null) {
