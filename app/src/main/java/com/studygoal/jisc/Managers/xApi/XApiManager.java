@@ -104,7 +104,7 @@ public class XApiManager {
                     .build();
 
             XApi api = retrofit.create(XApi.class);
-            String token = TOKEN_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MDU4MjcwODQsImp0aSI6ImFXWmF2WHF5ek5KOE02NEd5VnM0SDJnWWlLQUVBSlErK1FIM2owWFlITkE9IiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0XC9leGFtcGxlIiwibmJmIjoxNTA1ODI3MDc0LCJleHAiOjE1MDk5NzQyNzQsImRhdGEiOnsiZXBwbiI6InRvbS5nbGFudmlsbGVAY29ycC5qaXNjLmFjLnVrIiwicGlkIjoidG9tLmdsYW52aWxsZUBjb3JwLmppc2MuYWMudWsiLCJhZmZpbGlhdGlvbiI6InN0YWZmQGNvcnAuamlzYy5hYy51azttZW1iZXJAY29ycC5qaXNjLmFjLnVrIn19.lzH6OoXAeXtmloe0-siPmSTA5TNH3iN8W-HG9Ygkx3OI4igML9ptS18Hm_pthTzq7tRn0GgJmbP_7ptqVeBfBA";//DataManager.getInstance().get_jwt();
+            String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
             Call<List<ResponseAttendance>> call = api.getAttendance(token, skip, limit);
             Response<List<ResponseAttendance>> response = call.execute();
 

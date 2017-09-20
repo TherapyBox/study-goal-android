@@ -48,6 +48,7 @@ public class AttainmentAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if(convertView == null) {
             convertView = inflater.inflate(R.layout.attainment_item, parent, false);
+            //1.4: convertView = inflater.inflate(R.layout.item_attainment, parent, false);
         }
 
         if(position % 2 == 0) {
@@ -55,7 +56,6 @@ public class AttainmentAdapter extends BaseAdapter {
         } else {
             convertView.setBackgroundColor(Color.parseColor("#f0f7ff"));
         }
-
 
         TextView name = (TextView) convertView.findViewById(R.id.name);
         TextView percent = (TextView) convertView.findViewById(R.id.percent);
@@ -73,6 +73,25 @@ public class AttainmentAdapter extends BaseAdapter {
             name.setText(Utils.attainmentDate(attainment.date) + " " + attainment.module);
             percent.setText(attainment.percent);
         }
+
+        // 1.4 changes
+        /*TextView module = (TextView) convertView.findViewById(R.id.attainment_item_module);
+        TextView mark = (TextView) convertView.findViewById(R.id.attainment_item_marks);
+        TextView date = (TextView) convertView.findViewById(R.id.attainment_item_date);
+
+        if(position >= list.size() && DataManager.getInstance().user.affiliation.contains("glos.ac.uk")) {
+            module.setText(DataManager.getInstance().mainActivity.getString(R.string.attainment_info));
+            mark.setVisibility(View.GONE);
+            date.setVisibility(View.GONE);
+        } else {
+            Attainment attainment = list.get(position);
+            date.setVisibility(View.VISIBLE);
+            date.setText(Utils.attainmentDate(attainment.date).replace("-","/"));
+            mark.setVisibility(View.VISIBLE);
+            mark.setText(attainment.percent + "%");
+            module.setText(attainment.module);
+        }*/
+
         return convertView;
     }
 
