@@ -27,6 +27,7 @@ import com.studygoal.jisc.Adapters.ActivitiesHistoryAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 
 public class CheckInFragment extends Fragment {
 
@@ -38,7 +39,7 @@ public class CheckInFragment extends Fragment {
     boolean network_enabled = false;
 
     private ProgressDialog progressDialog;
-    
+
     @Override
     public void onResume() {
         super.onResume();
@@ -61,10 +62,8 @@ public class CheckInFragment extends Fragment {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                        ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                )
-                ) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 102);
+                        ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 102);
         }
 
 
@@ -107,9 +106,9 @@ public class CheckInFragment extends Fragment {
         mainView.findViewById(R.id.pin_send_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                   showProgressDialog(true);
-                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")){
-                                        showProgressDialog(false);
+                showProgressDialog(true);
+                if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                    showProgressDialog(false);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_setcheckinpin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -125,7 +124,7 @@ public class CheckInFragment extends Fragment {
 
                 if (DataManager.getInstance().user.isStaff
                         || DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
-                                        showProgressDialog(false);
+                    showProgressDialog(false);
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
                     alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
                     alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -139,69 +138,73 @@ public class CheckInFragment extends Fragment {
                     return;
                 }
 
-                final String pin_text_edit_text = pin_text_edit.getText().toString();
-                if (pin_text_edit_text.length() == 0) {
-                                        showProgressDialog(false);
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
-                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        } catch (SecurityException se) {
-                            se.printStackTrace();
-                        }
-
-                        final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
-
-                        // commented, not used
-                        //debug for testing getsettings - by tmobiledevcore
-                        //final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
-                        //final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
-
-
-                        CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+                if(ConnectionHandler.isConnected(getContext())) {
+                    final String pin_text_edit_text = pin_text_edit.getText().toString();
+                    if (pin_text_edit_text.length() == 0) {
+                        showProgressDialog(false);
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                        alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.alert_invalid_pin) + "</font>"));
+                        alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
-                            public void run() {
-                                String message;
-                                if (result) {
-                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
-                                } else {
-                                    message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
-                                }
-
-                                                                showProgressDialog(false);
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
-                                alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
-                                alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                                AlertDialog alertDialog = alertDialogBuilder.create();
-                                alertDialog.show();
-
-                                pin_text_edit.setText("");
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
                             }
                         });
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
                     }
-                }).start();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
+                                Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            } catch (SecurityException se) {
+                                se.printStackTrace();
+                            }
+
+                            final boolean result = NetworkManager.getInstance().setUserPin(pin_text_edit_text, "LOCATION");
+
+                            // commented, not used
+                            //debug for testing getsettings - by tmobiledevcore
+                            //final boolean result_getsetting_attendanceData = NetworkManager.getInstance().getSetting("attendanceData");
+                            //final boolean result_getsetting_checkinData = NetworkManager.getInstance().getSetting("checkinData");
+
+
+                            CheckInFragment.this.getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String message;
+                                    if (result) {
+                                        message = CheckInFragment.this.getActivity().getString(R.string.alert_valid_pin);
+                                    } else {
+                                        message = CheckInFragment.this.getActivity().getString(R.string.alert_invalid_pin);
+                                    }
+
+                                    showProgressDialog(false);
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CheckInFragment.this.getActivity());
+                                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + message + "</font>"));
+                                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                    AlertDialog alertDialog = alertDialogBuilder.create();
+                                    alertDialog.show();
+
+                                    pin_text_edit.setText("");
+                                }
+                            });
+                        }
+                    }).start();
+                } else {
+                    showProgressDialog(false);
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
-
 
         GridLayout grid = (GridLayout) mainView.findViewById(R.id.grid_layout);
         int childCount = grid.getChildCount();
@@ -229,7 +232,8 @@ public class CheckInFragment extends Fragment {
         }
 
         return mainView;
-        }
+    }
+
     private void showProgressDialog(final boolean show) {
         getActivity().runOnUiThread(new Runnable() {
             @Override

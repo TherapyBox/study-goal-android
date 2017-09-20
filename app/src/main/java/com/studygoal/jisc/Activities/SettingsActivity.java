@@ -25,6 +25,7 @@ import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.SettingsLandscape.ListMenuAdapter;
 import com.studygoal.jisc.SettingsLandscape.ProfileFragment;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 
 import java.io.ByteArrayOutputStream;
 
@@ -130,13 +131,17 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void sendBugReportEmail() {
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                "mailto", "learning.analytics@jisc.ac.uk", null));
-        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Bug/Feature idea " + DataManager.getInstance().institution);
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "+ Bug or feature?\n" +
-                "+ Which parts of the app are affected (feeds, stats, logs, targets, other)??\n" +
-                "+ Further Detail: ");
-        startActivity(Intent.createChooser(emailIntent, "Send email..."));
+        if(ConnectionHandler.isConnected(this)) {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                    "mailto", "learning.analytics@jisc.ac.uk", null));
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Bug/Feature idea " + DataManager.getInstance().institution);
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "+ Bug or feature?\n" +
+                    "+ Which parts of the app are affected (feeds, stats, logs, targets, other)??\n" +
+                    "+ Further Detail: ");
+            startActivity(Intent.createChooser(emailIntent, "Send email..."));
+        } else {
+            ConnectionHandler.showNoInternetConnectionSnackbar();
+        }
     }
 
     private void showProgressBar(@Nullable String text) {

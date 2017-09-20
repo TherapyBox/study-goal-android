@@ -19,6 +19,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.R;
 import com.studygoal.jisc.Activities.SettingsActivity;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,21 +108,25 @@ public class HomeScreen extends Fragment {
                     return;
                 }
 
-                if(!((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().equals(selected_value)) {
-                    HashMap<String, String> map = new HashMap<>();
-                    map.put("student_id", DataManager.getInstance().user.id);
-                    map.put("setting_type", "home_screen");
-                    map.put("setting_value", en_menu.get(position));
-                    if (NetworkManager.getInstance().changeAppSettings(map)) {
-                        DataManager.getInstance().home_screen = en_menu.get(position);
-                        SharedPreferences preferences = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
-                        preferences.edit().putString("home_screen", DataManager.getInstance().home_screen).apply();
+                if(ConnectionHandler.isConnected(getContext())) {
+                    if (!((TextView) view.findViewById(R.id.dialog_item_name)).getText().toString().equals(selected_value)) {
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("student_id", DataManager.getInstance().user.id);
+                        map.put("setting_type", "home_screen");
+                        map.put("setting_value", en_menu.get(position));
+                        if (NetworkManager.getInstance().changeAppSettings(map)) {
+                            DataManager.getInstance().home_screen = en_menu.get(position);
+                            SharedPreferences preferences = DataManager.getInstance().mainActivity.getSharedPreferences("jisc", Context.MODE_PRIVATE);
+                            preferences.edit().putString("home_screen", DataManager.getInstance().home_screen).apply();
+                        }
                     }
-                }
-                if(!DataManager.getInstance().mainActivity.isLandscape) {
-                    DataManager.getInstance().mainActivity.onBackPressed();
+                    if (!DataManager.getInstance().mainActivity.isLandscape) {
+                        DataManager.getInstance().mainActivity.onBackPressed();
+                    } else {
+                        listView.setAdapter(new GenericAdapter(getActivity(), DataManager.getInstance().home_screen.toUpperCase(), list));
+                    }
                 } else {
-                    listView.setAdapter(new GenericAdapter(getActivity(), DataManager.getInstance().home_screen.toUpperCase(), list));
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
             }
         });

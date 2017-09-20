@@ -22,6 +22,7 @@ import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Feed;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.EditTextCustom;
 
 import java.util.HashMap;
@@ -69,23 +70,6 @@ public class FeedFragment extends Fragment {
         XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateActivityFeed);
     }
 
-    public void post() {
-        String message = ((EditText) mainView.findViewById(R.id.message)).getText().toString();
-        HashMap<String, String> map = new HashMap<>();
-        map.put("student_id", DataManager.getInstance().user.id);
-        map.put("message", message);
-        if (NetworkManager.getInstance().postFeedMessage(map)) {
-            if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
-                adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
-                adapter.notifyDataSetChanged();
-            }
-            Snackbar.make(layout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
-        } else {
-            Snackbar.make(layout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
-        }
-        mainView.findViewById(R.id.overlay).callOnClick();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainView = inflater.inflate(R.layout.feed_fragment, container, false);
@@ -99,29 +83,33 @@ public class FeedFragment extends Fragment {
         floating_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataManager.getInstance().mainActivity.feedFragment = FeedFragment.this;
-                DataManager.getInstance().mainActivity.hideAllButtons();
-                DataManager.getInstance().mainActivity.showCertainButtons(6);
-                floating_btn.setVisibility(View.GONE);
-                myEditText.setText("");
-                mainView.findViewById(R.id.message).requestFocus();
-                InputMethodManager keyboard = (InputMethodManager) DataManager.getInstance().mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                keyboard.showSoftInput(mainView.findViewById(R.id.message), 0);
-                mainView.findViewById(R.id.overlay).setVisibility(View.VISIBLE);
-                mainView.findViewById(R.id.overlay).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        DataManager.getInstance().mainActivity.hideAllButtons();
-                        DataManager.getInstance().mainActivity.showCertainButtons(1);
-                        mainView.findViewById(R.id.overlay).setVisibility(View.GONE);
-                        View view = mainView.findViewById(R.id.message);
-                        if (view != null) {
-                            InputMethodManager imm = (InputMethodManager) DataManager.getInstance().mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                if (ConnectionHandler.isConnected(getContext())) {
+                    DataManager.getInstance().mainActivity.feedFragment = FeedFragment.this;
+                    DataManager.getInstance().mainActivity.hideAllButtons();
+                    DataManager.getInstance().mainActivity.showCertainButtons(6);
+                    floating_btn.setVisibility(View.GONE);
+                    myEditText.setText("");
+                    mainView.findViewById(R.id.message).requestFocus();
+                    InputMethodManager keyboard = (InputMethodManager) DataManager.getInstance().mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    keyboard.showSoftInput(mainView.findViewById(R.id.message), 0);
+                    mainView.findViewById(R.id.overlay).setVisibility(View.VISIBLE);
+                    mainView.findViewById(R.id.overlay).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DataManager.getInstance().mainActivity.hideAllButtons();
+                            DataManager.getInstance().mainActivity.showCertainButtons(1);
+                            mainView.findViewById(R.id.overlay).setVisibility(View.GONE);
+                            View view = mainView.findViewById(R.id.message);
+                            if (view != null) {
+                                InputMethodManager imm = (InputMethodManager) DataManager.getInstance().mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            }
+                            floating_btn.setVisibility(View.VISIBLE);
                         }
-                        floating_btn.setVisibility(View.VISIBLE);
-                    }
-                });
+                    });
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
@@ -132,6 +120,9 @@ public class FeedFragment extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        if(!ConnectionHandler.isConnected(getContext())) {
+                            ConnectionHandler.showNoInternetConnectionSnackbar();
+                        }
                         if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
                             adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
                             getActivity().runOnUiThread(new Runnable() {
@@ -172,4 +163,20 @@ public class FeedFragment extends Fragment {
         return mainView;
     }
 
+    public void post() {
+        String message = ((EditText) mainView.findViewById(R.id.message)).getText().toString();
+        HashMap<String, String> map = new HashMap<>();
+        map.put("student_id", DataManager.getInstance().user.id);
+        map.put("message", message);
+        if (NetworkManager.getInstance().postFeedMessage(map)) {
+            if (NetworkManager.getInstance().getFeed(DataManager.getInstance().user.id)) {
+                adapter.feedList = new Select().from(Feed.class).where("is_hidden = 0").execute();
+                adapter.notifyDataSetChanged();
+            }
+            Snackbar.make(layout, R.string.posted_message, Snackbar.LENGTH_LONG).show();
+        } else {
+            Snackbar.make(layout, R.string.fail_to_post_message, Snackbar.LENGTH_LONG).show();
+        }
+        mainView.findViewById(R.id.overlay).callOnClick();
+    }
 }

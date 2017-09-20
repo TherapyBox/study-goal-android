@@ -22,6 +22,7 @@ import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.PageControl;
 
 import java.util.HashMap;
@@ -45,6 +46,7 @@ public class TargetDetails extends Fragment {
         DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.target));
         DataManager.getInstance().mainActivity.hideAllButtons();
         DataManager.getInstance().mainActivity.showCertainButtons(4);
+
         if (pager != null && mAdapter != null && mAdapter.list.size() != new Select().from(Targets.class).count()) {
             mAdapter = new TargetPagerAdapter(DataManager.getInstance().mainActivity.getSupportFragmentManager());
             mAdapter.reference = this;
@@ -117,34 +119,37 @@ public class TargetDetails extends Fragment {
             return;
         }
 
-        final HashMap<String, String> params = new HashMap<>();
-        params.put("target_id", target.target_id);
-        DataManager.getInstance().mainActivity.showProgressBar(null);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (NetworkManager.getInstance().deleteTarget(params)) {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            target.delete();
-                            mAdapter.list.remove(finalPosition);
-                            mAdapter.notifyDataSetChanged();
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
+        if(ConnectionHandler.isConnected(getContext())) {
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("target_id", target.target_id);
+            DataManager.getInstance().mainActivity.showProgressBar(null);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (NetworkManager.getInstance().deleteTarget(params)) {
+                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                target.delete();
+                                mAdapter.list.remove(finalPosition);
+                                mAdapter.notifyDataSetChanged();
+                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                Snackbar.make(mainView.findViewById(R.id.parent), R.string.target_deleted_successfully, Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                Snackbar.make(mainView.findViewById(R.id.parent), R.string.fail_to_delete_target_message, Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                    }
                 }
-            }
-        }).start();
-
+            }).start();
+        } else {
+            ConnectionHandler.showNoInternetConnectionSnackbar();
+        }
     }
 }

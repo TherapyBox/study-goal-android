@@ -28,7 +28,10 @@ import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.databinding.TargetFragmentBinding;
+
+import org.apache.http.params.CoreConnectionPNames;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,9 +48,6 @@ public class TargetFragment extends BaseFragment {
     private SwipeRefreshLayout mLayout;
 
     private TargetFragmentBinding mBinding = null;
-
-    public TargetFragment() {
-    }
 
     @Override
     public void onResume() {
@@ -83,29 +83,49 @@ public class TargetFragment extends BaseFragment {
         mAdapterTarget = new TargetAdapter(getActivity(), new TargetAdapter.TargetAdapterListener() {
             @Override
             public void onDelete(Targets target, int finalPosition) {
-                deleteTarget(target, finalPosition);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    deleteTarget(target, finalPosition);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
 
             @Override
             public void onEdit(Targets targets) {
-                editTarget(targets);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    editTarget(targets);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
         mAdapterToDo = new ToDoTasksAdapter(getActivity(), new ToDoTasksAdapter.ToDoTasksAdapterListener() {
             @Override
             public void onDelete(ToDoTasks target, int finalPosition) {
-                deleteToDoTasks(target, finalPosition);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    deleteToDoTasks(target, finalPosition);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
 
             @Override
             public void onEdit(ToDoTasks targets) {
-                editToDoTasks(targets);
+                if(ConnectionHandler.isConnected(getContext())){
+                    editToDoTasks(targets);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
 
             @Override
             public void onDone(ToDoTasks target) {
-                completeToDoTask(target);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    completeToDoTask(target);
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
@@ -349,51 +369,55 @@ public class TargetFragment extends BaseFragment {
     }
 
     private void showAcceptTaskDialog(ToDoTasks item) {
-        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_accept_task);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        if(ConnectionHandler.isConnected(getContext())) {
+            final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.dialog_accept_task);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        if (DataManager.getInstance().mainActivity.isLandscape) {
-            DisplayMetrics displaymetrics = new DisplayMetrics();
-            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-            int width = (int) (displaymetrics.widthPixels * 0.45);
+            if (DataManager.getInstance().mainActivity.isLandscape) {
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int width = (int) (displaymetrics.widthPixels * 0.45);
 
-            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-            params.width = width;
-            dialog.getWindow().setAttributes(params);
+                WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                params.width = width;
+                dialog.getWindow().setAttributes(params);
+            }
+
+            ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+            ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.to_do_task_accept_dialog_title);
+
+            ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.to_do_task_accept_dialog_message);
+
+            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+            ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+            ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setText(R.string.cancel);
+
+            dialog.findViewById(R.id.dialog_ok).setOnClickListener(v1 -> {
+                dialog.dismiss();
+                processAcceptTask(item);
+            });
+
+            dialog.findViewById(R.id.dialog_no).setOnClickListener(v12 -> {
+                dialog.dismiss();
+                showDeclineTaskDialog(item);
+            });
+
+            dialog.findViewById(R.id.dialog_cancel).setOnClickListener(v12 -> {
+                dialog.dismiss();
+            });
+
+            dialog.show();
+        } else {
+            ConnectionHandler.showNoInternetConnectionSnackbar();
         }
-
-        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.to_do_task_accept_dialog_title);
-
-        ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.to_do_task_accept_dialog_message);
-
-        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
-
-        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
-
-        ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) dialog.findViewById(R.id.dialog_cancel_text)).setText(R.string.cancel);
-
-        dialog.findViewById(R.id.dialog_ok).setOnClickListener(v1 -> {
-            dialog.dismiss();
-            processAcceptTask(item);
-        });
-
-        dialog.findViewById(R.id.dialog_no).setOnClickListener(v12 -> {
-            dialog.dismiss();
-            showDeclineTaskDialog(item);
-        });
-
-        dialog.findViewById(R.id.dialog_cancel).setOnClickListener(v12 -> {
-            dialog.dismiss();
-        });
-
-        dialog.show();
     }
 
     private void showDeclineTaskDialog(ToDoTasks item) {

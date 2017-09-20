@@ -25,6 +25,7 @@ import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.Module;
 import com.studygoal.jisc.Models.RunningActivity;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 import com.studygoal.jisc.Utils.Utils;
 
@@ -39,7 +40,6 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
     Boolean hasRunning = false;
 
     public ActivitiesHistoryAdapter(LogActivityHistory fragment) {
-
         this.fragment = fragment;
         this.context = fragment.getActivity();
 
@@ -128,14 +128,18 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                     convertView.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            swipeLayout.close(true);
-                            LogLogActivity fragment = new LogLogActivity();
-                            fragment.isInEditMode = true;
-                            fragment.item = activityHistory;
-                            ((MainActivity) context).getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.main_fragment, fragment)
-                                    .addToBackStack(null)
-                                    .commit();
+                            if(ConnectionHandler.isConnected(context)) {
+                                swipeLayout.close(true);
+                                LogLogActivity fragment = new LogLogActivity();
+                                fragment.isInEditMode = true;
+                                fragment.item = activityHistory;
+                                ((MainActivity) context).getSupportFragmentManager().beginTransaction()
+                                        .replace(R.id.main_fragment, fragment)
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else {
+                                ConnectionHandler.showNoInternetConnectionSnackbar();
+                            }
                         }
                     });
                 } catch (Exception e) {
@@ -146,48 +150,51 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                     convertView.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            if(ConnectionHandler.isConnected(context)) {
+                                final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+                                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                dialog.setContentView(R.layout.dialog_confirmation);
+                                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                                if (DataManager.getInstance().mainActivity.isLandscape) {
+                                    DisplayMetrics displaymetrics = new DisplayMetrics();
+                                    DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                                    int width = (int) (displaymetrics.widthPixels * 0.45);
 
-                            final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                            dialog.setContentView(R.layout.dialog_confirmation);
-                            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                            if (DataManager.getInstance().mainActivity.isLandscape) {
-                                DisplayMetrics displaymetrics = new DisplayMetrics();
-                                DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                                int width = (int) (displaymetrics.widthPixels * 0.45);
+                                    WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                                    params.width = width;
+                                    dialog.getWindow().setAttributes(params);
+                                }
 
-                                WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                                params.width = width;
-                                dialog.getWindow().setAttributes(params);
+                                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
+
+                                ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                                ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
+
+                                ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                                ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+                                ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                                ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+                                dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        dialog.dismiss();
+                                        swipeLayout.close(true);
+                                        fragment.deleteLog(activityHistory, finalPosition);
+                                    }
+                                });
+                                dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                                dialog.show();
+                            } else {
+                                ConnectionHandler.showNoInternetConnectionSnackbar();
                             }
-
-                            ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                            ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
-
-                            ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                            ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
-
-                            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
-
-                            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
-
-                            dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    dialog.dismiss();
-                                    swipeLayout.close(true);
-                                    fragment.deleteLog(activityHistory, finalPosition);
-                                }
-                            });
-                            dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            dialog.show();
                         }
                     });
                 } catch (Exception e) {
@@ -234,14 +241,18 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                 convertView.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        swipeLayout.close(true);
-                        LogLogActivity fragment = new LogLogActivity();
-                        fragment.isInEditMode = true;
-                        fragment.item = activityHistory;
-                        ((MainActivity) context).getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.main_fragment, fragment)
-                                .addToBackStack(null)
-                                .commit();
+                        if(ConnectionHandler.isConnected(context)) {
+                            swipeLayout.close(true);
+                            LogLogActivity fragment = new LogLogActivity();
+                            fragment.isInEditMode = true;
+                            fragment.item = activityHistory;
+                            ((MainActivity) context).getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.main_fragment, fragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        } else {
+                            ConnectionHandler.showNoInternetConnectionSnackbar();
+                        }
                     }
                 });
             } catch (Exception e) {
@@ -252,47 +263,51 @@ public class ActivitiesHistoryAdapter extends BaseAdapter {
                 convertView.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                        dialog.setContentView(R.layout.dialog_confirmation);
-                        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                        if (DataManager.getInstance().mainActivity.isLandscape) {
-                            DisplayMetrics displaymetrics = new DisplayMetrics();
-                            DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                            int width = (int) (displaymetrics.widthPixels * 0.45);
+                        if(ConnectionHandler.isConnected(context)) {
+                            final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                            dialog.setContentView(R.layout.dialog_confirmation);
+                            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                            if (DataManager.getInstance().mainActivity.isLandscape) {
+                                DisplayMetrics displaymetrics = new DisplayMetrics();
+                                DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                                int width = (int) (displaymetrics.widthPixels * 0.45);
 
-                            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                            params.width = width;
-                            dialog.getWindow().setAttributes(params);
+                                WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                                params.width = width;
+                                dialog.getWindow().setAttributes(params);
+                            }
+
+                            ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                            ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
+
+                            ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                            ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
+
+                            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                            ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+                            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                            ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+                            dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                    swipeLayout.close(true);
+                                    fragment.deleteLog(activityHistory, finalPosition);
+                                }
+                            });
+                            dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            dialog.show();
+                        } else {
+                            ConnectionHandler.showNoInternetConnectionSnackbar();
                         }
-
-                        ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                        ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
-
-                        ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                        ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
-
-                        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                        ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
-
-                        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                        ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
-
-                        dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                                swipeLayout.close(true);
-                                fragment.deleteLog(activityHistory, finalPosition);
-                            }
-                        });
-                        dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                            }
-                        });
-                        dialog.show();
                     }
                 });
             } catch (Exception e) {
