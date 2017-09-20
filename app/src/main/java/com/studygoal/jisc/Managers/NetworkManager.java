@@ -4722,11 +4722,14 @@ public class NetworkManager {
                     is.close();
 
                     Log.d("", "call: get AppUsage Response Data" + sb.toString());
+                    //store in DataManager
+                    JSONObject jsonObject = new JSONObject(sb.toString());
 
-                    JSONArray jsonArray = new JSONArray(sb.toString());
-                    //JSONObject jsonObject = jsonArray.getJSONObject();
-                    //item.id = jsonObject.getString("id");
-                    //store in shared preferences
+                    DataManager.getInstance().appUsageData.sessions = jsonObject.getString("id");
+                    DataManager.getInstance().appUsageData.activities = jsonObject.getString("id");
+                    DataManager.getInstance().appUsageData.setTargets = jsonObject.getString("id");
+                    DataManager.getInstance().appUsageData.metTargets = jsonObject.getString("id");
+                    DataManager.getInstance().appUsageData.failedTargets = jsonObject.getString("id");
 
                     return false;
                 }
