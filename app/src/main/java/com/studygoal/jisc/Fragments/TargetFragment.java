@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
@@ -15,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.activeandroid.ActiveAndroid;
@@ -66,15 +68,15 @@ public class TargetFragment extends BaseFragment {
         mRootView = mBinding.getRoot();
 
         mBinding.targetSelector.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.target_recurring) {
+            if(checkedId == R.id.target_recurring) {
                 mBinding.list.setVisibility(View.VISIBLE);
                 mBinding.listTodo.setVisibility(View.GONE);
+                DataManager.getInstance().mainActivity.displaySingleTarget = false;
             } else {
                 mBinding.list.setVisibility(View.GONE);
                 mBinding.listTodo.setVisibility(View.VISIBLE);
+                DataManager.getInstance().mainActivity.displaySingleTarget = true;
             }
-
-            updateTutorialMessage();
         });
 
         mTutorialMessage = mRootView.findViewById(R.id.tutorial_message);
@@ -83,7 +85,7 @@ public class TargetFragment extends BaseFragment {
         mAdapterTarget = new TargetAdapter(getActivity(), new TargetAdapter.TargetAdapterListener() {
             @Override
             public void onDelete(Targets target, int finalPosition) {
-                if(ConnectionHandler.isConnected(getContext())) {
+                if (ConnectionHandler.isConnected(getContext())) {
                     deleteTarget(target, finalPosition);
                 } else {
                     ConnectionHandler.showNoInternetConnectionSnackbar();
@@ -92,7 +94,7 @@ public class TargetFragment extends BaseFragment {
 
             @Override
             public void onEdit(Targets targets) {
-                if(ConnectionHandler.isConnected(getContext())) {
+                if (ConnectionHandler.isConnected(getContext())) {
                     editTarget(targets);
                 } else {
                     ConnectionHandler.showNoInternetConnectionSnackbar();
@@ -103,7 +105,7 @@ public class TargetFragment extends BaseFragment {
         mAdapterToDo = new ToDoTasksAdapter(getActivity(), new ToDoTasksAdapter.ToDoTasksAdapterListener() {
             @Override
             public void onDelete(ToDoTasks target, int finalPosition) {
-                if(ConnectionHandler.isConnected(getContext())) {
+                if (ConnectionHandler.isConnected(getContext())) {
                     deleteToDoTasks(target, finalPosition);
                 } else {
                     ConnectionHandler.showNoInternetConnectionSnackbar();
@@ -112,7 +114,7 @@ public class TargetFragment extends BaseFragment {
 
             @Override
             public void onEdit(ToDoTasks targets) {
-                if(ConnectionHandler.isConnected(getContext())){
+                if (ConnectionHandler.isConnected(getContext())) {
                     editToDoTasks(targets);
                 } else {
                     ConnectionHandler.showNoInternetConnectionSnackbar();
@@ -121,7 +123,7 @@ public class TargetFragment extends BaseFragment {
 
             @Override
             public void onDone(ToDoTasks target) {
-                if(ConnectionHandler.isConnected(getContext())) {
+                if (ConnectionHandler.isConnected(getContext())) {
                     completeToDoTask(target);
                 } else {
                     ConnectionHandler.showNoInternetConnectionSnackbar();
@@ -276,7 +278,7 @@ public class TargetFragment extends BaseFragment {
                 .commit();
     }
 
-    private void acceptToDoTask(ToDoTasks item){
+    private void acceptToDoTask(ToDoTasks item) {
         showAcceptTaskDialog(item);
     }
 
@@ -303,10 +305,10 @@ public class TargetFragment extends BaseFragment {
                 List<ToDoTasks> currentTaskList = new Select().from(ToDoTasks.class).execute();
                 Iterator iterator = currentTaskList.iterator();
 
-                while (iterator.hasNext()){
-                    ToDoTasks currentTask = (ToDoTasks)iterator.next();
+                while (iterator.hasNext()) {
+                    ToDoTasks currentTask = (ToDoTasks) iterator.next();
 
-                    if(currentTask.status.equals("1")) {
+                    if (currentTask.status.equals("1")) {
                         iterator.remove();
                     } else if (currentTask.isAccepted.equals("2")) {
                         iterator.remove();
@@ -369,7 +371,7 @@ public class TargetFragment extends BaseFragment {
     }
 
     private void showAcceptTaskDialog(ToDoTasks item) {
-        if(ConnectionHandler.isConnected(getContext())) {
+        if (ConnectionHandler.isConnected(getContext())) {
             final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_accept_task);
