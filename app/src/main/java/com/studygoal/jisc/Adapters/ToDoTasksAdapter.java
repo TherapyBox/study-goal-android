@@ -166,9 +166,10 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         try {
             Date date = sDateFormat.parse(item.endDate);
+            Log.d(TAG, "getView: date check" + (currentDate.getTime()-oneDay) +  "   " + date.getTime());
             if(DateUtils.isToday(date.getTime())){
                 isToday = true;
-            } else if (currentDate.getTime()-oneDay == date.getTime()){
+            } else if (DateUtils.isToday(date.getTime()-oneDay)) {
                 isTomorrow = true;
             }
         } catch (Exception e) {
@@ -177,8 +178,8 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         if (isToday) {
             text += mContext.getString(R.string.today_small);
-        //} else if (isTomorrow){
-            //text += mContext.getString(R.string.due_tomorrow);
+        } else if (isTomorrow){
+            text += mContext.getString(R.string.due_tomorrow);
         } else {
             text += getDateFromEndDateTag(item.endDate);
         }
