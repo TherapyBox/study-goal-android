@@ -486,6 +486,8 @@
     <string name="by">By</string>
     <string name="attainment_not_data">There is no attainment data to show</string>
     <string name="today">Today</string>
+    <string name="today_small">today</string>
+    <string name="due_tomorrow">due tomorrow</string>
     <string name="to_do_task_accept_dialog_title">Accept</string>
     <string name="to_do_task_accept_dialog_message">Do you want to accept this target?</string>
     <string name="to_do_task_decline_dialog_title">Decline</string>

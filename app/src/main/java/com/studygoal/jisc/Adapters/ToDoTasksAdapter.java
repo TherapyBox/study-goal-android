@@ -155,23 +155,30 @@ public class ToDoTasksAdapter extends BaseAdapter {
 
         String text = "";
         text += overdueText + item.description;
-        if(!item.module.equals("no_module"))
+        if(!item.module.equals("no_module") && !item.module.equals("No module"))
             text += " " + mContext.getString(R.string._for) + " " + item.module;
         text  += " " + mContext.getString(R.string.by).toLowerCase() + " ";
 
         boolean isToday = false;
+        boolean isTomorrow = false;
+
+        long oneDay = 1000 * 60 * 60 * 24;
 
         try {
             Date date = sDateFormat.parse(item.endDate);
             if(DateUtils.isToday(date.getTime())){
                 isToday = true;
+            } else if (currentDate.getTime()-oneDay == date.getTime()){
+                isTomorrow = true;
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
 
         if (isToday) {
-            text += mContext.getString(R.string.today);
+            text += mContext.getString(R.string.today_small);
+        //} else if (isTomorrow){
+            //text += mContext.getString(R.string.due_tomorrow);
         } else {
             text += getDateFromEndDateTag(item.endDate);
         }
