@@ -194,10 +194,6 @@ public class AddTarget extends BaseFragment {
             }
         });
 
-        mIsRecurringTarget = true;
-        mBinding.recurringLayout.setVisibility(View.VISIBLE);
-        mBinding.singleLayout.setVisibility(View.GONE);
-
         mActivityType = ((AppCompatTextView) mRoot.findViewById(R.id.addtarget_activityType_textView));
         mActivityType.setSupportBackgroundTintList(ColorStateList.valueOf(0xFF8a63cc));
 
@@ -663,13 +659,13 @@ public class AddTarget extends BaseFragment {
                 }
 
                 String selectedEvery = "";
-                if (mEvery.getText().toString().toLowerCase().equals("day")) {
+                if(mEvery.getText().toString().toLowerCase().equals("day")){
                     selectedEvery = "Daily";
                 } else {
                     selectedEvery = mEvery.getText().toString() + "ly";
                 }
 
-                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?", selectedEvery).and("module_id = ?", id).exists()) {
+                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?",selectedEvery).and("module_id = ?", id).exists()) {
                     Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -678,7 +674,7 @@ public class AddTarget extends BaseFragment {
                 params.put("student_id", DataManager.getInstance().user.id);
                 params.put("target_id", item.target_id);
                 params.put("total_time", total_time + "");
-                params.put("time_span", selectedEvery);
+                params.put("time_span",selectedEvery);
 
                 if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase()))
                     params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
@@ -724,6 +720,7 @@ public class AddTarget extends BaseFragment {
                 alertDialog.show();
                 return;
             }
+
             String hours = mHours.getText().toString();
             if (hours.equals(""))
                 hours = "0";
@@ -732,7 +729,7 @@ public class AddTarget extends BaseFragment {
                 minutes = "0";
 
             int total_time = Integer.parseInt(hours) * 60 + Integer.parseInt(minutes);
-            
+
             if (total_time == 0) {
                 Snackbar.make(mRoot, R.string.fail_to_add_target_insufficient_time, Snackbar.LENGTH_LONG).show();
                 return;
@@ -749,13 +746,13 @@ public class AddTarget extends BaseFragment {
                 }
 
                 String selectedEvery = "";
-                if (mEvery.getText().toString().toLowerCase().equals("day")) {
+                if(mEvery.getText().toString().toLowerCase().equals("day")){
                     selectedEvery = "Daily";
                 } else {
                     selectedEvery = mEvery.getText().toString() + "ly";
                 }
 
-                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?", selectedEvery).and("module_id = ?", id).exists()) {
+                if (new Select().from(Targets.class).where("activity = ?", mChooseActivity.getText().toString()).and("time_span = ?",selectedEvery).and("module_id = ?", id).exists()) {
                     Snackbar.make(mRoot, R.string.target_same_parameters, Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -765,7 +762,7 @@ public class AddTarget extends BaseFragment {
                 params.put("activity_type", DataManager.getInstance().api_values.get(mActivityType.getText().toString()));
                 params.put("activity", DataManager.getInstance().api_values.get(mChooseActivity.getText().toString()));
                 params.put("total_time", total_time + "");
-                params.put("time_span", selectedEvery);
+                params.put("time_span",selectedEvery);
 
                 if (!mIn.getText().toString().toLowerCase().equals(DataManager.getInstance().mainActivity.getString(R.string.any_module).toLowerCase())) {
                     params.put("module", ((Module) (new Select().from(Module.class).where("module_name = ?", mIn.getText().toString()).executeSingle())).id);
