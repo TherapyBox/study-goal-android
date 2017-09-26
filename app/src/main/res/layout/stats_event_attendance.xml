@@ -48,8 +48,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="15dp"
-                android:background="#d1e0f3" />
+                android:layout_marginTop="15dp" />
         <!--</LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
