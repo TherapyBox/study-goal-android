@@ -4,14 +4,20 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Delete;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.entity.attendance.AttendanceStatement;
 import com.studygoal.jisc.Managers.xApi.response.ResponseAttendance;
 import com.studygoal.jisc.Managers.xApi.response.ResponseSetting;
+import com.studygoal.jisc.Managers.xApi.response.ResponseWeeklyAttendance;
 import com.studygoal.jisc.Models.Event;
+import com.studygoal.jisc.Models.WeeklyAttendance;
 
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -35,6 +41,10 @@ public class XApiManager {
     private static final String SETTING_ATTENDANCE_DATA = "attendanceData";
     private static final String SETTING_ATTAINMENT_DATA = "attainmentData";
     private static final String SETTING_STUDY_GOAL_ATTENDANCE = "studyGoalAttendance";
+
+    private static final boolean USE_TEST_JWT = true;
+    private static final String TEST_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MDU4MjcwODQsImp0aSI6ImFXWmF2WHF5ek5KOE02NEd5VnM0SDJnWWlLQUVBSlErK1FIM2owWFlITkE9IiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0XC9leGFtcGxlIiwibmJmIjoxNTA1ODI3MDc0LCJleHAiOjE1MDk5NzQyNzQsImRhdGEiOnsiZXBwbiI6InRvbS5nbGFudmlsbGVAY29ycC5qaXNjLmFjLnVrIiwicGlkIjoidG9tLmdsYW52aWxsZUBjb3JwLmppc2MuYWMudWsiLCJhZmZpbGlhdGlvbiI6InN0YWZmQGNvcnAuamlzYy5hYy51azttZW1iZXJAY29ycC5qaXNjLmFjLnVrIn19.lzH6OoXAeXtmloe0-siPmSTA5TNH3iN8W-HG9Ygkx3OI4igML9ptS18Hm_pthTzq7tRn0GgJmbP_7ptqVeBfBA";
+
 
     private static XApiManager sInstance = null;
 
@@ -104,7 +114,7 @@ public class XApiManager {
                     .build();
 
             XApi api = retrofit.create(XApi.class);
-            String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+            String token = getJwt();
             Call<List<ResponseAttendance>> call = api.getAttendance(token, skip, limit);
             Response<List<ResponseAttendance>> response = call.execute();
 
@@ -145,8 +155,8 @@ public class XApiManager {
 
                             if (dataInfo != null && dataInfo.length > 1) {
                                 dateString = dataInfo[dataInfo.length - 1] + " " + dataInfo[dataInfo.length - 2];
-                                if(dataInfo.length > 2){
-                                    for(int i = 0; i < dataInfo.length - 2; i++){
+                                if (dataInfo.length > 2) {
+                                    for (int i = 0; i < dataInfo.length - 2; i++) {
                                         moduleName += dataInfo[i] + " ";
                                     }
                                 }
@@ -164,6 +174,73 @@ public class XApiManager {
                             event.setModule(moduleName);
                             event.setTime(time);
                             event.save();
+                        }
+
+                        ActiveAndroid.setTransactionSuccessful();
+                        result = true;
+                    } finally {
+                        ActiveAndroid.endTransaction();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
+    }
+
+    public boolean getWeeklyAttendance(String startDate, String endDate) {
+        boolean result = true;
+
+        try {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(SERVER_BASE)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            XApi api = retrofit.create(XApi.class);
+            String token = getJwt();
+
+            Call<ResponseBody> call = api.getWeeklyAttendance(token, startDate, endDate);
+            Response<ResponseBody> response = call.execute();
+
+            if (response != null && response.isSuccessful()) {
+                List<ResponseWeeklyAttendance> list = new ArrayList<>();
+
+                if (response.body().contentLength() > 0) {
+                    Type listType = new TypeToken<ArrayList<ResponseWeeklyAttendance>>() {
+                    }.getType();
+                    Gson gson = new Gson();
+                    list = gson.fromJson(response.body().string(), listType);
+
+                    if (list == null) {
+                        list = new ArrayList<>();
+                    }
+                }
+
+                if (list != null) {
+                    ActiveAndroid.beginTransaction();
+
+                    try {
+                        new Delete().from(WeeklyAttendance.class).execute();
+
+                        if (list.size() > 0) {
+                            for (ResponseWeeklyAttendance aitem : list) {
+                                int count = aitem.getCount();
+                                String date = aitem.getDate();
+                                int week = aitem.getId().getWeek();
+                                int month = aitem.getId().getMonth();
+                                int year = aitem.getId().getYear();
+
+                                WeeklyAttendance event = new WeeklyAttendance();
+                                event.setCount(count);
+                                event.setDate(date);
+                                event.setWeek(week);
+                                event.setMonth(month);
+                                event.setYear(year);
+                                event.save();
+                            }
                         }
 
                         ActiveAndroid.setTransactionSuccessful();
@@ -287,7 +364,7 @@ public class XApiManager {
                             .build();
 
                     XApi api = retrofit.create(XApi.class);
-                    String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                    String token = getJwt();
                     Call<ResponseBody> call = api.getLogActivity(token, verb);
                     Response<ResponseBody> response = call.execute();
 
@@ -318,7 +395,7 @@ public class XApiManager {
                             .build();
 
                     XApi api = retrofit.create(XApi.class);
-                    String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                    String token = getJwt();
                     Call<ResponseBody> call = api.getLogActivity(token, verb, contentId, contentName);
                     Response<ResponseBody> response = call.execute();
 
@@ -350,7 +427,7 @@ public class XApiManager {
                             .build();
 
                     XApi api = retrofit.create(XApi.class);
-                    String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                    String token = getJwt();
                     Call<ResponseBody> call = api.getLogActivity(token, verb);
                     Response<ResponseBody> response = call.execute();
 
@@ -380,7 +457,7 @@ public class XApiManager {
                         .build();
 
                 XApi api = retrofit.create(XApi.class);
-                String token = TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+                String token = getJwt();
                 Call<ResponseSetting> call = api.getSetting(token, settingName);
                 Response<ResponseSetting> response = call.execute();
 
@@ -393,5 +470,13 @@ public class XApiManager {
         }
 
         return result;
+    }
+
+    private String getJwt() {
+        if (USE_TEST_JWT) {
+            return TOKEN_PREFIX + TEST_JWT;
+        } else {
+            return TOKEN_PREFIX + DataManager.getInstance().get_jwt();
+        }
     }
 }

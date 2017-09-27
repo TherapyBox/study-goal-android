@@ -37,6 +37,11 @@ interface XApi {
                                                  @Query("skip") int skip,
                                                  @Query("limit") int limit);
 
+    @GET("/sg/weeklyattendance")
+    Call<ResponseBody> getWeeklyAttendance(@Header("authorization") String token,
+                                           @Query("startdate") String startDate,
+                                           @Query("enddate") String endDate);
+
     @GET("/sg/setting")
     Call<ResponseSetting> getSetting(@Header("authorization") String token,
                                      @Query("setting") String settingName);

@@ -29,7 +29,6 @@ import com.studygoal.jisc.Models.Targets;
 import com.studygoal.jisc.Models.ToDoTasks;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.Models.TrophyMy;
-import com.studygoal.jisc.R;
 import com.studygoal.jisc.Utils.Utils;
 
 import org.json.JSONArray;
@@ -54,11 +53,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -4028,87 +4025,6 @@ public class NetworkManager {
         }
     }
 
-    public boolean getWeeklyAttendance() {
-        language = LinguisticManager.getInstance().getLanguageCode();
-        Future<String> futureResult = executorService.submit(new getWeeklyAttendance());
-        try {
-            String result = futureResult.get();
-            return result.equals("Success");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private class getWeeklyAttendance implements Callable<String> {
-
-        getWeeklyAttendance() {
-        }
-
-        @Override
-        public String call() {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-                Calendar cal = GregorianCalendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.DAY_OF_YEAR, -34);
-                Date daysBeforeDate = cal.getTime();
-                String current = sdf.format(new Date());
-                String past = sdf.format(daysBeforeDate);
-                String apiURL = "https://api.datax.jisc.ac.uk/sg/weeklyattendance?startdate=" + past + "&enddate=" + current;
-                URL url = new URL(apiURL);
-
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.addRequestProperty("Authorization", "Bearer " + DataManager.getInstance().get_jwt());
-                urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-                int responseCode = urlConnection.getResponseCode();
-                forbidden(responseCode);
-                if (responseCode != 200) {
-                    if (responseCode == 204) {
-                        Log.i("getWeeklyAttendance", "No records found");
-                        new Delete().from(Institution.class).execute();
-                    } else {
-                        Log.e("getWeeklyAttendance", "Code: " + responseCode);
-                    }
-                    return "Error";
-                }
-
-                InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                is.close();
-
-                JSONArray jsonArray = new JSONArray(sb.toString());
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(appContext);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(appContext.getString(R.string.attendance), sb.toString());
-                editor.apply();
-                Log.e("Attendance", sb.toString());
-
-//                ActiveAndroid.beginTransaction();
-//                try {
-//
-//                    }
-//
-//                    ActiveAndroid.setTransactionSuccessful();
-//                } finally {
-//                    ActiveAndroid.endTransaction();
-//                }
-                return "Success";
-            } catch (Exception e) {
-                e.printStackTrace();
-                return "Error";
-            }
-        }
-    }
-
     /**
      * getModules()
      *
@@ -4632,7 +4548,7 @@ public class NetworkManager {
         }
     }
 
-    public boolean updateAppUsage(String entry, String value){
+    public boolean updateAppUsage(String entry, String value) {
         Future<Boolean> future_result = executorService.submit(new UpdateAppUsage(entry, value));
         try {
             return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
@@ -4642,7 +4558,7 @@ public class NetworkManager {
         }
     }
 
-    private class UpdateAppUsage implements Callable<Boolean>{
+    private class UpdateAppUsage implements Callable<Boolean> {
         private String entry;
         private String value;
 
@@ -4675,7 +4591,7 @@ public class NetworkManager {
         }
     }
 
-    public boolean getAppUsage(String startDate, String endDate){
+    public boolean getAppUsage(String startDate, String endDate) {
         Future<Boolean> future_result = executorService.submit(new GetAppUsage(startDate, endDate));
         try {
             return future_result.get(NETWORK_TIMEOUT, TimeUnit.SECONDS);
@@ -4685,7 +4601,7 @@ public class NetworkManager {
         }
     }
 
-    private class GetAppUsage implements Callable<Boolean>{
+    private class GetAppUsage implements Callable<Boolean> {
 
         private String startDate;
         private String endDate;
