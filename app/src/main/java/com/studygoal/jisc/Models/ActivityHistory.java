@@ -29,4 +29,12 @@ public class ActivityHistory extends Model {
     public String modified_date;
 
     public ActivityHistory() {super();}
+
+    @Override
+    public String toString(){
+        String description = "Log ID " +id + "\n Student ID " + student_id + "\n Module ID " + module_id + "\n Activity Type" +
+                activity_type + "\n Activity " + activity + "\n Activity Date " + activity_date + "\n Time Spent " +
+                time_spent + "\n note " + note + "\n Created Date " + created_date + "\n Modified Date " + modified_date;
+        return description;
+    }
 }

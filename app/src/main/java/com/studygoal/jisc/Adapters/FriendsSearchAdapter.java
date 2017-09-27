@@ -17,15 +17,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
-import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.Models.PendingRequest;
 import com.studygoal.jisc.Models.ReceivedRequest;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 import com.studygoal.jisc.Utils.CircleTransform;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,12 +67,12 @@ public class FriendsSearchAdapter extends BaseAdapter {
         final Friend attendant = list.get(position);
 
         if(attendant.profile_pic.equals("")) {
-            Glide.with(context)
+            GlideApp.with(context)
                     .load(R.drawable.profilenotfound)
                     .transform(new CircleTransform(context))
                     .into(((ImageView) convertView.findViewById(R.id.portrait)));
         } else {
-            Glide.with(context)
+            GlideApp.with(context)
                     .load(NetworkManager.getInstance().host + attendant.profile_pic)
                     .transform(new CircleTransform(context))
                     .placeholder(R.drawable.profilenotfound)
@@ -181,7 +181,7 @@ public class FriendsSearchAdapter extends BaseAdapter {
             public void onClick(View v) {
                 final Dialog dialog = new Dialog(context);
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.confirmation_dialog);
+                dialog.setContentView(R.layout.dialog_confirmation);
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 if (DataManager.getInstance().mainActivity.isLandscape) {
                     DisplayMetrics displaymetrics = new DisplayMetrics();

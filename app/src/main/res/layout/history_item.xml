@@ -1,72 +1,99 @@
 <com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/swipelayout"
-    android:layout_width="match_parent" android:layout_height="80dp">
+    android:layout_width="match_parent"
+    android:layout_height="108dp">
+
     <!-- Bottom View Start-->
     <LinearLayout
         android:id="@+id/bottom_wrapper"
         android:layout_width="120dp"
-        android:weightSum="1"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="1">
+
         <RelativeLayout
             android:id="@+id/edit"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:background="@color/default_blue">
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:src="@drawable/edit_image"
-                android:layout_centerInParent="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/edit_image" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/edit"
+                    android:textColor="#ffffff"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/delete"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:background="@color/default_red">
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:src="@drawable/delete_image"
-                android:layout_centerInParent="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/delete_image" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/delete"
+                    android:textColor="#ffffff"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
+
     <LinearLayout
+        android:id="@+id/on_top"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/on_top"
         android:background="#FFF"
         android:weightSum="10">
+
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2">
+
             <ImageView
+                android:id="@+id/activity_icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_centerInParent="true"
-                android:id="@+id/activity_icon"/>
+                android:layout_centerInParent="true" />
         </RelativeLayout>
+
         <TextView
             android:id="@+id/history_item_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"
-            android:layout_margin="15dp"
             android:layout_gravity="center"
-            android:textSize="14sp"
-            android:textColor="@color/light_purple_text"/>
-
-        <!--<RelativeLayout-->
-            <!--android:id="@+id/history_item_ellipse"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1">-->
-            <!--<ImageView-->
-                <!--android:layout_centerInParent="true"-->
-                <!--android:layout_width="15dp"-->
-                <!--android:layout_height="15dp"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:src="@drawable/ellipse"/>-->
-        <!--</RelativeLayout>-->
+            android:layout_margin="15dp"
+            android:layout_weight="8"
+            android:textColor="@color/light_purple_text"
+            android:textSize="14sp" />
     </LinearLayout>
 </com.daimajia.swipe.SwipeLayout>

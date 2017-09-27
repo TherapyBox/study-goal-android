@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Fragments.TrophiesMy;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class TrophiesMyAdapter extends BaseAdapter implements View.OnClickListen
         image.setImageDrawable(null);
 
         TrophyMy trophy = list.get(position);
-        Glide.with(context).load(trophy.getImageDrawable(context)).into(image);
+        GlideApp.with(context).load(trophy.getImageDrawable(context)).into(image);
 
         TextView text_silver = (TextView) convertView.findViewById(R.id.total_gold);
         TextView text_gold = (TextView) convertView.findViewById(R.id.total_silver);

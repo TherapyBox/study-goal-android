@@ -4,7 +4,7 @@
     android:id="@+id/whole_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.studygoal.jisc.SettingsActivity">
+    tools:context="com.studygoal.jisc.Activities.SettingsActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

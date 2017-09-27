@@ -18,7 +18,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 public class FriendsList extends Fragment {
 
@@ -31,7 +31,7 @@ public class FriendsList extends Fragment {
         if(!DataManager.getInstance().isLandscape) {
             DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.my_friends_title));
             DataManager.getInstance().mainActivity.hideAllButtons();
-            DataManager.getInstance().mainActivity.showCertainButtons(7);
+            DataManager.getInstance().mainActivity.showCertainButtons(5);
 
             new Thread(new Runnable() {
                 @Override
@@ -53,7 +53,7 @@ public class FriendsList extends Fragment {
             } catch (Exception ignored) {
                 DataManager.getInstance().mainActivity.setTitle(DataManager.getInstance().mainActivity.getString(R.string.my_friends_title));
                 DataManager.getInstance().mainActivity.hideAllButtons();
-                DataManager.getInstance().mainActivity.showCertainButtons(7);
+                DataManager.getInstance().mainActivity.showCertainButtons(5);
             }
             new Thread(new Runnable() {
                 @Override

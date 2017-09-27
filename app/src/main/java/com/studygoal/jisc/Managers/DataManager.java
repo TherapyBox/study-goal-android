@@ -10,11 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.studygoal.jisc.MainActivity;
+import com.studygoal.jisc.Activities.MainActivity;
+import com.studygoal.jisc.Models.AppUsageData;
 import com.studygoal.jisc.Models.CurrentUser;
 import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ public class DataManager {
 
     public Context context;
     public CurrentUser user;
+    public AppUsageData appUsageData = new AppUsageData();
 
     private static DataManager ourInstance = new DataManager();
     public Typeface myriadpro_regular;
@@ -39,6 +40,7 @@ public class DataManager {
 
     public String home_screen;
     public String language;
+    public String first_time;
 
     public NotificationManager mNotificationManager;
     public MainActivity mainActivity;
@@ -53,8 +55,12 @@ public class DataManager {
     public String institution;
     public android.app.Activity currActivity;
     public boolean toast = false;
-    public boolean checkForbidden = true;
+    public boolean checkForbidden = false;
 
+    public boolean fromLogout = false;
+    public boolean reauthNecessary = false;
+
+    public String selfie_url;
 
     public static DataManager getInstance() {
         return ourInstance;

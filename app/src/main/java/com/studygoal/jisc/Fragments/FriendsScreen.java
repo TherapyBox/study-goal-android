@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.studygoal.jisc.Adapters.FriendsGenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 public class FriendsScreen extends Fragment {
 

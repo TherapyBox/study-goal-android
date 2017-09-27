@@ -21,6 +21,18 @@
     <string name="nov">Nov</string>
     <string name="dec">Dec</string>
 
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+
     <string name="_1st">1st</string>
     <string name="_2nd">2nd</string>
     <string name="_3rd">3rd</string>
@@ -55,6 +67,8 @@
     <string name="set">Set</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="done">Done</string>
+    <string name="share">Share</string>
     <string name="module">Module</string>
     <string name="post">Post</string>
     <string name="send">Send</string>
@@ -108,26 +122,34 @@
     <string name="language">Language</string>
     <string name="course_engagement">Course Engagement</string>
     <string name="attainment">Attainment</string>
+    <string name="points">Activity Points</string>
     <string name="activity_points">Activity Points</string>
+    <string name="leader_board">Engagement Leaderboard</string>
+    <string name="events_attended">Events Attended</string>
+    <string name="app_usage">App Usage</string>
+    <string name="attendance">Attendance Summary</string>
     <string name="this_week">This Week</string>
     <string name="period">Period</string>
     <string name="compare_to">Compare to</string>
     <string name="time_period">Time Period</string>
     <string name="last_day">Last Day</string>
     <string name="last_week">Last Week</string>
-    <string name="last_week_engagement">Last Week engagement</string>
-    <string name="last_month_engagement">Last Month engagement</string>
+    <string name="last_week_engagement">Last 7 days engagement</string>
+    <string name="last_month_engagement">Last 28 days engagement</string>
     <string name="Overall_engagement">Overall engagement</string>
     <string name="last_month">Last Month</string>
     <string name="Overall">Overall</string>
     <string name="anymodule">All Activity</string>
     <string name="last_7_days">Last 7 days</string>
+    <string name="last_7_days_short">7d</string>
+    <string name="last_28_days_short">28d</string>
+    <string name="all_days">All</string>
     <string name="no_one">No One</string>
     <string name="top10">Top 10</string>
     <string name="average">Average</string>
     <string name="last_30_days">Last 30 days</string>
     <string name="overall">Overall</string>
-    <string name="engagement_graph">Engagement Graph</string>
+    <string name="engagement_graph">VLE Activity</string>
     <string name="last_24_hours">Last 24 hours</string>
     <string name="add">Add</string>
     <string name="report_activity">Start Activity Now (Timed)</string>
@@ -163,7 +185,7 @@
     <string name="fail_to_accept_friend_request">Failed to accept friend request!</string>
     <string name="not_deleted_friend_request_message">Failed to remove friend request</string>
     <string name="fail_sendFriendRequest">Failed to send friend request!</string>
-    <string name="any_module">All Activity</string>
+    <string name="any_module">Any Module</string>
     <string name="hour">"hour "</string>
     <string name="and">and</string>
     <string name="minute">minute</string>
@@ -191,6 +213,7 @@
     <string name="success_delete_activity">Successfully deleted activity</string>
     <string name="fail_delete_activity">Failed to delete activity from history, please try again later</string>
     <string name="log_title">Log</string>
+    <string name="terms_title">Terms and Conditions</string>
     <string name="running_activity">Running Activity</string>
     <string name="new_activity">New Activity</string>
     <string name="edit_recent_activity">Edit Activity</string>
@@ -237,6 +260,7 @@
     <string name="invalid_email_or_password">Invalid Email or Password</string>
     <string name="press_back_again_to_exit_app">Press back again to exit application</string>
     <string name="in">in</string>
+    <string name="module_in">Choose Module</string>
     <string name="days">days</string>
     <string name="notes">Notes</string>
     <string name="add_notes">Add Notes</string>
@@ -253,6 +277,7 @@
     <string name="add_a_reason_to_keep_this_target">Add a reason to keep this target</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="cancel">CANCEL</string>
     <string name="confirm_delete_title">Confirm deletion</string>
     <string name="confirm_delete_message">Are you sure you want to delete?</string>
     <string name="pause">Pause</string>
@@ -329,6 +354,11 @@
     <string name="coursework_exams">Coursework/Exams</string>
     <string name="attending">Attending</string>
 
+    <string name="attendanceData">attendanceData</string>
+    <string name="studyGoalAttendance">studyGoalAttendance</string>
+    <string name="attainmentData">attainmentData</string>
+    <string name="pointsData">pointsData</string>
+
     <string name="week">Week</string>
     <string name="me">Me</string>
     <string name="sun">Sun</string>
@@ -346,6 +376,8 @@
 
     <string name="confirm_logout_message">Are you sure you want to logout?</string>
     <string name="no_internet">Check your internet connection and try again later</string>
+    <string name="no_internet_connection_hint">No internet connection - reconnect and try again</string>
+    <string name="slow_internet">Weak internet connectivity; trying to connect.</string>
 
     <string name="target_saved">Target saved. To edit or delete this target, swipe left across the target title in your target list.</string>
     <string name="failed_tochangefriend">Failed to change friend settings</string>
@@ -353,7 +385,8 @@
     <string name="friend_privacy_settings">Friend Privacy Settings</string>
     <string name="less_than_1_minute">less than 1 minute</string>
     <string name="of">of</string>
-    <string name="graphs">Graphs</string>
+    <string name="graphs">"VLE Activity"</string>
+
     <string name="attainment_refreshed">Attainments refreshed!</string>
     <string name="activity_paused">Activity paused</string>
     <string name="activity_resumed">Activity resumed</string>
@@ -381,6 +414,7 @@
 
     <string name="select_source">Select source</string>
     <string name="report_feature_bug">Report Feature/Bug</string>
+    <string name="privacy_statement">Privacy statement</string>
     <string name="send_friend_request">Send Friend Request</string>
     <string name="please_search_for_friend">Search for friend by email address</string>
     <string name="friend_request_sent">Friend request sent</string>
@@ -401,8 +435,71 @@
     <string name="login_with_facebook">login with Facebook</string>
     <string name="login_with_google">login with Google</string>
     <string name="login_with_twitter">login with Twitter</string>
-    <string name="facebook_app_id">1841301559462853</string>
+    <string name="facebook_app_id">220083488482658</string>
     <string name="facebook_error_email">In order to continue, the app needs EMAIL permission.</string>
-    <string name="login_imastaff_member">I\'m a staff member</string>
+    <string name="google_play_services_update_required">In order to continue, please update Google Play Services.</string>
+    <string name="login_imastaff_member">Member of staff</string>
+    <string name="login_imastudent_member">Student</string>
     <string name="login_keeplogged">Keep me logged in</string>
+    <string name="login_donot_keeplogged">I\'d like to log in with my username and password everytime</string>
+    <string name="login_search_institution">SEARCH INSTITUTION</string>
+    <string name="login_institution_not_listed">Institution not listed?</string>
+    <string name="login_institution_signinwith">Sign in with</string>
+    <string name="login_back_to_first_page">Back to first page</string>
+    <string name="check_in">Check-in</string>
+    <string name="send_pin_title">Send PIN</string>
+    <string name="alert_invalid_pin">Oops. PIN wasn\'t recognised. Please try again.</string>
+    <string name="alert_valid_pin">Thanks. You\'ve just successfully checked in.</string>
+    <string name="alert_invalid_pin_staff">"Check-in section is for demonstration purposes, and your PIN was not validated. This section is active for student users.</string>
+    <string name="demo_mode">See demo account</string>
+    <string name="demo_mode_postfeed">Login to start posting messages.</string>
+    <string name="demo_mode_sendfriendrequest">Login to start adding friends.</string>
+    <string name="demo_mode_setcheckinpin">Check-In option will be available to participating institutions.</string>
+    <string name="demo_mode_addactivitylog">To start saving logs, create an account.</string>
+    <string name="demo_mode_editactivitylog">You can\’t edit logs in demo mode.</string>
+    <string name="demo_mode_saveactivitylog">You can\’t save logs in demo mode.</string>
+    <string name="demo_mode_deleteactivitylog">You can\'t delete logs in demo mode.</string>
+    <string name="demo_mode_addtarget">To start saving targets, create an account.</string>
+    <string name="demo_mode_deletetarget">You can\’t delete targets in demo mode</string>
+    <string name="demo_mode_completetarget">You can\’t mark targets as done in demo mode</string>
+    <string name="demo_mode_edittarget">Targets can\’t be edited in demo mode.</string>
+    <string name="demo_mode_changeappsettings">Demo mode only. You can\’t change the settings.</string>
+    <string name="demo_mode_deletefeedlog">You can\’t delete items from feed in demo mode.</string>
+    <string name="demo_mode_sharefeedlog">You can\’t share items from feed in demo mode.</string>
+    <string name="demo_mode_updateprofileimage">You can\’t update your profile image in demo mode.</string>
+    <string name="social_login_error">This email is already registered in our system. Please try again with a different social platform!</string>
+    <string name="add_module">Add Module</string>
+    <string name="module_name_invalid">Please add a valid Module Name</string>
+    <string name="confirm_delete_feed">Are you sure you want to delete item this from feed?</string>
+
+    <string name="study_goal">Study Goal</string>
+    <string name="attainment_info">IMPORTANT: All marks / grades indicated with \'**\' are subject to moderation and confirmation by a Board of Examiners. These marks / grades are therefore provisional and subject to change.</string>
+    <string name="everyone">Everyone</string>
+    <string name="send_to">Send to</string>
+    <string name="gps_network_not_enabled">Turn on location services to use this feature.</string>
+    <string name="open_location_settings">Take me to settings</string>
+
+    <string name="target_add_recurring">Recurring</string>
+    <string name="target_add_single">Single</string>
+    <string name="my_goal">My goal is to ...</string>
+    <string name="add_a_reason_to_keep_this_target_single">Type here your message</string>
+    <string name="by">By</string>
+    <string name="attainment_not_data">There is no attainment data to show</string>
+    <string name="today">Today</string>
+    <string name="today_small">today</string>
+    <string name="due_tomorrow">due tomorrow</string>
+    <string name="to_do_task_accept_dialog_title">Accept</string>
+    <string name="to_do_task_accept_dialog_message">Do you want to accept this target?</string>
+    <string name="to_do_task_decline_dialog_title">Decline</string>
+    <string name="to_do_task_decline_dialog_message">Give reason for declining the task</string>
+    <string name="to_do_task_decline_reason">Reason</string>
+
+    <string name="to">to</string>
+    <string name="session_on_app">Sessions on App</string>
+    <string name="hours_of_activity_logged">Hours of Activity Logged</string>
+    <string name="targets_set">Targets Set</string>
+    <string name="targets_met">Targets Met</string>
+    <string name="targets_failed_to_meet">Targets Failed to Meet</string>
+
+    <string name="weekly_attendance_empty">No data to display</string>
 </resources>

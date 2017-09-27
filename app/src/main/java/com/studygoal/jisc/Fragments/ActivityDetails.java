@@ -1,11 +1,14 @@
 package com.studygoal.jisc.Fragments;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -16,7 +19,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.activeandroid.query.Select;
@@ -26,13 +28,11 @@ import com.studygoal.jisc.Managers.LinguisticManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.Models.Module;
-import com.studygoal.jisc.Models.Trophy;
-import com.studygoal.jisc.Models.TrophyMy;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 import com.studygoal.jisc.Utils.Utils;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ActivityDetails extends Fragment {
 
@@ -56,72 +56,12 @@ public class ActivityDetails extends Fragment {
         mainView = inflater.inflate(R.layout.activity_activity_details, container, false);
 
         save = (ImageView) mainView.findViewById(R.id.save);
-
         Glide.with(DataManager.getInstance().mainActivity).load(LinguisticManager.getInstance().images.get(activityHistory.activity)).into((ImageView)mainView.findViewById(R.id.activity_icon));
 
         TextView titleview = (TextView)mainView.findViewById(R.id.activity_details_text);
         titleview.setTypeface(DataManager.getInstance().myriadpro_regular);
         title = LinguisticManager.getInstance().translate(getActivity(), activityHistory.activity) + " " + getActivity().getString(R.string._for) + " " + Utils.getMinutesToHour(activityHistory.time_spent);
         titleview.setText(title);
-
-        ((TextView) mainView.findViewById(R.id.trophies_available_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-        ((TextView) mainView.findViewById(R.id.my_trophies_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-
-        final View trophies_my = mainView.findViewById(R.id.trophies_my);
-        final View trophies_all = mainView.findViewById(R.id.trophies_all);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final List<TrophyMy> list = new Select().from(TrophyMy.class).where("activity_name = ?", activityHistory.activity).execute();
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i=0; i < list.size(); i++) {
-                            View convertView = inflater.inflate(R.layout.activity_details_trophy_item, null, false);
-                            TrophyMy trophy = list.get(i);
-
-                            TextView trophy_name = (TextView) convertView.findViewById(R.id.trophy_name);
-                            TextView trophy_hours = (TextView) convertView.findViewById(R.id.trophy_hours);
-                            trophy_name.setTypeface(DataManager.getInstance().myriadpro_regular);
-                            trophy_name.setText(trophy.trophy_name);
-                            trophy_hours.setTypeface(DataManager.getInstance().myriadpro_regular);
-                            trophy_hours.setText(trophy.count);
-
-                            Glide.with(DataManager.getInstance().mainActivity).load(trophy.getImageDrawable(DataManager.getInstance().mainActivity)).into((ImageView) convertView.findViewById(R.id.image));
-
-                            ((LinearLayout) trophies_my).addView(convertView);
-                        }
-                    }
-                });
-            }
-        }).start();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final List<Trophy> list = new Select().from(Trophy.class).where("activity_name = ?", activityHistory.activity).execute();
-                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i=0; i < list.size(); i++) {
-                            View convertView = inflater.inflate(R.layout.activity_details_trophy_item, null, false);
-                            Trophy trophy = list.get(i);
-
-                            TextView trophy_name = (TextView) convertView.findViewById(R.id.trophy_name);
-                            TextView trophy_hours = (TextView) convertView.findViewById(R.id.trophy_hours);
-                            trophy_name.setTypeface(DataManager.getInstance().myriadpro_regular);
-                            trophy_name.setText(trophy.trophy_name);
-                            trophy_hours.setTypeface(DataManager.getInstance().myriadpro_regular);
-                            trophy_hours.setText(trophy.count);
-
-                            Glide.with(DataManager.getInstance().mainActivity).load(trophy.getImageDrawable(DataManager.getInstance().mainActivity)).into((ImageView) convertView.findViewById(R.id.image));
-
-                            ((LinearLayout) trophies_all).addView(convertView);
-                        }
-                    }
-                });
-            }
-        }).start();
 
         TextView date = (TextView) mainView.findViewById(R.id.activity_details_date);
         notes = (EditText) mainView.findViewById(R.id.activity_details_notes_edittext);
@@ -132,84 +72,105 @@ public class ActivityDetails extends Fragment {
         mainView.findViewById(R.id.edit_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LogLogActivity fragment = new LogLogActivity();
-                fragment.isInEditMode = true;
-                fragment.item = activityHistory;
-                DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_fragment, fragment)
-                        .addToBackStack(null)
-                        .commit();
+                if(ConnectionHandler.isConnected(getContext())) {
+                    LogLogActivity fragment = new LogLogActivity();
+                    fragment.isInEditMode = true;
+                    fragment.item = activityHistory;
+                    DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_fragment, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
         mainView.findViewById(R.id.delete_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.confirmation_dialog);
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                if(DataManager.getInstance().mainActivity.isLandscape) {
-                    DisplayMetrics displaymetrics = new DisplayMetrics();
-                    DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                    int width = (int) (displaymetrics.widthPixels * 0.45);
 
-                    WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-                    params.width = width;
-                    dialog.getWindow().setAttributes(params);
+                if(DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ActivityDetails.this.getActivity());
+                    alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deleteactivitylog) + "</font>"));
+                    alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+                    return;
                 }
 
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
-                ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    final Dialog dialog = new Dialog(DataManager.getInstance().mainActivity);
+                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    dialog.setContentView(R.layout.dialog_confirmation);
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                    if (DataManager.getInstance().mainActivity.isLandscape) {
+                        DisplayMetrics displaymetrics = new DisplayMetrics();
+                        DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                        int width = (int) (displaymetrics.widthPixels * 0.45);
 
-                ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
-
-                ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
-
-                ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
-                ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
-
-                dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        final HashMap<String, String> params = new HashMap<>();
-                        params.put("log_id", activityHistory.id);
-                        DataManager.getInstance().mainActivity.showProgressBar(null);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(NetworkManager.getInstance().deleteActivity(params)) {
-                                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            DataManager.getInstance().mainActivity.hideProgressBar();
-                                            DataManager.getInstance().mainActivity.onBackPressed();
-                                        }
-                                    });
-                                }
-                                else {
-                                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            DataManager.getInstance().mainActivity.hideProgressBar();
-                                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.fail_to_delete_from_activity_history, Snackbar.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
-                            }
-                        }).start();
+                        WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+                        params.width = width;
+                        dialog.getWindow().setAttributes(params);
                     }
-                });
-                dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
 
+                    ((TextView) dialog.findViewById(R.id.dialog_title)).setTypeface(DataManager.getInstance().oratorstd_typeface);
+                    ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.confirmation);
+
+                    ((TextView) dialog.findViewById(R.id.dialog_message)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                    ((TextView) dialog.findViewById(R.id.dialog_message)).setText(R.string.are_you_sure_you_want_to_delete_this_activity_log);
+
+                    ((TextView) dialog.findViewById(R.id.dialog_no_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                    ((TextView) dialog.findViewById(R.id.dialog_no_text)).setText(R.string.no);
+
+                    ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setTypeface(DataManager.getInstance().myriadpro_regular);
+                    ((TextView) dialog.findViewById(R.id.dialog_ok_text)).setText(R.string.yes);
+
+                    dialog.findViewById(R.id.dialog_ok).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            final HashMap<String, String> params = new HashMap<>();
+                            params.put("log_id", activityHistory.id);
+                            DataManager.getInstance().mainActivity.showProgressBar(null);
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (NetworkManager.getInstance().deleteActivity(params)) {
+                                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                                DataManager.getInstance().mainActivity.onBackPressed();
+                                            }
+                                        });
+                                    } else {
+                                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                                Snackbar.make(mainView.findViewById(R.id.parent), R.string.fail_to_delete_from_activity_history, Snackbar.LENGTH_LONG).show();
+                                            }
+                                        });
+                                    }
+                                }
+                            }).start();
+                        }
+                    });
+                    dialog.findViewById(R.id.dialog_no).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+                    dialog.show();
+                } else {
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
+                }
             }
         });
 
@@ -270,35 +231,39 @@ public class ActivityDetails extends Fragment {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(notes.getWindowToken(), 0);
+                if(ConnectionHandler.isConnected(getContext())) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(notes.getWindowToken(), 0);
 
-                if(!activityHistory.note.equals(notes.getText().toString())) {
-                    final HashMap<String, String> params = new HashMap<>();
-                    params.put("log_id", activityHistory.id);
-                    params.put("activity_date", activityHistory.activity_date);
-                    params.put("time_spent", activityHistory.time_spent);
-                    params.put("note", notes.getText().toString());
-                    params.put("student_id", DataManager.getInstance().user.id);
+                    if (!activityHistory.note.equals(notes.getText().toString())) {
+                        final HashMap<String, String> params = new HashMap<>();
+                        params.put("log_id", activityHistory.id);
+                        params.put("activity_date", activityHistory.activity_date);
+                        params.put("time_spent", activityHistory.time_spent);
+                        params.put("note", notes.getText().toString());
+                        params.put("student_id", DataManager.getInstance().user.id);
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (NetworkManager.getInstance().editActivity(params)) {
-                                DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        activityHistory.note = notes.getText().toString();
-                                        activityHistory.save();
-                                        Snackbar.make(mainView.findViewById(R.id.parent), R.string.saved_successfully, Snackbar.LENGTH_LONG).show();
-                                        save.setVisibility(View.INVISIBLE);
-                                    }
-                                });
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (NetworkManager.getInstance().editActivity(params)) {
+                                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            activityHistory.note = notes.getText().toString();
+                                            activityHistory.save();
+                                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.saved_successfully, Snackbar.LENGTH_LONG).show();
+                                            save.setVisibility(View.INVISIBLE);
+                                        }
+                                    });
+                                }
                             }
-                        }
-                    }).start();
+                        }).start();
+                    } else {
+                        save.setVisibility(View.INVISIBLE);
+                    }
                 } else {
-                    save.setVisibility(View.INVISIBLE);
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
             }
         });

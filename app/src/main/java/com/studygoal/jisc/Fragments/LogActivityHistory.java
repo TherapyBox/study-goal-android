@@ -1,10 +1,13 @@
 package com.studygoal.jisc.Fragments;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +23,11 @@ import com.studygoal.jisc.Adapters.ActivitiesHistoryAdapter;
 import com.studygoal.jisc.Adapters.GenericAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
+import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.ActivityHistory;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.Connection.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +39,6 @@ public class LogActivityHistory extends Fragment {
     ActivitiesHistoryAdapter adapter;
     SwipeRefreshLayout layout;
     TextView message;
-
 
     @Override
     public void onResume() {
@@ -63,7 +68,7 @@ public class LogActivityHistory extends Fragment {
                         adapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
                         adapter.notifyDataSetChanged();
 
-                        if(adapter.historyList.size() == 0) {
+                        if (adapter.historyList.size() == 0) {
                             message.setVisibility(View.VISIBLE);
                         } else {
                             message.setVisibility(View.GONE);
@@ -73,6 +78,8 @@ public class LogActivityHistory extends Fragment {
                 });
             }
         }).start();
+
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateLog);
     }
 
     @Override
@@ -81,7 +88,7 @@ public class LogActivityHistory extends Fragment {
         layout = (SwipeRefreshLayout) mainView.findViewById(R.id.swipelayout);
         message = (TextView) mainView.findViewById(R.id.message);
 
-        ((TextView)mainView.findViewById(R.id.activity_history_title)).setTypeface(DataManager.getInstance().myriadpro_regular);
+        ((TextView) mainView.findViewById(R.id.activity_history_title)).setTypeface(DataManager.getInstance().myriadpro_regular);
 
         adapter = new ActivitiesHistoryAdapter(LogActivityHistory.this);
         list = (ListView) mainView.findViewById(R.id.list);
@@ -110,33 +117,35 @@ public class LogActivityHistory extends Fragment {
         layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id)) {
-                                adapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.notifyDataSetChanged();
-                                        layout.setRefreshing(false);
-                                        if(adapter.historyList.size() == 0)
-                                            message.setVisibility(View.VISIBLE);
-                                        else
-                                            message.setVisibility(View.GONE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!ConnectionHandler.isConnected(getContext()))
+                            ConnectionHandler.showNoInternetConnectionSnackbar();
+                        if (NetworkManager.getInstance().getActivityHistory(DataManager.getInstance().user.id)) {
+                            adapter.historyList = new Select().from(ActivityHistory.class).orderBy("activity_date DESC").execute();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyDataSetChanged();
+                                    layout.setRefreshing(false);
+                                    if (adapter.historyList.size() == 0)
+                                        message.setVisibility(View.VISIBLE);
+                                    else
+                                        message.setVisibility(View.GONE);
 
-                                    }
-                                });
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        layout.setRefreshing(false);
-                                    }
-                                });
-                            }
+                                }
+                            });
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    layout.setRefreshing(false);
+                                }
+                            });
                         }
-                    }).start();
+                    }
+                }).start();
             }
         });
 
@@ -144,41 +153,58 @@ public class LogActivityHistory extends Fragment {
     }
 
     public void deleteLog(final ActivityHistory activityHistory, final int finalPosition) {
-        final HashMap<String, String> params = new HashMap<>();
-        params.put("log_id", activityHistory.id);
-        DataManager.getInstance().mainActivity.showProgressBar(null);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(NetworkManager.getInstance().deleteActivity(params)) {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            activityHistory.delete();
-                            adapter.historyList.remove(finalPosition);
-                            adapter.notifyDataSetChanged();
-                            if(adapter.historyList.size() == 0)
-                                message.setVisibility(View.VISIBLE);
-                            else
-                                message.setVisibility(View.GONE);
 
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.record_deleted_successfully, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
+        if (DataManager.getInstance().user.email.equals("demouser@jisc.ac.uk")) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LogActivityHistory.this.getActivity());
+            alertDialogBuilder.setTitle(Html.fromHtml("<font color='#3791ee'>" + getString(R.string.demo_mode_deleteactivitylog) + "</font>"));
+            alertDialogBuilder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
                 }
-                else {
-                    DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            DataManager.getInstance().mainActivity.hideProgressBar();
-                            Snackbar.make(mainView.findViewById(R.id.parent), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            }
-        }).start();
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+            return;
+        }
 
+        if(ConnectionHandler.isConnected(getContext())) {
+            final HashMap<String, String> params = new HashMap<>();
+            params.put("log_id", activityHistory.id);
+            DataManager.getInstance().mainActivity.showProgressBar(null);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (NetworkManager.getInstance().deleteActivity(params)) {
+                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                activityHistory.delete();
+                                adapter.historyList.remove(finalPosition);
+                                adapter.notifyDataSetChanged();
+                                if (adapter.historyList.size() == 0)
+                                    message.setVisibility(View.VISIBLE);
+                                else
+                                    message.setVisibility(View.GONE);
+
+                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                Snackbar.make(mainView.findViewById(R.id.parent), R.string.record_deleted_successfully, Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        DataManager.getInstance().mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DataManager.getInstance().mainActivity.hideProgressBar();
+                                Snackbar.make(mainView.findViewById(R.id.parent), R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                }
+            }).start();
+        } else {
+            ConnectionHandler.showNoInternetConnectionSnackbar();
+        }
     }
 
     public void showDialog() {
@@ -186,7 +212,7 @@ public class LogActivityHistory extends Fragment {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.custom_spinner_layout);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        if(DataManager.getInstance().mainActivity.isLandscape) {
+        if (DataManager.getInstance().mainActivity.isLandscape) {
             DisplayMetrics displaymetrics = new DisplayMetrics();
             DataManager.getInstance().mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
             int width = (int) (displaymetrics.widthPixels * 0.3);
@@ -200,7 +226,6 @@ public class LogActivityHistory extends Fragment {
         ((TextView) dialog.findViewById(R.id.dialog_title)).setText(R.string.add);
 
         ArrayList<String> items = new ArrayList<>();
-//                items.add("Last 24 hours");
         items.add(getString(R.string.report_activity));
         items.add(getString(R.string.log_recent_activity));
         final ListView listView = (ListView) dialog.findViewById(R.id.dialog_listview);
@@ -208,20 +233,24 @@ public class LogActivityHistory extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, new LogNewActivity(), "newActivity")
-                            .addToBackStack(null)
-                            .commit();
+                if(ConnectionHandler.isConnected(getContext())) {
+                    if (position == 0) {
+                        DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_fragment, new LogNewActivity(), "newActivity")
+                                .addToBackStack(null)
+                                .commit();
+                    } else {
+                        LogLogActivity fragment = new LogLogActivity();
+                        fragment.isInEditMode = false;
+                        DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.main_fragment, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                    }
+                    dialog.dismiss();
                 } else {
-                    LogLogActivity fragment = new LogLogActivity();
-                    fragment.isInEditMode = false;
-                    DataManager.getInstance().mainActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_fragment, fragment)
-                            .addToBackStack(null)
-                            .commit();
+                    ConnectionHandler.showNoInternetConnectionSnackbar();
                 }
-                dialog.dismiss();
             }
         });
         dialog.show();

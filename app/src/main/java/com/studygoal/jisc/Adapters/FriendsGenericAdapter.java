@@ -13,7 +13,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
 import com.studygoal.jisc.Models.Friend;
 import com.studygoal.jisc.R;
-import com.studygoal.jisc.SettingsActivity;
+import com.studygoal.jisc.Activities.SettingsActivity;
 
 import java.util.HashMap;
 import java.util.List;

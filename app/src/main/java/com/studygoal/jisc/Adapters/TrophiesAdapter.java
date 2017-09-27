@@ -13,12 +13,10 @@ import com.bumptech.glide.Glide;
 import com.studygoal.jisc.Fragments.TrophiesAll;
 import com.studygoal.jisc.Models.Trophy;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.GlideConfig.GlideApp;
 
 import java.util.List;
 
-/**
- * Created by MarcelC on 1/14/16.
- */
 public class TrophiesAdapter extends BaseAdapter implements View.OnClickListener {
 
     LayoutInflater inflater;
@@ -62,7 +60,7 @@ public class TrophiesAdapter extends BaseAdapter implements View.OnClickListener
         image.setImageDrawable(null);
 
         Trophy trophy = list.get(position);
-        Glide.with(context).load(trophy.getImageDrawable(context)).into(image);
+        GlideApp.with(context).load(trophy.getImageDrawable(context)).into(image);
 
         convertView.setTag("" + position);
         convertView.setOnClickListener(this);
