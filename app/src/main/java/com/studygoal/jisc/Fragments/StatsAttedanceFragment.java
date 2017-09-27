@@ -14,6 +14,7 @@ import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
 import com.studygoal.jisc.Models.WeeklyAttendance;
 import com.studygoal.jisc.R;
+import com.studygoal.jisc.Utils.ISO8601;
 import com.studygoal.jisc.databinding.FragmentStatsAttendanceBinding;
 
 import java.io.IOException;
@@ -27,16 +28,9 @@ import java.util.Locale;
 
 public class StatsAttedanceFragment extends BaseFragment {
 
-//    private LineChart lineChart;
-//    private BarChart barchart;
-//    private AppCompatTextView module;
-//
-//    private RelativeLayout mChartLayout;
-//    private List<ED> mList;
-//    private String mSelectedPeriod;
+    private final SimpleDateFormat mRequestDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
 
-//    ArrayList<String> dates = new ArrayList<>();
-//    ArrayList<String> count = new ArrayList<>();
+    private final SimpleDateFormat mGraphDateFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);
 
     private boolean mIsLoading = false;
 
@@ -65,13 +59,12 @@ public class StatsAttedanceFragment extends BaseFragment {
                 mIsLoading = true;
 
                 // set default start and end date
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
                 Calendar cal = GregorianCalendar.getInstance();
                 cal.setTime(new Date());
                 cal.add(Calendar.DAY_OF_YEAR, -34);
                 Date daysBeforeDate = cal.getTime();
-                String current = sdf.format(new Date());
-                String past = sdf.format(daysBeforeDate);
+                String current = mRequestDateFormat.format(new Date());
+                String past = mRequestDateFormat.format(daysBeforeDate);
 
                 XApiManager.getInstance().getWeeklyAttendance(past, current);
                 runOnUiThread(() -> {
@@ -117,8 +110,10 @@ public class StatsAttedanceFragment extends BaseFragment {
 
                 if (items != null && items.size() > 0) {
                     for (WeeklyAttendance item : items) {
+                        Calendar time = ISO8601.toCalendar(item.getDate());
+                        String formattedDate = mGraphDateFormat.format(time.getTime());
                         dataCount += "" + item.getCount() + ", ";
-                        dataDate += "'" + item.getDate() + "', \n";
+                        dataDate += "'" + formattedDate + "', \n";
                     }
                 }
 
