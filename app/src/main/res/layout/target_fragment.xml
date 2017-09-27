@@ -29,7 +29,6 @@
                     android:orientation="horizontal"
                     android:visibility="visible">
 
-          
                     <RadioButton
                         android:id="@+id/target_single"
                         android:layout_width="match_parent"

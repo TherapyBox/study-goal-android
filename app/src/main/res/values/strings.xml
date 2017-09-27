@@ -500,4 +500,6 @@
     <string name="targets_set">Targets Set</string>
     <string name="targets_met">Targets Met</string>
     <string name="targets_failed_to_meet">Targets Failed to Meet</string>
+
+    <string name="weekly_attendance_empty">No data to display</string>
 </resources>

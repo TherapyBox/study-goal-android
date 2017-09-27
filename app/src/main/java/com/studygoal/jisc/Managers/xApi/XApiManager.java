@@ -45,7 +45,6 @@ public class XApiManager {
     private static final boolean USE_TEST_JWT = true;
     private static final String TEST_JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MDU4MjcwODQsImp0aSI6ImFXWmF2WHF5ek5KOE02NEd5VnM0SDJnWWlLQUVBSlErK1FIM2owWFlITkE9IiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0XC9leGFtcGxlIiwibmJmIjoxNTA1ODI3MDc0LCJleHAiOjE1MDk5NzQyNzQsImRhdGEiOnsiZXBwbiI6InRvbS5nbGFudmlsbGVAY29ycC5qaXNjLmFjLnVrIiwicGlkIjoidG9tLmdsYW52aWxsZUBjb3JwLmppc2MuYWMudWsiLCJhZmZpbGlhdGlvbiI6InN0YWZmQGNvcnAuamlzYy5hYy51azttZW1iZXJAY29ycC5qaXNjLmFjLnVrIn19.lzH6OoXAeXtmloe0-siPmSTA5TNH3iN8W-HG9Ygkx3OI4igML9ptS18Hm_pthTzq7tRn0GgJmbP_7ptqVeBfBA";
 
-
     private static XApiManager sInstance = null;
 
     public static XApiManager getInstance() {
@@ -207,12 +206,13 @@ public class XApiManager {
 
             if (response != null && response.isSuccessful()) {
                 List<ResponseWeeklyAttendance> list = new ArrayList<>();
+                String content = response.body().string();
 
-                if (response.body().contentLength() > 0) {
+                if (content != null && !content.isEmpty()) {
                     Type listType = new TypeToken<ArrayList<ResponseWeeklyAttendance>>() {
                     }.getType();
                     Gson gson = new Gson();
-                    list = gson.fromJson(response.body().string(), listType);
+                    list = gson.fromJson(content, listType);
 
                     if (list == null) {
                         list = new ArrayList<>();

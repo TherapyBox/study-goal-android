@@ -15,8 +15,8 @@ import com.activeandroid.query.Select;
 import com.studygoal.jisc.Adapters.AttainmentAdapter;
 import com.studygoal.jisc.Managers.DataManager;
 import com.studygoal.jisc.Managers.NetworkManager;
-import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Managers.xApi.XApiManager;
+import com.studygoal.jisc.Managers.xApi.entity.LogActivityEvent;
 import com.studygoal.jisc.Models.Attainment;
 import com.studygoal.jisc.R;
 
@@ -51,7 +51,7 @@ public class StatsAttainment extends Fragment {
                 String[] attainmentData = attainmentDataBackup.split("----");
                 for (String data : attainmentData) {
                     String[] attainment = data.split(";");
-                    if(attainment.length == 4)
+                    if (attainment.length == 4)
                         mAdapter.list.add(new Attainment(attainment[0], attainment[1], attainment[2], attainment[3]));
                 }
             }
@@ -87,14 +87,9 @@ public class StatsAttainment extends Fragment {
 
                 mAdapter.notifyDataSetChanged();
             });
-        }).
+        }).start();
 
-                start();
-
-        XApiManager.getInstance().
-
-                sendLogActivityEvent(LogActivityEvent.NavigateAttainment);
-
+        XApiManager.getInstance().sendLogActivityEvent(LogActivityEvent.NavigateAttainment);
     }
 
     @Override
